@@ -1,6 +1,6 @@
 // 本地存储工具函数
 
-import { STORAGE_KEYS } from '@/constants/index.ts'
+import { STORAGE_KEYS } from '@/constants'
 
 /**
  * 安全的本地存储操作

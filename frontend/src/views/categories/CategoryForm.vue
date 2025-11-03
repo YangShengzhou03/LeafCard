@@ -53,10 +53,14 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+
+const route = useRoute()
+const router = useRouter()
+const formRef = ref()
 
 const defaultForm = {
   id: null,
@@ -67,86 +71,68 @@ const defaultForm = {
   description: ''
 }
 
-export default {
-  name: 'CategoryForm',
-  setup() {
-    const route = useRoute()
-    const router = useRouter()
-    const formRef = ref()
-    const form = reactive({ ...defaultForm })
-    const categories = ref([])
+const form = reactive({ ...defaultForm })
+const categories = ref([])
+
+const formTitle = computed(() => {
+  return route.params.id ? '编辑分类' : '新增分类'
+})
+
+const rules = {
+  name: [
+    { required: true, message: '请输入分类名称', trigger: 'blur' },
+    { min: 2, max: 50, message: '分类名称长度在 2 到 50 个字符', trigger: 'blur' }
+  ],
+  sort: [
+    { required: true, message: '请输入排序值', trigger: 'blur' }
+  ]
+}
+
+const loadCategories = async () => {
+  // 模拟加载分类列表
+  categories.value = [
+    { id: 1, name: '电子产品' },
+    { id: 2, name: '服装鞋帽' },
+    { id: 3, name: '家居用品' }
+  ]
+}
+
+const loadCategoryDetail = async (id) => {
+  // 模拟加载分类详情
+  const category = {
+    id: id,
+    name: '示例分类',
+    parentId: 1,
+    sort: 10,
+    status: 1,
+    description: '这是一个示例分类'
+  }
+  Object.assign(form, category)
+}
+
+const handleSubmit = async () => {
+  try {
+    await formRef.value.validate()
     
-    const formTitle = computed(() => {
-      return route.params.id ? '编辑分类' : '新增分类'
-    })
-    
-    const rules = {
-      name: [
-        { required: true, message: '请输入分类名称', trigger: 'blur' },
-        { min: 2, max: 50, message: '分类名称长度在 2 到 50 个字符', trigger: 'blur' }
-      ],
-      sort: [
-        { required: true, message: '请输入排序值', trigger: 'blur' }
-      ]
-    }
-    
-    const loadCategories = async () => {
-      // 模拟加载分类列表
-      categories.value = [
-        { id: 1, name: '电子产品' },
-        { id: 2, name: '服装鞋帽' },
-        { id: 3, name: '家居用品' }
-      ]
-    }
-    
-    const loadCategoryDetail = async (id) => {
-      // 模拟加载分类详情
-      const category = {
-        id: id,
-        name: '示例分类',
-        parentId: 1,
-        sort: 10,
-        status: 1,
-        description: '这是一个示例分类'
-      }
-      Object.assign(form, category)
-    }
-    
-    const handleSubmit = async () => {
-      try {
-        await formRef.value.validate()
-        
-        // 模拟保存操作
-        ElMessage.success(route.params.id ? '分类更新成功' : '分类创建成功')
-        router.push('/categories')
-      } catch (error) {
-        console.error('表单验证失败:', error)
-      }
-    }
-    
-    const handleCancel = () => {
-      router.push('/categories')
-    }
-    
-    onMounted(() => {
-      loadCategories()
-      
-      if (route.params.id) {
-        loadCategoryDetail(route.params.id)
-      }
-    })
-    
-    return {
-      formRef,
-      form,
-      categories,
-      formTitle,
-      rules,
-      handleSubmit,
-      handleCancel
-    }
+    // 模拟保存操作
+    ElMessage.success(route.params.id ? '分类更新成功' : '分类创建成功')
+    router.push('/categories')
+  } catch (error) {
+    console.error('表单验证失败:', error)
   }
 }
+
+const handleCancel = () => {
+  router.push('/categories')
+}
+
+onMounted(() => {
+  loadCategories()
+  
+  if (route.params.id) {
+    loadCategoryDetail(route.params.id)
+  }
+})
 </script>
 
 <style scoped>

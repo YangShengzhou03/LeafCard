@@ -78,163 +78,142 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
-export default {
-  name: 'UserList',
-  setup() {
-    const router = useRouter()
-    const loading = ref(false)
-    const tableData = ref([])
+const router = useRouter()
+const loading = ref(false)
+const tableData = ref([])
+
+const searchForm = reactive({
+  username: '',
+  email: '',
+  status: ''
+})
+
+const pagination = reactive({
+  current: 1,
+  size: 10,
+  total: 0
+})
+
+const getRoleText = (role) => {
+  const roleMap = {
+    'admin': '管理员',
+    'user': '普通用户',
+    'guest': '访客'
+  }
+  return roleMap[role] || role
+}
+
+const getRoleType = (role) => {
+  const typeMap = {
+    'admin': 'danger',
+    'user': 'primary',
+    'guest': 'info'
+  }
+  return typeMap[role] || 'info'
+}
+
+const loadUserList = async () => {
+  loading.value = true
+  try {
+    // 模拟API调用
+    await new Promise(resolve => setTimeout(resolve, 500))
     
-    const searchForm = reactive({
-      username: '',
-      email: '',
-      status: ''
-    })
-    
-    const pagination = reactive({
-      current: 1,
-      size: 10,
-      total: 0
-    })
-    
-    const getRoleText = (role) => {
-      const roleMap = {
-        'admin': '管理员',
-        'user': '普通用户',
-        'guest': '访客'
+    tableData.value = [
+      {
+        id: 1,
+        username: 'admin',
+        email: 'admin@example.com',
+        role: 'admin',
+        status: 1,
+        createTime: '2023-01-01 10:00:00'
+      },
+      {
+        id: 2,
+        username: 'user1',
+        email: 'user1@example.com',
+        role: 'user',
+        status: 1,
+        createTime: '2023-01-02 14:30:00'
+      },
+      {
+        id: 3,
+        username: 'user2',
+        email: 'user2@example.com',
+        role: 'user',
+        status: 0,
+        createTime: '2023-01-03 09:15:00'
       }
-      return roleMap[role] || role
-    }
+    ]
     
-    const getRoleType = (role) => {
-      const typeMap = {
-        'admin': 'danger',
-        'user': 'primary',
-        'guest': 'info'
-      }
-      return typeMap[role] || 'info'
-    }
-    
-    const loadUserList = async () => {
-      loading.value = true
-      try {
-        // 模拟API调用
-        await new Promise(resolve => setTimeout(resolve, 500))
-        
-        tableData.value = [
-          {
-            id: 1,
-            username: 'admin',
-            email: 'admin@example.com',
-            role: 'admin',
-            status: 1,
-            createTime: '2023-01-01 10:00:00'
-          },
-          {
-            id: 2,
-            username: 'user1',
-            email: 'user1@example.com',
-            role: 'user',
-            status: 1,
-            createTime: '2023-01-02 14:30:00'
-          },
-          {
-            id: 3,
-            username: 'user2',
-            email: 'user2@example.com',
-            role: 'user',
-            status: 0,
-            createTime: '2023-01-03 09:15:00'
-          }
-        ]
-        
-        pagination.total = tableData.value.length
-      } catch (error) {
-        console.error('加载用户列表失败:', error)
-        ElMessage.error('加载用户列表失败')
-      } finally {
-        loading.value = false
-      }
-    }
-    
-    const handleSearch = () => {
-      pagination.current = 1
-      loadUserList()
-    }
-    
-    const handleReset = () => {
-      Object.keys(searchForm).forEach(key => {
-        searchForm[key] = ''
-      })
-      pagination.current = 1
-      loadUserList()
-    }
-    
-    const handleAdd = () => {
-      router.push('/users/add')
-    }
-    
-    const handleEdit = (row) => {
-      router.push(`/users/edit/${row.id}`)
-    }
-    
-    const handleToggleStatus = async (row) => {
-      try {
-        await ElMessageBox.confirm(
-          `确定要${row.status ? '禁用' : '启用'}用户 "${row.username}" 吗？`,
-          '提示',
-          {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }
-        )
-        
-        // 模拟状态切换
-        row.status = row.status ? 0 : 1
-        ElMessage.success(`用户${row.status ? '启用' : '禁用'}成功`)
-      } catch (error) {
-        // 用户取消操作
-      }
-    }
-    
-    const handleSizeChange = (size) => {
-      pagination.size = size
-      pagination.current = 1
-      loadUserList()
-    }
-    
-    const handleCurrentChange = (current) => {
-      pagination.current = current
-      loadUserList()
-    }
-    
-    onMounted(() => {
-      loadUserList()
-    })
-    
-    return {
-      loading,
-      tableData,
-      searchForm,
-      pagination,
-      getRoleText,
-      getRoleType,
-      handleSearch,
-      handleReset,
-      handleAdd,
-      handleEdit,
-      handleToggleStatus,
-      handleSizeChange,
-      handleCurrentChange
-    }
+    pagination.total = tableData.value.length
+  } catch (error) {
+    console.error('加载用户列表失败:', error)
+    ElMessage.error('加载用户列表失败')
+  } finally {
+    loading.value = false
   }
 }
+
+const handleSearch = () => {
+  pagination.current = 1
+  loadUserList()
+}
+
+const handleReset = () => {
+  Object.keys(searchForm).forEach(key => {
+    searchForm[key] = ''
+  })
+  pagination.current = 1
+  loadUserList()
+}
+
+const handleAdd = () => {
+  router.push('/users/add')
+}
+
+const handleEdit = (row) => {
+  router.push(`/users/edit/${row.id}`)
+}
+
+const handleToggleStatus = async (row) => {
+  try {
+    await ElMessageBox.confirm(
+      `确定要${row.status ? '禁用' : '启用'}用户 "${row.username}" 吗？`,
+      '提示',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    
+    // 模拟状态切换
+    row.status = row.status ? 0 : 1
+    ElMessage.success(`用户${row.status ? '启用' : '禁用'}成功`)
+  } catch (error) {
+    // 用户取消操作
+  }
+}
+
+const handleSizeChange = (size) => {
+  pagination.size = size
+  pagination.current = 1
+  loadUserList()
+}
+
+const handleCurrentChange = (current) => {
+  pagination.current = current
+  loadUserList()
+}
+
+onMounted(() => {
+  loadUserList()
+})
 </script>
 
 <style scoped>

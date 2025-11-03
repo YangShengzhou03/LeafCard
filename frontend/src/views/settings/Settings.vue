@@ -127,138 +127,116 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 
-export default {
-  name: 'Settings',
-  setup() {
-    const activeTab = ref('basic')
-    
-    // 基本设置
-    const basicFormRef = ref()
-    const basicForm = reactive({
-      siteName: 'Leaf Card',
-      siteTitle: 'Leaf Card - 卡片管理系统',
-      siteDescription: '一个功能强大的卡片管理系统',
-      keywords: '卡片,管理,系统',
-      icp: ''
-    })
-    
-    const basicRules = {
-      siteName: [
-        { required: true, message: '请输入网站名称', trigger: 'blur' }
-      ],
-      siteTitle: [
-        { required: true, message: '请输入网站标题', trigger: 'blur' }
-      ]
-    }
-    
-    // 安全设置
-    const securityFormRef = ref()
-    const securityForm = reactive({
-      sessionTimeout: 30,
-      passwordStrength: 'medium',
-      loginLock: true,
-      maxLoginAttempts: 5,
-      lockDuration: 30
-    })
-    
-    const securityRules = {
-      sessionTimeout: [
-        { required: true, message: '请输入登录超时时间', trigger: 'blur' }
-      ]
-    }
-    
-    // 邮件设置
-    const emailFormRef = ref()
-    const emailForm = reactive({
-      smtpHost: 'smtp.example.com',
-      smtpPort: 587,
-      encryption: 'tls',
-      fromEmail: 'noreply@example.com',
-      fromName: 'Leaf Card',
-      username: '',
-      password: ''
-    })
-    
-    const emailRules = {
-      smtpHost: [
-        { required: true, message: '请输入SMTP服务器地址', trigger: 'blur' }
-      ],
-      smtpPort: [
-        { required: true, message: '请输入端口号', trigger: 'blur' }
-      ],
-      fromEmail: [
-        { required: true, message: '请输入发件人邮箱', trigger: 'blur' },
-        { type: 'email', message: '请输入有效的邮箱地址', trigger: 'blur' }
-      ]
-    }
-    
-    const saveBasicSettings = async () => {
-      try {
-        await basicFormRef.value.validate()
-        // 模拟保存操作
-        ElMessage.success('基本设置保存成功')
-      } catch (error) {
-        console.error('表单验证失败:', error)
-      }
-    }
-    
-    const saveSecuritySettings = async () => {
-      try {
-        await securityFormRef.value.validate()
-        // 模拟保存操作
-        ElMessage.success('安全设置保存成功')
-      } catch (error) {
-        console.error('表单验证失败:', error)
-      }
-    }
-    
-    const saveEmailSettings = async () => {
-      try {
-        await emailFormRef.value.validate()
-        // 模拟保存操作
-        ElMessage.success('邮件设置保存成功')
-      } catch (error) {
-        console.error('表单验证失败:', error)
-      }
-    }
-    
-    const testEmailConnection = async () => {
-      try {
-        await emailFormRef.value.validate()
-        // 模拟测试连接
-        ElMessage.success('邮件连接测试成功')
-      } catch (error) {
-        console.error('邮件连接测试失败:', error)
-        ElMessage.error('邮件连接测试失败')
-      }
-    }
-    
-    onMounted(() => {
-      // 可以在这里加载设置数据
-    })
-    
-    return {
-      activeTab,
-      basicFormRef,
-      basicForm,
-      basicRules,
-      securityFormRef,
-      securityForm,
-      securityRules,
-      emailFormRef,
-      emailForm,
-      emailRules,
-      saveBasicSettings,
-      saveSecuritySettings,
-      saveEmailSettings,
-      testEmailConnection
-    }
+const activeTab = ref('basic')
+
+// 基本设置
+const basicFormRef = ref()
+const basicForm = reactive({
+  siteName: 'Leaf Card',
+  siteTitle: 'Leaf Card - 卡片管理系统',
+  siteDescription: '一个功能强大的卡片管理系统',
+  keywords: '卡片,管理,系统',
+  icp: ''
+})
+
+const basicRules = {
+  siteName: [
+    { required: true, message: '请输入网站名称', trigger: 'blur' }
+  ],
+  siteTitle: [
+    { required: true, message: '请输入网站标题', trigger: 'blur' }
+  ]
+}
+
+// 安全设置
+const securityFormRef = ref()
+const securityForm = reactive({
+  sessionTimeout: 30,
+  passwordStrength: 'medium',
+  loginLock: true,
+  maxLoginAttempts: 5,
+  lockDuration: 30
+})
+
+const securityRules = {
+  sessionTimeout: [
+    { required: true, message: '请输入登录超时时间', trigger: 'blur' }
+  ]
+}
+
+// 邮件设置
+const emailFormRef = ref()
+const emailForm = reactive({
+  smtpHost: 'smtp.example.com',
+  smtpPort: 587,
+  encryption: 'tls',
+  fromEmail: 'noreply@example.com',
+  fromName: 'Leaf Card',
+  username: '',
+  password: ''
+})
+
+const emailRules = {
+  smtpHost: [
+    { required: true, message: '请输入SMTP服务器地址', trigger: 'blur' }
+  ],
+  smtpPort: [
+    { required: true, message: '请输入端口号', trigger: 'blur' }
+  ],
+  fromEmail: [
+    { required: true, message: '请输入发件人邮箱', trigger: 'blur' },
+    { type: 'email', message: '请输入有效的邮箱地址', trigger: 'blur' }
+  ]
+}
+
+const saveBasicSettings = async () => {
+  try {
+    await basicFormRef.value.validate()
+    // 模拟保存操作
+    ElMessage.success('基本设置保存成功')
+  } catch (error) {
+    console.error('表单验证失败:', error)
   }
 }
+
+const saveSecuritySettings = async () => {
+  try {
+    await securityFormRef.value.validate()
+    // 模拟保存操作
+    ElMessage.success('安全设置保存成功')
+  } catch (error) {
+    console.error('表单验证失败:', error)
+  }
+}
+
+const saveEmailSettings = async () => {
+  try {
+    await emailFormRef.value.validate()
+    // 模拟保存操作
+    ElMessage.success('邮件设置保存成功')
+  } catch (error) {
+    console.error('表单验证失败:', error)
+  }
+}
+
+const testEmailConnection = async () => {
+  try {
+    await emailFormRef.value.validate()
+    // 模拟测试连接
+    ElMessage.success('邮件连接测试成功')
+  } catch (error) {
+    console.error('邮件连接测试失败:', error)
+    ElMessage.error('邮件连接测试失败')
+  }
+}
+
+onMounted(() => {
+  // 可以在这里加载设置数据
+})
 </script>
 
 <style scoped>

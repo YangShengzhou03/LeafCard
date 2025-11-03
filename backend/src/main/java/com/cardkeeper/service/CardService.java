@@ -8,6 +8,21 @@ import java.util.Map;
 public interface CardService {
     
     /**
+     * 卡密验证（规格类型文本+数字标识）
+     */
+    Map<String, Object> validateCard(String cardNumber, String specificationType, String digitalIdentifier);
+    
+    /**
+     * 批量卡密验证
+     */
+    Map<String, Object> batchValidateCards(String[] cardNumbers, String specificationType, String digitalIdentifier);
+    
+    /**
+     * 获取卡密验证规则
+     */
+    Map<String, Object> getValidationRules();
+    
+    /**
      * 获取卡列表（分页查询）
      */
     Page<Card> getCardList(String cardNumber, String cardLevel, String productCategory, String productType, String productSpec, Integer cardStatus, int page, int size);
