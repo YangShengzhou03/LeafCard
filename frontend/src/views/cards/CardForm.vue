@@ -14,29 +14,17 @@
         label-width="120px"
         style="max-width: 600px"
       >
-        <el-form-item label="卡号" prop="cardNumber">
+        <el-form-item label="卡名称" prop="cardName">
           <el-input
-            v-model="formData.cardNumber"
-            placeholder="请输入卡号"
-            :disabled="isEdit"
+            v-model="formData.cardName"
+            placeholder="请输入卡名称"
           />
         </el-form-item>
 
-        <el-form-item label="卡等级" prop="cardLevel">
-          <el-select v-model="formData.cardLevel" placeholder="请选择卡等级">
+        <el-form-item label="分类" prop="categoryId">
+          <el-select v-model="formData.categoryId" placeholder="请选择分类" @change="handleCategoryChange">
             <el-option
-              v-for="level in cardLevels"
-              :key="level.value"
-              :label="level.label"
-              :value="level.value"
-            />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="商品类别" prop="productCategory">
-          <el-select v-model="formData.productCategory" placeholder="请选择商品类别">
-            <el-option
-              v-for="category in productCategories"
+              v-for="category in categories"
               :key="category.value"
               :label="category.label"
               :value="category.value"
@@ -44,24 +32,41 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="过期时间" prop="expireTime">
-          <el-date-picker
-            v-model="formData.expireTime"
-            type="datetime"
-            placeholder="选择过期时间"
-            value-format="YYYY-MM-DD HH:mm:ss"
-            style="width: 100%"
-          />
-          <div class="form-tip">留空表示永久有效</div>
+        <el-form-item label="子分类" prop="subCategoryId">
+          <el-select v-model="formData.subCategoryId" placeholder="请选择子分类">
+            <el-option
+              v-for="subCategory in subCategories"
+              :key="subCategory.value"
+              :label="subCategory.label"
+              :value="subCategory.value"
+            />
+          </el-select>
         </el-form-item>
 
-        <el-form-item label="备注" prop="remark">
+        <el-form-item label="卡描述" prop="description">
           <el-input
-            v-model="formData.remark"
+            v-model="formData.description"
             type="textarea"
             :rows="3"
-            placeholder="请输入备注信息"
+            placeholder="请输入卡描述信息"
           />
+        </el-form-item>
+
+        <el-form-item label="卡内容" prop="content">
+          <el-input
+            v-model="formData.content"
+            type="textarea"
+            :rows="4"
+            placeholder="请输入卡的具体内容，如卡号、密码等"
+          />
+        </el-form-item>
+
+        <el-form-item label="状态" prop="cardStatus">
+          <el-radio-group v-model="formData.cardStatus">
+            <el-radio value="unused">未使用</el-radio>
+            <el-radio value="used">已使用</el-radio>
+            <el-radio value="disabled">已禁用</el-radio>
+          </el-radio-group>
         </el-form-item>
 
         <el-form-item>
@@ -80,8 +85,9 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import type { Card } from '@/api/card'
-import { addCard, updateCard, getCardDetail } from '@/api/card'
+import type { CardInfo } from '@/types'
+import { cardApi } from '@/api/card'
+import { categoryApi } from '@/api/category'
 
 const route = useRoute()
 const router = useRouter()
@@ -90,50 +96,80 @@ const formRef = ref<FormInstance>()
 const isEdit = ref(false)
 const cardId = ref<number>()
 
+// 分类数据
+const categories = ref<{ value: number; label: string }[]>([])
+const subCategories = ref<{ value: number; label: string }[]>([])
+
 // 表单数据
-const formData = reactive<Card>({
-  cardNumber: '',
-  cardLevel: '',
-  productCategory: '',
-  cardStatus: 0,
-  expireTime: '',
-  remark: '',
-  rechargeTimes: 0
+const formData = reactive<Partial<CardInfo>>({
+  cardName: '',
+  categoryId: undefined,
+  subCategoryId: undefined,
+  description: '',
+  content: '',
+  cardStatus: 1
 })
 
 // 表单验证规则
 const formRules: FormRules = {
-  cardNumber: [
-    { required: true, message: '请输入卡号', trigger: 'blur' },
-    { min: 6, max: 50, message: '卡号长度在 6 到 50 个字符', trigger: 'blur' }
+  cardName: [
+    { required: true, message: '请输入卡名称', trigger: 'blur' },
+    { min: 1, max: 100, message: '卡名称长度在 1 到 100 个字符', trigger: 'blur' }
   ],
-  cardLevel: [
-    { required: true, message: '请选择卡等级', trigger: 'change' }
+  categoryId: [
+    { required: true, message: '请选择分类', trigger: 'change' }
   ],
-  productCategory: [
-    { required: true, message: '请选择商品类别', trigger: 'change' }
+  subCategoryId: [
+    { required: true, message: '请选择子分类', trigger: 'change' }
+  ],
+  content: [
+    { required: true, message: '请输入卡内容', trigger: 'blur' }
   ]
 }
 
-// 枚举数据
-const cardLevels = [
-  { value: '普通会员', label: '普通会员' },
-  { value: '超级会员', label: '超级会员' },
-  { value: '钻石会员', label: '钻石会员' }
-]
+// 加载分类数据
+const loadCategories = async () => {
+  try {
+    const response = await categoryApi.getCategoryList({ page: 1, size: 1000 })
+    categories.value = response.records.map(item => ({
+      value: item.id!,
+      label: item.name
+    }))
+  } catch (error) {
+    console.error('加载分类数据失败:', error)
+  }
+}
 
-const productCategories = [
-  { value: '视频会员', label: '视频会员' },
-  { value: '音乐会员', label: '音乐会员' },
-  { value: '电商优惠券', label: '电商优惠券' },
-  { value: '游戏点卡', label: '游戏点卡' }
-]
+// 分类变化时加载子分类
+const handleCategoryChange = async (categoryId: number | undefined) => {
+  if (!categoryId) {
+    subCategories.value = []
+    formData.subCategoryId = undefined
+    return
+  }
+  
+  try {
+    const response = await categoryApi.getSubCategoryList(categoryId, { page: 1, size: 1000 })
+    subCategories.value = response.records.map(item => ({
+      value: item.id!,
+      label: item.name
+    }))
+    formData.subCategoryId = undefined
+  } catch (error) {
+    console.error('加载子分类数据失败:', error)
+  }
+}
 
 // 加载卡详情
 const loadCardDetail = async (id: number) => {
   try {
-    const data = await getCardDetail(id)
+    const data = await cardApi.getCard(id)
     Object.assign(formData, data)
+    
+    // 如果卡有分类信息，加载对应的子分类
+    if (data.categoryId) {
+      await handleCategoryChange(data.categoryId)
+    }
   } catch (error) {
     ElMessage.error('加载卡详情失败')
     router.back()
@@ -148,10 +184,10 @@ const handleSubmit = async () => {
     await formRef.value.validate()
     
     if (isEdit.value) {
-      await updateCard(formData)
+      await cardApi.updateCard(cardId.value!, formData)
       ElMessage.success('更新成功')
     } else {
-      await addCard(formData)
+      await cardApi.createCard(formData)
       ElMessage.success('创建成功')
     }
     
@@ -167,6 +203,8 @@ const handleCancel = () => {
 }
 
 onMounted(() => {
+  loadCategories()
+  
   const { id } = route.params
   if (id) {
     isEdit.value = true

@@ -86,7 +86,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'trash',
         name: 'Trash',
-        component: () => import('@/views/trash/TrashList.vue'),
+        component: () => import('@/views/TrashList.vue'),
         meta: { title: '回收站', requiresAuth: true }
       }
     ]

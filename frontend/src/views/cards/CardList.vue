@@ -5,7 +5,7 @@
       <el-form :model="searchForm" inline>
         <el-form-item label="卡名称">
           <el-input
-            v-model="searchForm.keyword"
+            v-model="searchForm.title"
             placeholder="请输入卡名称/描述"
             clearable
             style="width: 200px"
@@ -36,8 +36,9 @@
         <el-form-item label="状态">
           <el-select v-model="searchForm.status" placeholder="请选择状态" clearable>
             <el-option label="全部" value="" />
-            <el-option label="启用" :value="1" />
-            <el-option label="禁用" :value="0" />
+            <el-option label="未使用" value="unused" />
+            <el-option label="已使用" value="used" />
+            <el-option label="已禁用" value="disabled" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -67,15 +68,15 @@
     <el-card>
       <el-table :data="tableData" v-loading="loading" stripe>
         <el-table-column type="index" label="序号" width="60" />
-        <el-table-column prop="cardName" label="卡名称" min-width="150" />
-        <el-table-column prop="categoryName" label="分类" width="120" />
-        <el-table-column prop="subCategoryName" label="子分类" width="120" />
-        <el-table-column prop="cardStatus" label="状态" width="100">
+        <el-table-column prop="title" label="卡名称" min-width="150" />
+<el-table-column prop="categoryName" label="分类" width="120" />
+<el-table-column prop="subCategoryName" label="子分类" width="120" />
+<el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="getStatusTagType(row.cardStatus)">
-              {{ getStatusLabel(row.cardStatus) }}
-            </el-tag>
-          </template>
+  <el-tag :type="getStatusTagType(row.status)">
+    {{ getStatusLabel(row.status) }}
+  </el-tag>
+</template>
         </el-table-column>
         <el-table-column prop="viewCount" label="查看次数" width="100" />
         <el-table-column prop="isFavorite" label="收藏" width="80">
@@ -86,25 +87,25 @@
             </el-icon>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="160" />
-        <el-table-column prop="updateTime" label="更新时间" width="160" />
+        <el-table-column prop="createdAt" label="创建时间" width="160" />
+<el-table-column prop="updatedAt" label="更新时间" width="160" />
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" @click="handleView(row)">查看</el-button>
             <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
             <el-button 
-              v-if="row.cardStatus === 0" 
+              v-if="row.cardStatus === 'disabled'" 
               link 
               type="success" 
-              @click="handleActivate(row)"
+              @click="handleEnable(row)"
             >
               启用
             </el-button>
             <el-button 
-              v-if="row.cardStatus === 1" 
+              v-if="row.cardStatus === 'unused' || row.cardStatus === 'used'" 
               link 
               type="warning" 
-              @click="handleDeactivate(row)"
+              @click="handleDisable(row)"
             >
               禁用
             </el-button>
@@ -210,22 +211,28 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Download, Upload, Document } from '@element-plus/icons-vue'
-import type { Card, CardQueryParams } from '@/api/card'
-import { getCardList, deleteCard, activateCard, rechargeCard, importCards, downloadTemplate, exportCards } from '@/api/card'
+import { Plus, Download, Upload, Document, Star, StarFilled } from '@element-plus/icons-vue'
+import type { CardInfo, CardQueryParams } from '@/types'
+import { cardApi } from '@/api/card'
+import { categoryApi } from '@/api/category'
 
 const router = useRouter()
 
 // 搜索表单
 const searchForm = reactive({
-  cardNumber: '',
-  cardLevel: '',
-  productCategory: '',
-  cardStatus: undefined as number | undefined
+  title: '',
+  categoryId: undefined as number | undefined,
+  subCategoryId: undefined as number | undefined,
+  status: '' as string | undefined,
+  isFavorite: false
 })
 
+// 分类数据
+const categoryOptions = ref<{ id: number; name: string }[]>([])
+const subCategoryOptions = ref<{ id: number; name: string }[]>([])
+
 // 表格数据
-const tableData = ref<Card[]>([])
+const tableData = ref<CardInfo[]>([])
 const loading = ref(false)
 
 // 导入相关
@@ -249,59 +256,63 @@ const pagination = reactive({
 })
 
 // 枚举数据
-const cardLevels = [
-  { value: '普通会员', label: '普通会员' },
-  { value: '超级会员', label: '超级会员' },
-  { value: '钻石会员', label: '钻石会员' }
-]
-
-const productCategories = [
-  { value: '视频会员', label: '视频会员' },
-  { value: '音乐会员', label: '音乐会员' },
-  { value: '电商优惠券', label: '电商优惠券' },
-  { value: '游戏点卡', label: '游戏点卡' }
-]
-
 const cardStatuses = [
-  { value: 0, label: '未激活' },
-  { value: 1, label: '已激活' },
-  { value: 2, label: '已使用' },
-  { value: 3, label: '已过期' },
-  { value: 4, label: '已冻结' }
+  { value: 'unused', label: '未使用' },
+  { value: 'used', label: '已使用' },
+  { value: 'disabled', label: '已禁用' }
 ]
 
 // 获取标签类型
-const getLevelTagType = (level: string) => {
+const getStatusTagType = (status: string) => {
   const map: Record<string, string> = {
-    '普通会员': '',
-    '超级会员': 'warning',
-    '钻石会员': 'success'
-  }
-  return map[level] || ''
-}
-
-const getStatusTagType = (status: number) => {
-  const map: Record<number, string> = {
-    0: 'info',
-    1: 'success',
-    2: '',
-    3: 'warning',
-    4: 'danger'
+    'unused': 'info',
+    'used': 'success',
+    'disabled': 'danger'
   }
   return map[status] || ''
 }
 
 // 获取标签文本
-const getLevelLabel = (level: string) => level
-const getStatusLabel = (status: number) => {
-  const map: Record<number, string> = {
-    0: '未激活',
-    1: '已激活',
-    2: '已使用',
-    3: '已过期',
-    4: '已冻结'
+const getStatusLabel = (status: string) => {
+  const map: Record<string, string> = {
+    'unused': '未使用',
+    'used': '已使用',
+    'disabled': '已禁用'
   }
   return map[status] || '未知'
+}
+
+// 加载分类数据
+const loadCategories = async () => {
+  try {
+    const response = await categoryApi.getCategories({ page: 1, size: 1000 })
+    categoryOptions.value = response.records.map(item => ({
+      id: item.id!,
+      name: item.name
+    }))
+  } catch (error) {
+    console.error('加载分类数据失败:', error)
+  }
+}
+
+// 分类变化时加载子分类
+const handleCategoryChange = async (categoryId: number | undefined) => {
+  if (!categoryId) {
+    subCategoryOptions.value = []
+    searchForm.subCategoryId = undefined
+    return
+  }
+  
+  try {
+    const response = await categoryApi.getSubCategoryList(categoryId, { page: 1, size: 1000 })
+    subCategoryOptions.value = response.records.map(item => ({
+      id: item.id!,
+      name: item.name
+    }))
+    searchForm.subCategoryId = undefined
+  } catch (error) {
+    console.error('加载子分类数据失败:', error)
+  }
 }
 
 // 加载数据
@@ -313,7 +324,7 @@ const loadData = async () => {
       size: pagination.size,
       ...searchForm
     }
-    const response = await getCardList(params)
+    const response = await cardApi.getCards(params)
     tableData.value = response.records
     pagination.total = response.total
   } catch (error) {
@@ -332,11 +343,13 @@ const handleSearch = () => {
 // 重置
 const handleReset = () => {
   Object.assign(searchForm, {
-    cardNumber: '',
-    cardLevel: '',
-    productCategory: '',
-    cardStatus: undefined
+    title: '',
+    categoryId: undefined,
+    subCategoryId: undefined,
+    status: undefined,
+    isFavorite: false
   })
+  subCategoryOptions.value = []
   handleSearch()
 }
 
@@ -346,43 +359,43 @@ const handleAdd = () => {
 }
 
 // 查看
-const handleView = (row: Card) => {
+const handleView = (row: CardInfo) => {
   router.push(`/cards/detail/${row.id}`)
 }
 
 // 编辑
-const handleEdit = (row: Card) => {
+const handleEdit = (row: CardInfo) => {
   router.push(`/cards/edit/${row.id}`)
 }
 
-// 激活
-const handleActivate = async (row: Card) => {
+// 启用
+const handleEnable = async (row: CardInfo) => {
   try {
-    await ElMessageBox.confirm('确定要激活这张卡吗？', '提示', {
+    await ElMessageBox.confirm('确定要启用这张卡吗？', '提示', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
     })
     
-    await activateCard(row.id!)
-    ElMessage.success('激活成功')
+    await cardApi.updateCardStatus(row.id!, 'unused')
+    ElMessage.success('启用成功')
     loadData()
   } catch (error) {
     // 用户取消操作
   }
 }
 
-// 补充
-const handleRecharge = async (row: Card) => {
+// 禁用
+const handleDisable = async (row: CardInfo) => {
   try {
-    await ElMessageBox.confirm('确定要补充这张卡吗？', '提示', {
+    await ElMessageBox.confirm('确定要禁用这张卡吗？', '提示', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
     })
     
-    await rechargeCard(row.id!)
-    ElMessage.success('补充成功')
+    await cardApi.updateCardStatus(row.id!, 'disabled')
+    ElMessage.success('禁用成功')
     loadData()
   } catch (error) {
     // 用户取消操作
@@ -390,19 +403,31 @@ const handleRecharge = async (row: Card) => {
 }
 
 // 删除
-const handleDelete = async (row: Card) => {
+const handleDelete = async (row: CardInfo) => {
   try {
-    await ElMessageBox.confirm('确定要删除这张卡吗？', '提示', {
+    await ElMessageBox.confirm('确定要删除这张卡吗？删除后将进入回收站', '提示', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
     })
     
-    await deleteCard(row.id!)
+    await cardApi.deleteCard(row.id!)
     ElMessage.success('删除成功')
     loadData()
   } catch (error) {
     // 用户取消操作
+  }
+}
+
+// 切换收藏状态
+const handleToggleFavorite = async (row: CardInfo) => {
+  try {
+    await cardApi.toggleFavoriteStatus(row.id!)
+    ElMessage.success(row.isFavorite ? '已取消收藏' : '已收藏')
+    loadData()
+  } catch (error) {
+    console.error('切换收藏状态失败:', error)
+    ElMessage.error('操作失败')
   }
 }
 
@@ -444,7 +469,7 @@ const handleImport = async () => {
   
   try {
     importLoading.value = true
-    await importCards(selectedFile.value)
+    await cardApi.importCards(selectedFile.value)
     ElMessage.success('导入成功')
     showImportDialog.value = false
     selectedFile.value = null
@@ -469,7 +494,7 @@ const formatFileSize = (bytes: number): string => {
 // 下载模板
 const handleDownloadTemplate = async () => {
   try {
-    const response = await downloadTemplate()
+    const response = await cardApi.downloadTemplate()
     const blob = new Blob([response.data])
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
@@ -502,7 +527,7 @@ const handleExport = async () => {
       params.size = pagination.total
     }
     
-    const response = await exportCards(params)
+    const response = await cardApi.exportCards(params)
     
     // 创建下载链接
     const blob = new Blob([response.data])
@@ -541,6 +566,7 @@ const handleCurrentChange = (current: number) => {
 }
 
 onMounted(() => {
+  loadCategories()
   loadData()
 })
 </script>

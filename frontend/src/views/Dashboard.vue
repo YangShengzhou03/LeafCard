@@ -18,12 +18,12 @@
       <el-col :span="6">
         <el-card class="stat-card">
           <div class="stat-content">
-            <div class="stat-icon active">
-              <el-icon><Check /></el-icon>
+            <div class="stat-icon unused">
+              <el-icon><Clock /></el-icon>
             </div>
             <div class="stat-info">
-              <div class="stat-value">{{ stats.activeCards }}</div>
-              <div class="stat-label">已激活</div>
+              <div class="stat-value">{{ stats.unusedCards }}</div>
+              <div class="stat-label">未使用</div>
             </div>
           </div>
         </el-card>
@@ -44,12 +44,12 @@
       <el-col :span="6">
         <el-card class="stat-card">
           <div class="stat-content">
-            <div class="stat-icon expired">
-              <el-icon><Clock /></el-icon>
+            <div class="stat-icon disabled">
+              <el-icon><Close /></el-icon>
             </div>
             <div class="stat-info">
-              <div class="stat-value">{{ stats.expiredCards }}</div>
-              <div class="stat-label">已过期</div>
+              <div class="stat-value">{{ stats.disabledCards }}</div>
+              <div class="stat-label">已禁用</div>
             </div>
           </div>
         </el-card>
@@ -99,9 +99,9 @@ import * as echarts from 'echarts'
 // 统计数据
 const stats = ref({
   totalCards: 1256,
-  activeCards: 342,
+  unusedCards: 342,
   usedCards: 567,
-  expiredCards: 89
+  disabledCards: 89
 })
 
 // 最近操作记录
@@ -169,10 +169,9 @@ const initStatusChart = () => {
         radius: ['40%', '70%'],
         center: ['40%', '50%'],
         data: [
-          { value: stats.value.activeCards, name: '已激活' },
+          { value: stats.value.unusedCards, name: '未使用' },
           { value: stats.value.usedCards, name: '已使用' },
-          { value: stats.value.expiredCards, name: '已过期' },
-          { value: stats.value.totalCards - stats.value.activeCards - stats.value.usedCards - stats.value.expiredCards, name: '未激活' }
+          { value: stats.value.disabledCards, name: '已禁用' }
         ],
         emphasis: {
           itemStyle: {
@@ -273,15 +272,15 @@ onMounted(() => {
   background: #409EFF;
 }
 
-.stat-icon.active {
-  background: #67C23A;
+.stat-icon.unused {
+  background: #409EFF;
 }
 
 .stat-icon.used {
-  background: #E6A23C;
+  background: #67C23A;
 }
 
-.stat-icon.expired {
+.stat-icon.disabled {
   background: #F56C6C;
 }
 

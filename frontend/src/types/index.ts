@@ -290,7 +290,7 @@ export interface CardInfo {
   content: string
   tags?: string[]
   priority: number // 优先级
-  status: 'active' | 'inactive' | 'deleted'
+  status: 'unused' | 'used' | 'disabled'
   isFavorite: boolean
   viewCount: number
   createdBy: number
@@ -349,7 +349,7 @@ export interface UpdateCardParams {
   content?: string
   tags?: string[]
   priority?: number
-  status?: 'active' | 'inactive'
+  status?: 'unused' | 'used' | 'disabled'
 }
 
 export interface CardQueryParams extends PaginationParams {
@@ -357,7 +357,7 @@ export interface CardQueryParams extends PaginationParams {
   subCategoryId?: number
   keyword?: string
   tags?: string[]
-  status?: 'active' | 'inactive' | 'deleted'
+  status?: 'unused' | 'used' | 'disabled'
   isFavorite?: boolean
   startDate?: string
   endDate?: string

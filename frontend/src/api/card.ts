@@ -30,6 +30,11 @@ export const cardApi = {
     return service.put(`/cards/${id}`, data)
   },
 
+  // 更新卡状态
+  updateCardStatus(id: number, status: 'unused' | 'used' | 'disabled'): Promise<CardInfo> {
+    return service.patch(`/cards/${id}/status`, { status })
+  },
+
   // 删除卡（软删除）
   deleteCard(id: number): Promise<void> {
     return service.delete(`/cards/${id}`)
