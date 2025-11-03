@@ -19,13 +19,27 @@
           <el-icon><DataBoard /></el-icon>
           <span>仪表板</span>
         </el-menu-item>
+        <el-sub-menu index="/product">
+          <template #title>
+            <el-icon><Goods /></el-icon>
+            <span>商品管理</span>
+          </template>
+          <el-menu-item index="/product/goods">
+            <el-icon><Goods /></el-icon>
+            <span>商品管理</span>
+          </el-menu-item>
+          <el-menu-item index="/product/categories">
+            <el-icon><Folder /></el-icon>
+            <span>商品分类</span>
+          </el-menu-item>
+          <el-menu-item index="/product/specifications">
+            <el-icon><List /></el-icon>
+            <span>规格管理</span>
+          </el-menu-item>
+        </el-sub-menu>
         <el-menu-item index="/cards">
           <el-icon><CreditCard /></el-icon>
           <span>卡密管理</span>
-        </el-menu-item>
-        <el-menu-item index="/specifications">
-          <el-icon><List /></el-icon>
-          <span>规格管理</span>
         </el-menu-item>
         <el-menu-item index="/validation">
           <el-icon><Search /></el-icon>
@@ -76,7 +90,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAppStore } from '@/stores'
 

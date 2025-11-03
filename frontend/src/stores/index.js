@@ -48,6 +48,7 @@ export const useCardStore = defineStore('card', {
         // 这里将调用卡密验证API
         // const response = await api.validateCard(cardKey)
         // return response.data
+        console.log('验证卡密:', cardKey) // 临时添加使用cardKey
       } catch (error) {
         console.error('卡密验证失败:', error)
         throw error
