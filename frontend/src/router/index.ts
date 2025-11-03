@@ -38,17 +38,37 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/Dashboard.vue'),
         meta: { title: '仪表板', requiresAuth: true }
       },
+      // 卡分类管理
+      {
+        path: 'categories',
+        name: 'CategoryManagement',
+        component: () => import('@/views/categories/CategoryList.vue'),
+        meta: { title: '分类管理', requiresAuth: true }
+      },
+      {
+        path: 'categories/add',
+        name: 'CategoryAdd',
+        component: () => import('@/views/categories/CategoryForm.vue'),
+        meta: { title: '添加分类', requiresAuth: true }
+      },
+      {
+        path: 'categories/edit/:id',
+        name: 'CategoryEdit',
+        component: () => import('@/views/categories/CategoryForm.vue'),
+        meta: { title: '编辑分类', requiresAuth: true }
+      },
+      // 卡管理
       {
         path: 'cards',
-        name: 'CardManagement',
+        name: 'CardList',
         component: () => import('@/views/cards/CardList.vue'),
-        meta: { title: '卡管理', requiresAuth: true }
+        meta: { title: '卡列表', requiresAuth: true }
       },
       {
         path: 'cards/add',
         name: 'CardAdd',
         component: () => import('@/views/cards/CardForm.vue'),
-        meta: { title: '新增卡', requiresAuth: true }
+        meta: { title: '添加卡', requiresAuth: true }
       },
       {
         path: 'cards/edit/:id',
@@ -61,6 +81,13 @@ const routes: RouteRecordRaw[] = [
         name: 'CardDetail',
         component: () => import('@/views/cards/CardDetail.vue'),
         meta: { title: '卡详情', requiresAuth: true }
+      },
+      // 回收站
+      {
+        path: 'trash',
+        name: 'Trash',
+        component: () => import('@/views/trash/TrashList.vue'),
+        meta: { title: '回收站', requiresAuth: true }
       }
     ]
   },

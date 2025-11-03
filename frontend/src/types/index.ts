@@ -253,3 +253,130 @@ export interface MenuItem {
   sort: number
   hidden?: boolean
 }
+
+// 卡分类相关类型
+export interface CardCategory {
+  id: number
+  name: string
+  description?: string
+  icon?: string
+  color?: string
+  sort: number
+  status: boolean
+  subCategories: CardSubCategory[]
+  cardCount: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CardSubCategory {
+  id: number
+  categoryId: number
+  name: string
+  level: number // 等级
+  description?: string
+  sort: number
+  status: boolean
+  cardCount: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CardInfo {
+  id: number
+  categoryId: number
+  subCategoryId?: number
+  title: string
+  content: string
+  tags?: string[]
+  priority: number // 优先级
+  status: 'active' | 'inactive' | 'deleted'
+  isFavorite: boolean
+  viewCount: number
+  createdBy: number
+  updatedBy?: number
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string
+}
+
+export interface CreateCardCategoryParams {
+  name: string
+  description?: string
+  icon?: string
+  color?: string
+  sort?: number
+}
+
+export interface UpdateCardCategoryParams {
+  name?: string
+  description?: string
+  icon?: string
+  color?: string
+  sort?: number
+  status?: boolean
+}
+
+export interface CreateCardSubCategoryParams {
+  categoryId: number
+  name: string
+  level: number
+  description?: string
+  sort?: number
+}
+
+export interface UpdateCardSubCategoryParams {
+  name?: string
+  level?: number
+  description?: string
+  sort?: number
+  status?: boolean
+}
+
+export interface CreateCardParams {
+  categoryId: number
+  subCategoryId?: number
+  title: string
+  content: string
+  tags?: string[]
+  priority?: number
+}
+
+export interface UpdateCardParams {
+  categoryId?: number
+  subCategoryId?: number
+  title?: string
+  content?: string
+  tags?: string[]
+  priority?: number
+  status?: 'active' | 'inactive'
+}
+
+export interface CardQueryParams extends PaginationParams {
+  categoryId?: number
+  subCategoryId?: number
+  keyword?: string
+  tags?: string[]
+  status?: 'active' | 'inactive' | 'deleted'
+  isFavorite?: boolean
+  startDate?: string
+  endDate?: string
+  sortBy?: 'createdAt' | 'updatedAt' | 'title' | 'priority'
+  sortOrder?: 'asc' | 'desc'
+}
+
+export interface CardCategoryQueryParams extends PaginationParams {
+  keyword?: string
+  status?: boolean
+}
+
+export interface CardStatistics {
+  totalCards: number
+  activeCards: number
+  deletedCards: number
+  favoriteCards: number
+  totalCategories: number
+  totalSubCategories: number
+  todayAdded: number
+  todayViewed: number
+}

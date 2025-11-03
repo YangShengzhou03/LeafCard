@@ -3,42 +3,41 @@
     <!-- 搜索区域 -->
     <el-card class="search-card">
       <el-form :model="searchForm" inline>
-        <el-form-item label="卡号">
+        <el-form-item label="卡名称">
           <el-input
-            v-model="searchForm.cardNumber"
-            placeholder="请输入卡号"
+            v-model="searchForm.keyword"
+            placeholder="请输入卡名称/描述"
             clearable
             style="width: 200px"
           />
         </el-form-item>
-        <el-form-item label="卡等级">
-          <el-select v-model="searchForm.cardLevel" placeholder="请选择卡等级" clearable>
+        <el-form-item label="分类">
+          <el-select v-model="searchForm.categoryId" placeholder="请选择分类" clearable @change="handleCategoryChange">
+            <el-option label="全部分类" value="" />
             <el-option
-              v-for="level in cardLevels"
-              :key="level.value"
-              :label="level.label"
-              :value="level.value"
+              v-for="category in categoryOptions"
+              :key="category.id"
+              :label="category.name"
+              :value="category.id"
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="商品类别">
-          <el-select v-model="searchForm.productCategory" placeholder="请选择商品类别" clearable>
+        <el-form-item label="子分类">
+          <el-select v-model="searchForm.subCategoryId" placeholder="请选择子分类" clearable>
+            <el-option label="全部子分类" value="" />
             <el-option
-              v-for="category in productCategories"
-              :key="category.value"
-              :label="category.label"
-              :value="category.value"
+              v-for="subCategory in subCategoryOptions"
+              :key="subCategory.id"
+              :label="subCategory.name"
+              :value="subCategory.id"
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="卡状态">
-          <el-select v-model="searchForm.cardStatus" placeholder="请选择卡状态" clearable>
-            <el-option
-              v-for="status in cardStatuses"
-              :key="status.value"
-              :label="status.label"
-              :value="status.value"
-            />
+        <el-form-item label="状态">
+          <el-select v-model="searchForm.status" placeholder="请选择状态" clearable>
+            <el-option label="全部" value="" />
+            <el-option label="启用" :value="1" />
+            <el-option label="禁用" :value="0" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -68,15 +67,9 @@
     <el-card>
       <el-table :data="tableData" v-loading="loading" stripe>
         <el-table-column type="index" label="序号" width="60" />
-        <el-table-column prop="cardNumber" label="卡号" min-width="150" />
-        <el-table-column prop="cardLevel" label="卡等级" width="120">
-          <template #default="{ row }">
-            <el-tag :type="getLevelTagType(row.cardLevel)">
-              {{ getLevelLabel(row.cardLevel) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="productCategory" label="商品类别" width="120" />
+        <el-table-column prop="cardName" label="卡名称" min-width="150" />
+        <el-table-column prop="categoryName" label="分类" width="120" />
+        <el-table-column prop="subCategoryName" label="子分类" width="120" />
         <el-table-column prop="cardStatus" label="状态" width="100">
           <template #default="{ row }">
             <el-tag :type="getStatusTagType(row.cardStatus)">
@@ -84,9 +77,17 @@
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column prop="viewCount" label="查看次数" width="100" />
+        <el-table-column prop="isFavorite" label="收藏" width="80">
+          <template #default="{ row }">
+            <el-icon :color="row.isFavorite ? '#f56c6c' : '#ccc'" style="cursor: pointer" @click="handleToggleFavorite(row)">
+              <StarFilled v-if="row.isFavorite" />
+              <Star v-else />
+            </el-icon>
+          </template>
+        </el-table-column>
         <el-table-column prop="createTime" label="创建时间" width="160" />
-        <el-table-column prop="expireTime" label="过期时间" width="160" />
-        <el-table-column prop="rechargeTimes" label="补充次数" width="100" />
+        <el-table-column prop="updateTime" label="更新时间" width="160" />
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" @click="handleView(row)">查看</el-button>
@@ -97,15 +98,15 @@
               type="success" 
               @click="handleActivate(row)"
             >
-              激活
+              启用
             </el-button>
             <el-button 
               v-if="row.cardStatus === 1" 
               link 
               type="warning" 
-              @click="handleRecharge(row)"
+              @click="handleDeactivate(row)"
             >
-              补充
+              禁用
             </el-button>
             <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
           </template>

@@ -31,12 +31,36 @@
             <span>仪表板</span>
           </template>
         </el-menu-item>
-        <el-menu-item index="/cards">
-          <el-icon><CreditCard /></el-icon>
+        <el-sub-menu index="card-management">
           <template #title>
+            <el-icon><CreditCard /></el-icon>
             <span>卡管理</span>
           </template>
-        </el-menu-item>
+          <el-menu-item index="/categories">
+            <el-icon><Folder /></el-icon>
+            <template #title>
+              <span>分类管理</span>
+            </template>
+          </el-menu-item>
+          <el-menu-item index="/cards">
+            <el-icon><List /></el-icon>
+            <template #title>
+              <span>卡列表</span>
+            </template>
+          </el-menu-item>
+          <el-menu-item index="/cards/add">
+            <el-icon><Plus /></el-icon>
+            <template #title>
+              <span>添加卡</span>
+            </template>
+          </el-menu-item>
+          <el-menu-item index="/trash">
+            <el-icon><Delete /></el-icon>
+            <template #title>
+              <span>回收站</span>
+            </template>
+          </el-menu-item>
+        </el-sub-menu>
       </el-menu>
     </el-aside>
 
@@ -125,6 +149,22 @@ import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore, useUserStore } from '@/stores'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { 
+  House, 
+  CreditCard, 
+  Folder, 
+  List, 
+  Plus, 
+  Delete,
+  Expand,
+  Fold,
+  FullScreen,
+  Bell,
+  ArrowDown,
+  User,
+  Setting,
+  SwitchButton
+} from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -146,10 +186,14 @@ const userAvatar = computed(() => userStore.userInfo?.avatar || '')
 const currentTitle = computed(() => {
   const titleMap: Record<string, string> = {
     '/dashboard': '仪表板',
-    '/cards': '卡管理',
-    '/cards/new': '新增卡片',
-    '/cards/edit': '编辑卡片',
-    '/cards/detail': '卡片详情',
+    '/categories': '分类管理',
+    '/categories/add': '添加分类',
+    '/categories/edit': '编辑分类',
+    '/cards': '卡列表',
+    '/cards/add': '添加卡',
+    '/cards/edit': '编辑卡',
+    '/cards/detail': '卡详情',
+    '/trash': '回收站',
     '/login': '登录',
     '/register': '注册',
     '/404': '页面不存在'
