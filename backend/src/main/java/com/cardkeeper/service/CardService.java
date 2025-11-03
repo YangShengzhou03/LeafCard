@@ -8,10 +8,29 @@ import java.util.Map;
 public interface CardService {
     
     /**
-     * 获取卡列表（分页）
+     * 获取卡列表（分页查询）
      */
-    Page<Card> getCardList(String cardNumber, String cardLevel, String productCategory, 
-                          Integer cardStatus, int page, int size);
+    Page<Card> getCardList(String cardNumber, String cardLevel, String productCategory, String productType, String productSpec, Integer cardStatus, int page, int size);
+    
+    /**
+     * 根据产品类型和规格获取卡列表
+     */
+    Page<Card> getCardListByProductTypeAndSpec(String productType, String productSpec, Integer cardStatus, int page, int size);
+    
+    /**
+     * 获取产品类型统计
+     */
+    Map<String, Long> getProductTypeStatistics();
+    
+    /**
+     * 获取产品规格统计
+     */
+    Map<String, Long> getProductSpecStatistics();
+    
+    /**
+     * 获取产品类型和规格组合统计
+     */
+    Map<String, Map<String, Long>> getProductTypeAndSpecStatistics();
     
     /**
      * 根据ID获取卡详情

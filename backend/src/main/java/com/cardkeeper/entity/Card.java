@@ -27,11 +27,21 @@ public class Card {
     @Size(max = 20, message = "卡等级长度不能超过20个字符")
     @Column(name = "card_level", nullable = false, length = 20)
     private String cardLevel;
-    
+
     @NotBlank(message = "商品类别不能为空")
     @Size(max = 50, message = "商品类别长度不能超过50个字符")
     @Column(name = "product_category", nullable = false, length = 50)
     private String productCategory;
+
+    @NotBlank(message = "产品类型不能为空")
+    @Size(max = 30, message = "产品类型长度不能超过30个字符")
+    @Column(name = "product_type", nullable = false, length = 30)
+    private String productType;
+
+    @NotBlank(message = "产品规格不能为空")
+    @Size(max = 50, message = "产品规格长度不能超过50个字符")
+    @Column(name = "product_spec", nullable = false, length = 50)
+    private String productSpec;
     
     @NotNull(message = "卡状态不能为空")
     @Column(name = "card_status", nullable = false)
@@ -77,11 +87,13 @@ public class Card {
         this.createTime = LocalDateTime.now();
     }
     
-    public Card(String cardNumber, String cardLevel, String productCategory) {
+    public Card(String cardNumber, String cardLevel, String productCategory, String productType, String productSpec) {
         this();
         this.cardNumber = cardNumber;
         this.cardLevel = cardLevel;
         this.productCategory = productCategory;
+        this.productType = productType;
+        this.productSpec = productSpec;
         this.cardStatus = 0; // 默认未激活
     }
     

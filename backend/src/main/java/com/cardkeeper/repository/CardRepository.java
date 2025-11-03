@@ -40,6 +40,44 @@ public interface CardRepository extends JpaRepository<Card, Long> {
     List<Card> findByProductCategory(String productCategory);
     
     /**
+     * 根据产品类型查询
+     */
+    List<Card> findByProductType(String productType);
+    
+    /**
+     * 根据产品规格查询
+     */
+    List<Card> findByProductSpec(String productSpec);
+    
+    /**
+     * 根据产品类型和规格查询
+     */
+    List<Card> findByProductTypeAndProductSpec(String productType, String productSpec);
+    
+    /**
+     * 根据产品类型、规格和状态查询
+     */
+    List<Card> findByProductTypeAndProductSpecAndCardStatus(String productType, String productSpec, Integer cardStatus);
+    
+    /**
+     * 统计各产品类型的卡数量
+     */
+    @Query("SELECT c.productType, COUNT(c) FROM Card c GROUP BY c.productType")
+    List<Object[]> countByProductType();
+    
+    /**
+     * 统计各产品规格的卡数量
+     */
+    @Query("SELECT c.productSpec, COUNT(c) FROM Card c GROUP BY c.productSpec")
+    List<Object[]> countByProductSpec();
+    
+    /**
+     * 统计各产品类型和规格组合的卡数量
+     */
+    @Query("SELECT c.productType, c.productSpec, COUNT(c) FROM Card c GROUP BY c.productType, c.productSpec")
+    List<Object[]> countByProductTypeAndSpec();
+    
+    /**
      * 根据多个条件查询卡列表（分页）
      */
     @Query("SELECT c FROM Card c WHERE " +

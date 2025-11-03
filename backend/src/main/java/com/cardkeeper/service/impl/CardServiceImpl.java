@@ -24,10 +24,92 @@ public class CardServiceImpl implements CardService {
     private CardRepository cardRepository;
     
     @Override
-    public Page<Card> getCardList(String cardNumber, String cardLevel, String productCategory, 
-                                Integer cardStatus, int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
-        return cardRepository.findByConditions(cardNumber, cardLevel, productCategory, cardStatus, pageable);
+    public Page<Card> getCardList(String cardNumber, String cardLevel, String productCategory, String productType, String productSpec, Integer cardStatus, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createTime").descending());
+        
+        Specification<Card> spec = Specification.where(null);
+        
+        if (StringUtils.hasText(cardNumber)) {
+            spec = spec.and((root, query, cb) -> cb.like(root.get("cardNumber"), "%" + cardNumber + "%"));
+        }
+        
+        if (StringUtils.hasText(cardLevel)) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("cardLevel"), cardLevel));
+        }
+        
+        if (StringUtils.hasText(productCategory)) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("productCategory"), productCategory));
+        }
+        
+        if (StringUtils.hasText(productType)) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("productType"), productType));
+        }
+        
+        if (StringUtils.hasText(productSpec)) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("productSpec"), productSpec));
+        }
+        
+        if (cardStatus != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("cardStatus"), cardStatus));
+        }
+        
+        return cardRepository.findAll(spec, pageable);
+    }
+    
+    @Override
+    public Page<Card> getCardListByProductTypeAndSpec(String productType, String productSpec, Integer cardStatus, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createTime").descending());
+        
+        Specification<Card> spec = Specification.where(null);
+        
+        if (StringUtils.hasText(productType)) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("productType"), productType));
+        }
+        
+        if (StringUtils.hasText(productSpec)) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("productSpec"), productSpec));
+        }
+        
+        if (cardStatus != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("cardStatus"), cardStatus));
+        }
+        
+        return cardRepository.findAll(spec, pageable);
+    }
+    
+    @Override
+    public Map<String, Long> getProductTypeStatistics() {
+        List<Object[]> results = cardRepository.countByProductType();
+        Map<String, Long> statistics = new HashMap<>();
+        for (Object[] result : results) {
+            statistics.put((String) result[0], (Long) result[1]);
+        }
+        return statistics;
+    }
+    
+    @Override
+    public Map<String, Long> getProductSpecStatistics() {
+        List<Object[]> results = cardRepository.countByProductSpec();
+        Map<String, Long> statistics = new HashMap<>();
+        for (Object[] result : results) {
+            statistics.put((String) result[0], (Long) result[1]);
+        }
+        return statistics;
+    }
+    
+    @Override
+    public Map<String, Map<String, Long>> getProductTypeAndSpecStatistics() {
+        List<Object[]> results = cardRepository.countByProductTypeAndSpec();
+        Map<String, Map<String, Long>> statistics = new HashMap<>();
+        for (Object[] result : results) {
+            String productType = (String) result[0];
+            String productSpec = (String) result[1];
+            Long count = (Long) result[2];
+            
+            statistics.computeIfAbsent(productType, k -> new HashMap<>())
+                      .put(productSpec, count);
+        }
+        return statistics;
     }
     
     @Override

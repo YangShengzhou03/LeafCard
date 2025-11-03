@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS card (
     card_number VARCHAR(50) NOT NULL UNIQUE,
     card_level VARCHAR(20) NOT NULL,
     product_category VARCHAR(50) NOT NULL,
+    product_type VARCHAR(30) NOT NULL,
+    product_spec VARCHAR(50) NOT NULL,
     card_status TINYINT NOT NULL DEFAULT 0,
     create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     activate_time DATETIME NULL,
@@ -26,6 +28,8 @@ CREATE TABLE IF NOT EXISTS card (
     INDEX idx_card_status (card_status),
     INDEX idx_card_level (card_level),
     INDEX idx_product_category (product_category),
+    INDEX idx_product_type (product_type),
+    INDEX idx_product_spec (product_spec),
     INDEX idx_create_time (create_time),
     INDEX idx_expire_time (expire_time)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
