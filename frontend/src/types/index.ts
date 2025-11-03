@@ -263,29 +263,19 @@ export interface CardCategory {
   color?: string
   sort: number
   status: boolean
-  subCategories: CardSubCategory[]
+  parentId?: number // 父分类ID，顶级分类为空
+  level: number // 分类层级，顶级为1
+  children?: CardCategory[] // 子分类
   cardCount: number
   createdAt: string
   updatedAt: string
 }
 
-export interface CardSubCategory {
-  id: number
-  categoryId: number
-  name: string
-  level: number // 等级
-  description?: string
-  sort: number
-  status: boolean
-  cardCount: number
-  createdAt: string
-  updatedAt: string
-}
+
 
 export interface CardInfo {
   id: number
   categoryId: number
-  subCategoryId?: number
   title: string
   content: string
   tags?: string[]
@@ -306,6 +296,7 @@ export interface CreateCardCategoryParams {
   icon?: string
   color?: string
   sort?: number
+  parentId?: number // 父分类ID，顶级分类为空
 }
 
 export interface UpdateCardCategoryParams {
@@ -315,27 +306,12 @@ export interface UpdateCardCategoryParams {
   color?: string
   sort?: number
   status?: boolean
+  parentId?: number // 父分类ID，顶级分类为空
 }
 
-export interface CreateCardSubCategoryParams {
-  categoryId: number
-  name: string
-  level: number
-  description?: string
-  sort?: number
-}
-
-export interface UpdateCardSubCategoryParams {
-  name?: string
-  level?: number
-  description?: string
-  sort?: number
-  status?: boolean
-}
 
 export interface CreateCardParams {
   categoryId: number
-  subCategoryId?: number
   title: string
   content: string
   tags?: string[]
@@ -344,7 +320,6 @@ export interface CreateCardParams {
 
 export interface UpdateCardParams {
   categoryId?: number
-  subCategoryId?: number
   title?: string
   content?: string
   tags?: string[]
@@ -354,7 +329,6 @@ export interface UpdateCardParams {
 
 export interface CardQueryParams extends PaginationParams {
   categoryId?: number
-  subCategoryId?: number
   keyword?: string
   tags?: string[]
   status?: 'unused' | 'used' | 'disabled'
@@ -376,7 +350,6 @@ export interface CardStatistics {
   deletedCards: number
   favoriteCards: number
   totalCategories: number
-  totalSubCategories: number
   todayAdded: number
   todayViewed: number
 }

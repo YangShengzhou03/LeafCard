@@ -47,7 +47,9 @@
         :data="categoryList"
         v-loading="loading"
         row-key="id"
-        :tree-props="{ children: 'subCategories', hasChildren: 'hasSubCategories' }"
+        :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
+        ref="tableRef"
+        default-expand-all
       >
         <el-table-column prop="name" label="分类名称" min-width="200">
           <template #default="{ row }">
@@ -63,15 +65,15 @@
         
         <el-table-column prop="description" label="描述" min-width="200" show-overflow-tooltip />
         
-        <el-table-column prop="cardCount" label="卡片数量" width="100" align="center">
+        <el-table-column prop="level" label="层级" width="80" align="center">
           <template #default="{ row }">
-            <span :class="{ 'text-primary': row.cardCount > 0 }">{{ row.cardCount }}</span>
+            <el-tag size="small" :type="getLevelTagType(row.level)">L{{ row.level }}</el-tag>
           </template>
         </el-table-column>
         
-        <el-table-column prop="subCategoryCount" label="子分类数量" width="120" align="center">
+        <el-table-column prop="cardCount" label="卡片数量" width="100" align="center">
           <template #default="{ row }">
-            <span :class="{ 'text-primary': row.subCategoryCount > 0 }">{{ row.subCategoryCount }}</span>
+            <span :class="{ 'text-primary': row.cardCount > 0 }">{{ row.cardCount }}</span>
           </template>
         </el-table-column>
         
@@ -94,15 +96,15 @@
           </template>
         </el-table-column>
         
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column label="操作" width="250" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link @click="handleEdit(row)">
               <el-icon><Edit /></el-icon>
               编辑
             </el-button>
-            <el-button type="primary" link @click="handleManageSubCategories(row)">
-              <el-icon><Folder /></el-icon>
-              子分类
+            <el-button type="success" link @click="handleAddSubCategory(row)">
+              <el-icon><Plus /></el-icon>
+              添加子分类
             </el-button>
             <el-button type="danger" link @click="handleDelete(row)">
               <el-icon><Delete /></el-icon>
@@ -130,15 +132,9 @@
     <category-form-dialog
       v-model="dialogVisible"
       :category="currentCategory"
+      :parent-category="parentCategory"
       :mode="dialogMode"
       @success="handleDialogSuccess"
-    />
-
-    <!-- 子分类管理对话框 -->
-    <sub-category-dialog
-      v-model="subCategoryDialogVisible"
-      :category="currentCategory"
-      @success="handleSubCategorySuccess"
     />
   </div>
 </template>
@@ -146,18 +142,18 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Plus, Refresh, Edit, Delete, Folder } from '@element-plus/icons-vue'
+import { Search, Plus, Refresh, Edit, Delete } from '@element-plus/icons-vue'
 import type { CardCategory, CardCategoryQueryParams } from '@/types'
 import categoryApi from '@/api/category'
 import CategoryFormDialog from './components/CategoryFormDialog.vue'
-import SubCategoryDialog from './components/SubCategoryDialog.vue'
 
 // 响应式数据
 const loading = ref(false)
 const dialogVisible = ref(false)
-const subCategoryDialogVisible = ref(false)
 const dialogMode = ref<'add' | 'edit'>('add')
 const currentCategory = ref<CardCategory | null>(null)
+const parentCategory = ref<CardCategory | null>(null)
+const tableRef = ref()
 
 const categoryList = ref<CardCategory[]>([])
 
@@ -247,19 +243,22 @@ const handleStatusChange = async (category: CardCategory) => {
   }
 }
 
-const handleManageSubCategories = (category: CardCategory) => {
-  currentCategory.value = category
-  subCategoryDialogVisible.value = true
+const handleAddSubCategory = (category: CardCategory) => {
+  currentCategory.value = null
+  parentCategory.value = category
+  dialogMode.value = 'add'
+  dialogVisible.value = true
 }
 
 const handleDialogSuccess = () => {
   dialogVisible.value = false
+  parentCategory.value = null
   loadCategories()
 }
 
-const handleSubCategorySuccess = () => {
-  subCategoryDialogVisible.value = false
-  loadCategories()
+const getLevelTagType = (level: number) => {
+  const types = ['', 'primary', 'success', 'warning', 'danger', 'info']
+  return types[level] || 'info'
 }
 
 const handleSizeChange = (size: number) => {

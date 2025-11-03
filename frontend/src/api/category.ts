@@ -1,11 +1,8 @@
 import service from './index'
 import type { 
   CardCategory, 
-  CardSubCategory, 
   CreateCardCategoryParams, 
   UpdateCardCategoryParams,
-  CreateCardSubCategoryParams,
-  UpdateCardSubCategoryParams,
   CardCategoryQueryParams,
   PaginationResponse,
   ApiResponse 
@@ -13,14 +10,24 @@ import type {
 
 // 分类管理API
 export const categoryApi = {
-  // 获取分类列表
+  // 获取分类列表（树形结构）
   getCategories(params?: CardCategoryQueryParams): Promise<PaginationResponse<CardCategory>> {
     return service.get('/categories', { params })
   },
 
-  // 获取所有分类（不分页）
+  // 获取所有分类（树形结构，不分页）
   getAllCategories(): Promise<CardCategory[]> {
     return service.get('/categories/all')
+  },
+
+  // 获取顶级分类列表
+  getTopLevelCategories(): Promise<CardCategory[]> {
+    return service.get('/categories/top-level')
+  },
+
+  // 获取指定分类的子分类
+  getChildCategories(parentId: number): Promise<CardCategory[]> {
+    return service.get(`/categories/${parentId}/children`)
   },
 
   // 获取分类详情
@@ -53,37 +60,15 @@ export const categoryApi = {
     return service.patch(`/categories/${id}/status`)
   },
 
-  // 获取子分类列表
-  getSubCategories(categoryId: number): Promise<CardSubCategory[]> {
-    return service.get(`/categories/${categoryId}/sub-categories`)
-  },
-
-  // 创建子分类
-  createSubCategory(data: CreateCardSubCategoryParams): Promise<CardSubCategory> {
-    return service.post('/sub-categories', data)
-  },
-
-  // 更新子分类
-  updateSubCategory(id: number, data: UpdateCardSubCategoryParams): Promise<CardSubCategory> {
-    return service.put(`/sub-categories/${id}`, data)
-  },
-
-  // 删除子分类
-  deleteSubCategory(id: number): Promise<void> {
-    return service.delete(`/sub-categories/${id}`)
-  },
-
-  // 切换子分类状态
-  toggleSubCategoryStatus(id: number): Promise<CardSubCategory> {
-    return service.patch(`/sub-categories/${id}/status`)
+  // 移动分类到新的父分类下
+  moveCategory(id: number, newParentId?: number): Promise<CardCategory> {
+    return service.patch(`/categories/${id}/move`, { parentId: newParentId })
   },
 
   // 获取分类统计
   getCategoryStats(): Promise<{
     totalCategories: number
     activeCategories: number
-    totalSubCategories: number
-    activeSubCategories: number
   }> {
     return service.get('/categories/stats')
   }

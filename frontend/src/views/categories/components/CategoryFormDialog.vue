@@ -12,6 +12,31 @@
       label-width="100px"
       label-position="right"
     >
+      <el-form-item label="父分类" prop="parentId" v-if="showParentSelect">
+        <el-select
+          v-model="formData.parentId"
+          placeholder="请选择父分类"
+          style="width: 100%"
+          clearable
+        >
+          <el-option
+            v-for="category in categoryOptions"
+            :key="category.id"
+            :label="category.name"
+            :value="category.id"
+            :disabled="category.id === category?.id"
+          >
+            <div style="display: flex; align-items: center; gap: 8px">
+              <el-icon><component :is="category.icon" /></el-icon>
+              <span>{{ category.name }}</span>
+              <el-tag size="small" :type="getLevelTagType(category.level)">
+                {{ `L${category.level}` }}
+              </el-tag>
+            </div>
+          </el-option>
+        </el-select>
+      </el-form-item>
+
       <el-form-item label="分类名称" prop="name">
         <el-input
           v-model="formData.name"
@@ -162,10 +187,12 @@ interface Props {
   modelValue: boolean
   category?: CardCategory | null
   mode?: 'add' | 'edit'
+  parentCategory?: CardCategory | null
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  mode: 'add'
+  mode: 'add',
+  parentCategory: null
 })
 
 // Emits
@@ -178,6 +205,7 @@ const emit = defineEmits<{
 const visible = ref(false)
 const loading = ref(false)
 const formRef = ref<FormInstance>()
+const categoryOptions = ref<CardCategory[]>([])
 
 const formData = reactive<CreateCardCategoryParams | UpdateCardCategoryParams>({
   name: '',
@@ -186,7 +214,8 @@ const formData = reactive<CreateCardCategoryParams | UpdateCardCategoryParams>({
   sortOrder: 0,
   status: 1,
   isDefault: false,
-  color: '#409EFF'
+  color: '#409EFF',
+  parentId: undefined
 })
 
 // 表单验证规则
@@ -208,6 +237,11 @@ const dialogTitle = computed(() => {
   return props.mode === 'add' ? '添加分类' : '编辑分类'
 })
 
+const showParentSelect = computed(() => {
+  // 添加模式时显示父分类选择，或者编辑模式时显示（除非是顶级分类）
+  return props.mode === 'add' || (props.mode === 'edit' && props.category?.level !== 0)
+})
+
 // 方法
 const resetForm = () => {
   Object.assign(formData, {
@@ -217,9 +251,24 @@ const resetForm = () => {
     sortOrder: 0,
     status: 1,
     isDefault: false,
-    color: '#409EFF'
+    color: '#409EFF',
+    parentId: undefined
   })
   formRef.value?.clearValidate()
+}
+
+const loadCategoryOptions = async () => {
+  try {
+    const response = await categoryApi.getCategories()
+    categoryOptions.value = response.data
+  } catch (error) {
+    console.error('加载分类选项失败:', error)
+  }
+}
+
+const getLevelTagType = (level: number) => {
+  const types = ['', 'primary', 'success', 'warning', 'danger', 'info']
+  return types[level] || 'info'
 }
 
 const handleClose = () => {
@@ -264,8 +313,16 @@ watch(
     visible.value = val
     
     if (val) {
+      // 加载分类选项
+      loadCategoryOptions()
+      
       // 重置表单
       resetForm()
+      
+      // 如果是添加模式且有父分类，设置父分类ID
+      if (props.mode === 'add' && props.parentCategory) {
+        formData.parentId = props.parentCategory.id
+      }
       
       // 如果是编辑模式，填充数据
       if (props.mode === 'edit' && props.category) {
@@ -276,7 +333,8 @@ watch(
           sortOrder: props.category.sortOrder,
           status: props.category.status,
           isDefault: props.category.isDefault || false,
-          color: props.category.color || '#409EFF'
+          color: props.category.color || '#409EFF',
+          parentId: props.category.parentId
         })
       }
     }
