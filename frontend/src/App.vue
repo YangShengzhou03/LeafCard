@@ -1,65 +1,162 @@
 <template>
-  <div id="app">
-    <!-- 全局加载组件 -->
-    <GlobalLoading />
-    
-    <!-- 错误边界包装 -->
-    <ErrorBoundary>
-      <router-view />
-    </ErrorBoundary>
-    
-    <!-- 全局通知容器 -->
-    <div id="global-notifications"></div>
-  </div>
+  <el-container class="app-container">
+    <!-- 侧边栏 -->
+    <el-aside :width="sidebarWidth">
+      <div class="logo">
+        <el-icon><ElementPlus /></el-icon>
+        <span v-show="!isCollapsed">Leaf Card</span>
+      </div>
+      <el-menu
+        :default-active="activeMenu"
+        :collapse="isCollapsed"
+        router
+        class="sidebar-menu"
+        background-color="#304156"
+        text-color="#bfcbd9"
+        active-text-color="#409EFF"
+      >
+        <el-menu-item index="/dashboard">
+          <el-icon><DataBoard /></el-icon>
+          <span>仪表板</span>
+        </el-menu-item>
+        <el-menu-item index="/cards">
+          <el-icon><CreditCard /></el-icon>
+          <span>卡密管理</span>
+        </el-menu-item>
+        <el-menu-item index="/specifications">
+          <el-icon><List /></el-icon>
+          <span>规格管理</span>
+        </el-menu-item>
+        <el-menu-item index="/validation">
+          <el-icon><Search /></el-icon>
+          <span>卡密验证</span>
+        </el-menu-item>
+      </el-menu>
+    </el-aside>
+
+    <!-- 主内容区 -->
+    <el-container>
+      <!-- 顶部导航栏 -->
+      <el-header class="header">
+        <div class="header-left">
+          <el-button
+            :icon="isCollapsed ? 'Expand' : 'Fold'"
+            @click="toggleSidebar"
+            circle
+            size="small"
+          />
+          <el-breadcrumb separator="/">
+            <el-breadcrumb-item :to="{ path: '/dashboard' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item>{{ currentRouteTitle }}</el-breadcrumb-item>
+          </el-breadcrumb>
+        </div>
+        <div class="header-right">
+          <el-dropdown>
+            <span class="user-info">
+              <el-avatar :size="32" :icon="User" />
+              <span>管理员</span>
+            </span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item>个人中心</el-dropdown-item>
+                <el-dropdown-item>设置</el-dropdown-item>
+                <el-dropdown-item divided>退出登录</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </div>
+      </el-header>
+
+      <!-- 页面内容 -->
+      <el-main class="main-content">
+        <router-view />
+      </el-main>
+    </el-container>
+  </el-container>
 </template>
 
 <script setup>
-import { onMounted, onErrorCaptured, getCurrentInstance } from 'vue'
-import { errorHandler } from '@/utils/errorHandler'
-import GlobalLoading from '@/components/GlobalLoading.vue'
-import ErrorBoundary from '@/components/ErrorBoundary.vue'
+import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { useAppStore } from '@/stores'
 
-// 获取当前应用实例
-const app = getCurrentInstance()
+const route = useRoute()
+const appStore = useAppStore()
 
-// 全局错误捕获
-onErrorCaptured((error, instance, info) => {
-  errorHandler.handleError(error, `Vue错误边界: ${info}`)
-  return false // 阻止错误继续向上传播
-})
+const isCollapsed = computed(() => !appStore.sidebarOpened)
+const sidebarWidth = computed(() => isCollapsed.value ? '64px' : '200px')
+const activeMenu = computed(() => route.path)
+const currentRouteTitle = computed(() => route.meta.title || '页面')
 
-// 应用初始化
-onMounted(() => {
-  // 初始化错误处理
-  if (app) {
-    errorHandler.install(app.appContext.app)
-  }
-  
-  // 监听全局错误
-  window.addEventListener('error', (event) => {
-    event.preventDefault()
-    errorHandler.handleError(event.error, '全局脚本错误')
-  })
-  
-  // 监听未处理的Promise拒绝
-  window.addEventListener('unhandledrejection', (event) => {
-    event.preventDefault()
-    errorHandler.handleError(event.reason, '未处理的Promise拒绝')
-  })
-  
-  console.log('🚀 枫叶卡管系统应用已启动')
-})
-
-// 提供全局错误处理给所有组件
-if (app) {
-  app.appContext.config.globalProperties.$errorHandler = errorHandler
+const toggleSidebar = () => {
+  appStore.toggleSidebar()
 }
 </script>
 
-<style>
-#app {
+<style scoped>
+.app-container {
   height: 100vh;
-  margin: 0;
-  padding: 0;
+}
+
+.logo {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  background-color: #2b2f3a;
+}
+
+.logo .el-icon {
+  margin-right: 8px;
+  font-size: 24px;
+}
+
+.sidebar-menu {
+  border: none;
+  height: calc(100vh - 60px);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #fff;
+  border-bottom: 1px solid #e6e6e6;
+  padding: 0 20px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.main-content {
+  background-color: #f5f7fa;
+  padding: 20px;
+}
+
+:deep(.el-menu-item) {
+  height: 56px;
+  line-height: 56px;
+}
+
+:deep(.el-menu-item .el-icon) {
+  margin-right: 8px;
 }
 </style>

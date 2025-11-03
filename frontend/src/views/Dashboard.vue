@@ -1,16 +1,15 @@
 <template>
   <div class="dashboard">
-    <!-- 统计卡片 -->
     <el-row :gutter="20">
       <el-col :span="6">
         <el-card class="stat-card">
           <div class="stat-content">
-            <div class="stat-icon total">
+            <div class="stat-icon total-cards">
               <el-icon><CreditCard /></el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ stats.totalCards }}</div>
-              <div class="stat-label">总卡数</div>
+              <div class="stat-label">总卡密数</div>
             </div>
           </div>
         </el-card>
@@ -18,25 +17,12 @@
       <el-col :span="6">
         <el-card class="stat-card">
           <div class="stat-content">
-            <div class="stat-icon unused">
-              <el-icon><Clock /></el-icon>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value">{{ stats.unusedCards }}</div>
-              <div class="stat-label">未使用</div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
-        <el-card class="stat-card">
-          <div class="stat-content">
-            <div class="stat-icon used">
-              <el-icon><Finished /></el-icon>
+            <div class="stat-icon used-cards">
+              <el-icon><Check /></el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ stats.usedCards }}</div>
-              <div class="stat-label">已使用</div>
+              <div class="stat-label">已使用数</div>
             </div>
           </div>
         </el-card>
@@ -44,202 +30,108 @@
       <el-col :span="6">
         <el-card class="stat-card">
           <div class="stat-content">
-            <div class="stat-icon disabled">
-              <el-icon><Close /></el-icon>
+            <div class="stat-icon today-cards">
+              <el-icon><Calendar /></el-icon>
             </div>
             <div class="stat-info">
-              <div class="stat-value">{{ stats.disabledCards }}</div>
-              <div class="stat-label">已禁用</div>
+              <div class="stat-value">{{ stats.todayCards }}</div>
+              <div class="stat-label">今日新增</div>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card class="stat-card">
+          <div class="stat-content">
+            <div class="stat-icon specs">
+              <el-icon><List /></el-icon>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value">{{ stats.totalSpecs }}</div>
+              <div class="stat-label">规格类型</div>
             </div>
           </div>
         </el-card>
       </el-col>
     </el-row>
 
-    <!-- 图表区域 -->
-    <el-row :gutter="20" style="margin-top: 20px;">
+    <el-row :gutter="20" class="mt-20">
       <el-col :span="12">
-        <el-card>
-          <template #header>
-            <span>卡状态分布</span>
-          </template>
-          <div ref="statusChart" style="height: 300px;"></div>
+        <el-card header="卡密使用趋势">
+          <div class="chart-container">
+            <div class="placeholder-chart">
+              <el-icon><TrendCharts /></el-icon>
+              <p>卡密使用趋势图表</p>
+            </div>
+          </div>
         </el-card>
       </el-col>
       <el-col :span="12">
-        <el-card>
-          <template #header>
-            <span>卡等级分布</span>
-          </template>
-          <div ref="levelChart" style="height: 300px;"></div>
+        <el-card header="规格分布">
+          <div class="chart-container">
+            <div class="placeholder-chart">
+              <el-icon><PieChart /></el-icon>
+              <p>规格分布图表</p>
+            </div>
+          </div>
         </el-card>
       </el-col>
     </el-row>
 
-    <!-- 最近操作 -->
-    <el-card style="margin-top: 20px;">
-      <template #header>
-        <span>最近操作记录</span>
-      </template>
-      <el-table :data="recentOperations" stripe>
-        <el-table-column prop="time" label="时间" width="180" />
-        <el-table-column prop="cardNumber" label="卡号" width="150" />
-        <el-table-column prop="operation" label="操作" width="120" />
-        <el-table-column prop="operator" label="操作人" width="120" />
-        <el-table-column prop="remark" label="备注" />
-      </el-table>
-    </el-card>
+    <el-row :gutter="20" class="mt-20">
+      <el-col :span="24">
+        <el-card header="最近操作">
+          <el-table :data="recentOperations" style="width: 100%">
+            <el-table-column prop="time" label="时间" width="180" />
+            <el-table-column prop="action" label="操作" />
+            <el-table-column prop="details" label="详情" />
+            <el-table-column prop="user" label="操作人" width="120" />
+          </el-table>
+        </el-card>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import * as echarts from 'echarts'
-import { CreditCard, Clock, Finished, Close } from '@element-plus/icons-vue'
 
-// 统计数据
 const stats = ref({
-  totalCards: 1256,
-  unusedCards: 342,
-  usedCards: 567,
-  disabledCards: 89
+  totalCards: 1250,
+  usedCards: 843,
+  todayCards: 15,
+  totalSpecs: 8
 })
 
-// 最近操作记录
 const recentOperations = ref([
   {
-    time: '2024-01-15 10:30:25',
-    cardNumber: 'CARD20240115001',
-    operation: '激活',
-    operator: '管理员',
-    remark: '用户激活使用'
+    time: '2024-01-15 14:30',
+    action: '添加卡密',
+    details: '添加了50张VIP会员卡',
+    user: 'admin'
   },
   {
-    time: '2024-01-15 09:15:10',
-    cardNumber: 'CARD20240114005',
-    operation: '补充',
-    operator: '管理员',
-    remark: '补充卡次数'
+    time: '2024-01-15 13:15',
+    action: '验证卡密',
+    details: '卡密验证成功 - 规格类型: 月卡',
+    user: 'user001'
   },
   {
-    time: '2024-01-14 16:45:30',
-    cardNumber: 'CARD20240113012',
-    operation: '新增',
-    operator: '管理员',
-    remark: '批量导入新卡'
+    time: '2024-01-15 11:20',
+    action: '删除规格',
+    details: '删除了"测试规格"类型',
+    user: 'admin'
   },
   {
-    time: '2024-01-14 14:20:15',
-    cardNumber: 'CARD20240112008',
-    operation: '使用',
-    operator: '用户A',
-    remark: '正常使用消耗'
-  },
-  {
-    time: '2024-01-13 11:05:40',
-    cardNumber: 'CARD20240111003',
-    operation: '过期',
-    operator: '系统',
-    remark: '自动标记过期'
+    time: '2024-01-15 10:05',
+    action: '添加规格',
+    details: '新增了"年卡"规格类型',
+    user: 'admin'
   }
 ])
 
-// 图表实例
-let statusChart = null
-let levelChart = null
-
-// 初始化状态分布图表
-const initStatusChart = () => {
-  const chartDom = document.querySelector('.dashboard .el-row .el-col:first-child .el-card .el-card__body div')
-  if (!chartDom) return
-  
-  statusChart = echarts.init(chartDom)
-  const option = {
-    tooltip: {
-      trigger: 'item'
-    },
-    legend: {
-      orient: 'vertical',
-      right: 10,
-      top: 'center'
-    },
-    series: [
-      {
-        name: '卡状态',
-        type: 'pie',
-        radius: ['40%', '70%'],
-        center: ['40%', '50%'],
-        data: [
-          { value: stats.value.unusedCards, name: '未使用' },
-          { value: stats.value.usedCards, name: '已使用' },
-          { value: stats.value.disabledCards, name: '已禁用' }
-        ],
-        emphasis: {
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
-          }
-        }
-      }
-    ]
-  }
-  
-  statusChart.setOption(option)
-}
-
-// 初始化等级分布图表
-const initLevelChart = () => {
-  const chartDom = document.querySelector('.dashboard .el-row .el-col:last-child .el-card .el-card__body div')
-  if (!chartDom) return
-  
-  levelChart = echarts.init(chartDom)
-  const option = {
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: {
-        type: 'shadow'
-      }
-    },
-    xAxis: {
-      type: 'category',
-      data: ['普通会员', '超级会员', '钻石会员']
-    },
-    yAxis: {
-      type: 'value'
-    },
-    series: [
-      {
-        data: [456, 342, 458],
-        type: 'bar',
-        itemStyle: {
-          color: function(params) {
-            const colorList = ['#5470c6', '#91cc75', '#fac858']
-            return colorList[params.dataIndex]
-          }
-        }
-      }
-    ]
-  }
-  
-  levelChart.setOption(option)
-}
-
-// 响应式调整图表
-const resizeCharts = () => {
-  statusChart?.resize()
-  levelChart?.resize()
-}
-
 onMounted(() => {
-  // 等待DOM渲染完成
-  setTimeout(() => {
-    initStatusChart()
-    initLevelChart()
-    
-    // 监听窗口大小变化
-    window.addEventListener('resize', resizeCharts)
-  }, 100)
+  // 这里可以调用API获取实时数据
 })
 </script>
 
@@ -255,6 +147,7 @@ onMounted(() => {
 .stat-content {
   display: flex;
   align-items: center;
+  gap: 16px;
 }
 
 .stat-icon {
@@ -264,40 +157,56 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 15px;
-  font-size: 24px;
+  font-size: 28px;
   color: white;
 }
 
-.stat-icon.total {
-  background: #409EFF;
+.stat-icon.total-cards {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.stat-icon.unused {
-  background: #409EFF;
+.stat-icon.used-cards {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
 }
 
-.stat-icon.used {
-  background: #67C23A;
+.stat-icon.today-cards {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 }
 
-.stat-icon.disabled {
-  background: #F56C6C;
-}
-
-.stat-info {
-  flex: 1;
+.stat-icon.specs {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
 }
 
 .stat-value {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: bold;
   color: #303133;
-  margin-bottom: 5px;
 }
 
 .stat-label {
   font-size: 14px;
   color: #909399;
+  margin-top: 4px;
+}
+
+.mt-20 {
+  margin-top: 20px;
+}
+
+.chart-container {
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholder-chart {
+  text-align: center;
+  color: #909399;
+}
+
+.placeholder-chart .el-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
 }
 </style>
