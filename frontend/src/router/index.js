@@ -70,20 +70,14 @@ const routes = [
       {
         path: 'cards/add',
         name: 'CardAdd',
-        component: () => import('@/views/cards/CardForm.vue'),
+        component: () => import('@/views/cards/CardAdd.vue'),
         meta: { title: '添加卡', requiresAuth: true }
       },
       {
         path: 'cards/edit/:id',
         name: 'CardEdit',
-        component: () => import('@/views/cards/CardForm.vue'),
+        component: () => import('@/views/cards/CardEdit.vue'),
         meta: { title: '编辑卡', requiresAuth: true }
-      },
-      {
-        path: 'cards/detail/:id',
-        name: 'CardDetail',
-        component: () => import('@/views/cards/CardDetail.vue'),
-        meta: { title: '卡详情', requiresAuth: true }
       },
       // 商品管理
       {
@@ -95,14 +89,20 @@ const routes = [
       {
         path: 'products/add',
         name: 'ProductAdd',
-        component: () => import('@/views/products/ProductForm.vue'),
+        component: () => import('@/views/products/ProductAdd.vue'),
         meta: { title: '添加商品', requiresAuth: true }
       },
       {
         path: 'products/edit/:id',
         name: 'ProductEdit',
-        component: () => import('@/views/products/ProductForm.vue'),
+        component: () => import('@/views/products/ProductEdit.vue'),
         meta: { title: '编辑商品', requiresAuth: true }
+      },
+      {
+        path: 'products/detail/:id',
+        name: 'ProductDetail',
+        component: () => import('@/views/products/ProductDetail.vue'),
+        meta: { title: '商品详情', requiresAuth: true }
       },
       // 规格管理
       {

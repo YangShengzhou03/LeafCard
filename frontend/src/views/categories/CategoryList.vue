@@ -139,25 +139,24 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, Refresh, Edit, Delete } from '@element-plus/icons-vue'
-import type { CardCategory, CardCategoryQueryParams } from '@/types'
-import categoryApi from '@/api/category'
+import { getCategoryTree, deleteCategory, toggleCategoryStatus } from '@/api/category'
 import CategoryFormDialog from './components/CategoryFormDialog.vue'
 
 // 响应式数据
 const loading = ref(false)
 const dialogVisible = ref(false)
-const dialogMode = ref<'add' | 'edit'>('add')
-const currentCategory = ref<CardCategory | null>(null)
-const parentCategory = ref<CardCategory | null>(null)
+const dialogMode = ref('add')
+const currentCategory = ref(null)
+const parentCategory = ref(null)
 const tableRef = ref()
 
-const categoryList = ref<CardCategory[]>([])
+const categoryList = ref([])
 
-const searchParams = reactive<CardCategoryQueryParams>({
+const searchParams = reactive({
   keyword: '',
   status: undefined,
   page: 1,
@@ -174,11 +173,29 @@ const pagination = reactive({
 const loadCategories = async () => {
   try {
     loading.value = true
-    const response = await categoryApi.getCategories(searchParams)
-    categoryList.value = response.records
-    pagination.total = response.total
-    pagination.current = response.current
-    pagination.size = response.size
+    const params = {
+      keyword: searchParams.keyword || undefined,
+      status: searchParams.status || undefined
+    }
+    
+    const response = await getCategoryTree(params)
+    if (response.success && response.data) {
+      categoryList.value = response.data
+      // 对于树形结构，我们需要手动计算总数
+      const countItems = (items) => {
+        let count = 0
+        items.forEach(item => {
+          count++
+          if (item.children && item.children.length > 0) {
+            count += countItems(item.children)
+          }
+        })
+        return count
+      }
+      pagination.total = countItems(response.data)
+    } else {
+      ElMessage.error(response.message || '获取分类列表失败')
+    }
   } catch (error) {
     ElMessage.error('获取分类列表失败')
     console.error('获取分类列表失败:', error)
@@ -202,13 +219,13 @@ const handleAdd = () => {
   dialogVisible.value = true
 }
 
-const handleEdit = (category: CardCategory) => {
+const handleEdit = (category) => {
   currentCategory.value = { ...category }
   dialogMode.value = 'edit'
   dialogVisible.value = true
 }
 
-const handleDelete = async (category: CardCategory) => {
+const handleDelete = async (category) => {
   try {
     await ElMessageBox.confirm(
       `确定要删除分类"${category.name}"吗？此操作将同时删除该分类下的所有子分类和卡片。`,
@@ -220,9 +237,13 @@ const handleDelete = async (category: CardCategory) => {
       }
     )
     
-    await categoryApi.deleteCategory(category.id!)
-    ElMessage.success('删除成功')
-    loadCategories()
+    const response = await deleteCategory(category.id)
+    if (response.success) {
+      ElMessage.success('删除成功')
+      loadCategories()
+    } else {
+      ElMessage.error(response.message || '删除失败')
+    }
   } catch (error) {
     if (error !== 'cancel') {
       ElMessage.error('删除失败')
@@ -231,10 +252,16 @@ const handleDelete = async (category: CardCategory) => {
   }
 }
 
-const handleStatusChange = async (category: CardCategory) => {
+const handleStatusChange = async (category) => {
   try {
-    await categoryApi.toggleCategoryStatus(category.id!)
-    ElMessage.success('状态更新成功')
+    const response = await toggleCategoryStatus(category.id)
+    if (response.success) {
+      ElMessage.success('状态更新成功')
+    } else {
+      // 回滚状态
+      category.status = category.status === 1 ? 0 : 1
+      ElMessage.error(response.message || '状态更新失败')
+    }
   } catch (error) {
     // 回滚状态
     category.status = category.status === 1 ? 0 : 1
@@ -243,7 +270,7 @@ const handleStatusChange = async (category: CardCategory) => {
   }
 }
 
-const handleAddSubCategory = (category: CardCategory) => {
+const handleAddSubCategory = (category) => {
   currentCategory.value = null
   parentCategory.value = category
   dialogMode.value = 'add'
@@ -256,23 +283,23 @@ const handleDialogSuccess = () => {
   loadCategories()
 }
 
-const getLevelTagType = (level: number) => {
+const getLevelTagType = (level) => {
   const types = ['', 'primary', 'success', 'warning', 'danger', 'info']
   return types[level] || 'info'
 }
 
-const handleSizeChange = (size: number) => {
+const handleSizeChange = (size) => {
   searchParams.size = size
   searchParams.page = 1
   loadCategories()
 }
 
-const handleCurrentChange = (page: number) => {
+const handleCurrentChange = (page) => {
   searchParams.page = page
   loadCategories()
 }
 
-const formatTime = (time: string) => {
+const formatTime = (time) => {
   return new Date(time).toLocaleString('zh-CN')
 }
 

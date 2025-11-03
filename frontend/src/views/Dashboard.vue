@@ -92,7 +92,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, onMounted } from 'vue'
 import * as echarts from 'echarts'
 
@@ -144,12 +144,12 @@ const recentOperations = ref([
 ])
 
 // 图表实例
-let statusChart: echarts.ECharts | null = null
-let levelChart: echarts.ECharts | null = null
+let statusChart = null
+let levelChart = null
 
 // 初始化状态分布图表
 const initStatusChart = () => {
-  const chartDom = document.querySelector('.dashboard .el-row .el-col:first-child .el-card .el-card__body div') as HTMLElement
+  const chartDom = document.querySelector('.dashboard .el-row .el-col:first-child .el-card .el-card__body div')
   if (!chartDom) return
   
   statusChart = echarts.init(chartDom)
@@ -189,7 +189,7 @@ const initStatusChart = () => {
 
 // 初始化等级分布图表
 const initLevelChart = () => {
-  const chartDom = document.querySelector('.dashboard .el-row .el-col:last-child .el-card .el-card__body div') as HTMLElement
+  const chartDom = document.querySelector('.dashboard .el-row .el-col:last-child .el-card .el-card__body div')
   if (!chartDom) return
   
   levelChart = echarts.init(chartDom)
@@ -212,7 +212,7 @@ const initLevelChart = () => {
         data: [456, 342, 458],
         type: 'bar',
         itemStyle: {
-          color: function(params: any) {
+          color: function(params) {
             const colorList = ['#5470c6', '#91cc75', '#fac858']
             return colorList[params.dataIndex]
           }

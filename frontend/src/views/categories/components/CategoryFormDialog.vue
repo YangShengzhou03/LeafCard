@@ -127,10 +127,9 @@
   </el-dialog>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, reactive, computed, watch } from 'vue'
-import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
-import type { CardCategory, CreateCardCategoryParams, UpdateCardCategoryParams } from '@/types'
+import { ElMessage } from 'element-plus'
 import categoryApi from '@/api/category'
 
 // 图标选项
@@ -183,31 +182,35 @@ const predefineColors = [
 ]
 
 // Props
-interface Props {
-  modelValue: boolean
-  category?: CardCategory | null
-  mode?: 'add' | 'edit'
-  parentCategory?: CardCategory | null
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  mode: 'add',
-  parentCategory: null
+const props = defineProps({
+  modelValue: {
+    type: Boolean,
+    default: false
+  },
+  category: {
+    type: Object,
+    default: null
+  },
+  mode: {
+    type: String,
+    default: 'add'
+  },
+  parentCategory: {
+    type: Object,
+    default: null
+  }
 })
 
 // Emits
-const emit = defineEmits<{
-  'update:modelValue': [value: boolean]
-  success: []
-}>()
+const emit = defineEmits(['update:modelValue', 'success'])
 
 // 响应式数据
 const visible = ref(false)
 const loading = ref(false)
-const formRef = ref<FormInstance>()
-const categoryOptions = ref<CardCategory[]>([])
+const formRef = ref()
+const categoryOptions = ref([])
 
-const formData = reactive<CreateCardCategoryParams | UpdateCardCategoryParams>({
+const formData = reactive({
   name: '',
   icon: 'Folder',
   description: '',
@@ -219,7 +222,7 @@ const formData = reactive<CreateCardCategoryParams | UpdateCardCategoryParams>({
 })
 
 // 表单验证规则
-const formRules: FormRules = {
+const formRules = {
   name: [
     { required: true, message: '请输入分类名称', trigger: 'blur' },
     { min: 1, max: 50, message: '分类名称长度在 1 到 50 个字符', trigger: 'blur' }
@@ -266,7 +269,7 @@ const loadCategoryOptions = async () => {
   }
 }
 
-const getLevelTagType = (level: number) => {
+const getLevelTagType = (level) => {
   const types = ['', 'primary', 'success', 'warning', 'danger', 'info']
   return types[level] || 'info'
 }
@@ -287,11 +290,11 @@ const handleSubmit = async () => {
     loading.value = true
 
     if (props.mode === 'add') {
-      await categoryApi.createCategory(formData as CreateCardCategoryParams)
+      await categoryApi.createCategory(formData)
       ElMessage.success('添加分类成功')
     } else {
       if (props.category?.id) {
-        await categoryApi.updateCategory(props.category.id, formData as UpdateCardCategoryParams)
+        await categoryApi.updateCategory(props.category.id, formData)
         ElMessage.success('更新分类成功')
       }
     }

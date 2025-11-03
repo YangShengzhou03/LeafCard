@@ -13,24 +13,11 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { onMounted, onErrorCaptured, getCurrentInstance } from 'vue'
 import { errorHandler } from '@/utils/errorHandler'
 import GlobalLoading from '@/components/GlobalLoading.vue'
 import ErrorBoundary from '@/components/ErrorBoundary.vue'
-
-// 声明全局loading类型
-declare global {
-  interface Window {
-    $loading: {
-      show: (text?: string) => number
-      hide: (timestamp: number) => void
-      updateProgress: (timestamp: number, progress: number) => void
-      asyncWithLoading: <T>(operation: () => Promise<T>, text?: string) => Promise<T>
-      asyncWithProgress: <T>(operation: (progressCallback: (progress: number) => void) => Promise<T>, text?: string) => Promise<T>
-    }
-  }
-}
 
 // 获取当前应用实例
 const app = getCurrentInstance()

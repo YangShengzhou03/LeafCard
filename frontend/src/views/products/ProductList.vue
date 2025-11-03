@@ -222,28 +222,23 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox, type UploadFile } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Upload, Download, Delete, Picture } from '@element-plus/icons-vue'
-import { safeProductApi } from '@/api/product'
-import type { 
-  ProductInfo, 
-  ProductQueryParams,
-  ProductCategory,
-  ProductImportResult 
-} from '@/types'
+import { productApi, batchDeleteProducts, importProducts, exportProducts } from '@/api/product'
+import { getCategoryTree } from '@/api/category'
 
 const router = useRouter()
 
 // 搜索表单
 const searchForm = reactive({
   keyword: '',
-  categoryId: undefined as number | undefined,
+  categoryId: undefined,
   status: '',
-  minPrice: undefined as number | undefined,
-  maxPrice: undefined as number | undefined
+  minPrice: undefined,
+  maxPrice: undefined
 })
 
 // 分页
@@ -254,12 +249,12 @@ const pagination = reactive({
 })
 
 // 表格数据
-const tableData = ref<ProductInfo[]>([])
+const tableData = ref([])
 const loading = ref(false)
-const selectedIds = ref<number[]>([])
+const selectedIds = ref([])
 
 // 分类选项
-const categoryOptions = ref<ProductCategory[]>([])
+const categoryOptions = ref([])
 
 // 对话框状态
 const showImportDialog = ref(false)
@@ -269,13 +264,13 @@ const exportLoading = ref(false)
 
 // 导出表单
 const exportForm = reactive({
-  format: 'excel' as 'excel' | 'csv',
+  format: 'excel',
   fields: ['name', 'sku', 'price', 'stock', 'status']
 })
 
 // 文件上传引用
 const uploadRef = ref()
-const uploadFile = ref<File | null>(null)
+const uploadFile = ref(null)
 
 onMounted(() => {
   loadProductList()
@@ -286,13 +281,13 @@ onMounted(() => {
 const loadProductList = async () => {
   loading.value = true
   try {
-    const params: ProductQueryParams = {
+    const params = {
       page: pagination.current,
       pageSize: pagination.size,
       ...searchForm
     }
     
-    const response = await safeProductApi.getProducts(params)
+    const response = await productApi.getProducts(params)
     if (response.success && response.data) {
       tableData.value = response.data.list || []
       pagination.total = response.data.total || 0
@@ -310,15 +305,36 @@ const loadProductList = async () => {
 // 加载分类列表
 const loadCategories = async () => {
   try {
-    // 这里需要调用分类API，暂时使用模拟数据
-    categoryOptions.value = [
-      { id: 1, name: '电子产品', level: 1, sort: 1, status: true, productCount: 0, createdAt: '', updatedAt: '' },
-      { id: 2, name: '服装', level: 1, sort: 2, status: true, productCount: 0, createdAt: '', updatedAt: '' },
-      { id: 3, name: '食品', level: 1, sort: 3, status: true, productCount: 0, createdAt: '', updatedAt: '' }
-    ]
+    const response = await getCategoryTree()
+    if (response.success && response.data) {
+      // 将分类数据转换为级联选择器需要的格式
+      categoryOptions.value = formatCategoryOptions(response.data)
+    }
   } catch (error) {
     console.error('加载分类列表失败:', error)
+    // 使用模拟数据作为后备
+    categoryOptions.value = [
+      { value: 1, label: '电子产品' },
+      { value: 2, label: '服装' },
+      { value: 3, label: '食品' }
+    ]
   }
+}
+
+// 格式化分类选项
+const formatCategoryOptions = (categories) => {
+  return categories.map(category => {
+    const option = {
+      value: category.id,
+      label: category.name
+    }
+    
+    if (category.children && category.children.length > 0) {
+      option.children = formatCategoryOptions(category.children)
+    }
+    
+    return option
+  })
 }
 
 // 搜索
@@ -340,20 +356,20 @@ const handleReset = () => {
 }
 
 // 分页大小改变
-const handleSizeChange = (size: number) => {
+const handleSizeChange = (size) => {
   pagination.size = size
   pagination.current = 1
   loadProductList()
 }
 
 // 当前页改变
-const handleCurrentChange = (current: number) => {
+const handleCurrentChange = (current) => {
   pagination.current = current
   loadProductList()
 }
 
 // 选择改变
-const handleSelectionChange = (selection: ProductInfo[]) => {
+const handleSelectionChange = (selection) => {
   selectedIds.value = selection.map(item => item.id)
 }
 
@@ -363,20 +379,20 @@ const handleAdd = () => {
 }
 
 // 编辑商品
-const handleEdit = (row: ProductInfo) => {
+const handleEdit = (row) => {
   router.push(`/products/edit/${row.id}`)
 }
 
 // 查看商品
-const handleView = (row: ProductInfo) => {
+const handleView = (row) => {
   router.push(`/products/detail/${row.id}`)
 }
 
 // 切换商品状态
-const handleToggleStatus = async (row: ProductInfo) => {
+const handleToggleStatus = async (row) => {
   try {
     const newStatus = row.status === 'active' ? 'inactive' : 'active'
-    const response = await safeProductApi.updateProduct(row.id, { status: newStatus })
+    const response = await productApi.updateProduct(row.id, { status: newStatus })
     if (response.success) {
       ElMessage.success('状态更新成功')
       loadProductList()
@@ -390,7 +406,7 @@ const handleToggleStatus = async (row: ProductInfo) => {
 }
 
 // 删除商品
-const handleDelete = async (row: ProductInfo) => {
+const handleDelete = async (row) => {
   try {
     await ElMessageBox.confirm(
       `确定要删除商品"${row.name}"吗？此操作不可恢复。`,
@@ -402,7 +418,7 @@ const handleDelete = async (row: ProductInfo) => {
       }
     )
     
-    const response = await safeProductApi.deleteProduct(row.id)
+    const response = await productApi.deleteProduct(row.id)
     if (response.success) {
       ElMessage.success('删除成功')
       loadProductList()
@@ -432,18 +448,25 @@ const handleBatchDelete = async () => {
       }
     )
     
-    // 这里需要调用批量删除API
-    ElMessage.success('批量删除成功')
-    selectedIds.value = []
-    loadProductList()
+    const response = await batchDeleteProducts(selectedIds.value)
+    if (response.success) {
+      ElMessage.success('批量删除成功')
+      selectedIds.value = []
+      loadProductList()
+    } else {
+      ElMessage.error(response.message || '批量删除失败')
+    }
   } catch (error) {
-    console.error('批量删除失败:', error)
+    if (error !== 'cancel') {
+      console.error('批量删除失败:', error)
+      ElMessage.error('批量删除失败')
+    }
   }
 }
 
 // 文件选择
-const handleFileChange = (file: UploadFile) => {
-  uploadFile.value = file.raw as File
+const handleFileChange = (file) => {
+  uploadFile.value = file.raw
 }
 
 // 导入商品
@@ -455,10 +478,16 @@ const handleImport = async () => {
 
   importLoading.value = true
   try {
-    // 这里需要调用导入API
-    ElMessage.success('导入成功')
-    showImportDialog.value = false
-    loadProductList()
+    const response = await importProducts(uploadFile.value)
+    if (response.success) {
+      ElMessage.success('导入成功')
+      showImportDialog.value = false
+      uploadFile.value = null
+      uploadRef.value?.clearFiles()
+      loadProductList()
+    } else {
+      ElMessage.error(response.message || '导入失败')
+    }
   } catch (error) {
     console.error('导入失败:', error)
     ElMessage.error('导入失败')
@@ -471,7 +500,28 @@ const handleImport = async () => {
 const handleExport = async () => {
   exportLoading.value = true
   try {
-    // 这里需要调用导出API
+    const params = {
+      format: exportForm.format,
+      fields: exportForm.fields.join(','),
+      ...searchForm
+    }
+    
+    const response = await exportProducts(params)
+    
+    // 创建下载链接
+    const blob = new Blob([response], {
+      type: exportForm.format === 'excel' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'text/csv'
+    })
+    
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `products.${exportForm.format}`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+    
     ElMessage.success('导出成功')
     showExportDialog.value = false
   } catch (error) {
@@ -483,7 +533,7 @@ const handleExport = async () => {
 }
 
 // 状态标签类型
-const getStatusTagType = (status: string) => {
+const getStatusTagType = (status) => {
   switch (status) {
     case 'active': return 'success'
     case 'inactive': return 'info'
@@ -493,7 +543,7 @@ const getStatusTagType = (status: string) => {
 }
 
 // 状态标签文本
-const getStatusLabel = (status: string) => {
+const getStatusLabel = (status) => {
   switch (status) {
     case 'active': return '上架'
     case 'inactive': return '下架'
@@ -503,7 +553,7 @@ const getStatusLabel = (status: string) => {
 }
 
 // 格式化日期
-const formatDate = (dateString: string) => {
+const formatDate = (dateString) => {
   return new Date(dateString).toLocaleString('zh-CN')
 }
 </script>

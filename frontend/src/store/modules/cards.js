@@ -1,5 +1,12 @@
 import { cardApi } from '@/api/card'
-import { CardStatus } from '@/types'
+
+// 卡状态常量
+const CardStatus = {
+  DRAFT: 'draft',
+  PUBLISHED: 'published',
+  SOLD_OUT: 'sold_out',
+  DISABLED: 'disabled'
+}
 
 const state = {
   cards: [],

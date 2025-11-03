@@ -43,6 +43,40 @@ export const productApi = {
       url: `/api/products/${id}`,
       method: 'delete'
     })
+  },
+
+  // 批量删除商品
+  batchDeleteProducts(ids) {
+    return request({
+      url: '/api/products/batch',
+      method: 'delete',
+      data: { ids }
+    })
+  },
+
+  // 导入商品
+  importProducts(file) {
+    const formData = new FormData()
+    formData.append('file', file)
+    
+    return request({
+      url: '/api/products/import',
+      method: 'post',
+      data: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  },
+
+  // 导出商品
+  exportProducts(params) {
+    return request({
+      url: '/api/products/export',
+      method: 'get',
+      params,
+      responseType: 'blob'
+    })
   }
 }
 
@@ -52,3 +86,6 @@ export const getProductDetail = productApi.getProduct
 export const createProduct = productApi.createProduct
 export const updateProduct = productApi.updateProduct
 export const deleteProduct = productApi.deleteProduct
+export const batchDeleteProducts = productApi.batchDeleteProducts
+export const importProducts = productApi.importProducts
+export const exportProducts = productApi.exportProducts

@@ -170,8 +170,8 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus, Delete } from '@element-plus/icons-vue'
-import { useCardsStore } from '@/stores/cards'
-import { getCards, deleteCard, updateCardStatus } from '@/api/card'
+import { useCardsStore } from '@/store/modules/cards'
+import { getCards, deleteCard, updateCardStatus, batchDeleteCards } from '@/api/card'
 
 const router = useRouter()
 const cardsStore = useCardsStore()
@@ -337,29 +337,14 @@ const handleBatchDelete = async () => {
     })
     
     const ids = selectedRows.value.map(row => row.id)
-    // 这里假设有一个批量删除的API
-    // const response = await batchDeleteCards(ids)
+    const response = await batchDeleteCards(ids)
     
-    // 临时方案：逐个删除
-    let successCount = 0
-    for (const id of ids) {
-      try {
-        const response = await deleteCard(id)
-        if (response.success) {
-          successCount++
-        }
-      } catch (error) {
-        console.error(`删除ID为${id}的卡失败:`, error)
-      }
-    }
-    
-    if (successCount === ids.length) {
+    if (response.success) {
       ElMessage.success('批量删除成功')
+      fetchCardList()
     } else {
-      ElMessage.warning(`成功删除${successCount}张卡，失败${ids.length - successCount}张`)
+      ElMessage.error(response.message || '批量删除失败')
     }
-    
-    fetchCardList()
   } catch (error) {
     if (error !== 'cancel') {
       console.error('批量删除失败:', error)
