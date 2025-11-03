@@ -1,15 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import type { RouteRecordRaw } from 'vue-router'
 import { setupRouterGuards } from './guards'
 
-// 路由元信息类型定义
-interface RouteMeta {
-  title?: string
-  requiresAuth?: boolean
-  permissions?: string[]
-}
-
-const routes: RouteRecordRaw[] = [
+const routes = [
   {
     path: '/',
     redirect: '/dashboard'
@@ -92,6 +84,44 @@ const routes: RouteRecordRaw[] = [
         name: 'CardDetail',
         component: () => import('@/views/cards/CardDetail.vue'),
         meta: { title: '卡详情', requiresAuth: true }
+      },
+      // 商品管理
+      {
+        path: 'products',
+        name: 'ProductList',
+        component: () => import('@/views/products/ProductList.vue'),
+        meta: { title: '商品列表', requiresAuth: true }
+      },
+      {
+        path: 'products/add',
+        name: 'ProductAdd',
+        component: () => import('@/views/products/ProductForm.vue'),
+        meta: { title: '添加商品', requiresAuth: true }
+      },
+      {
+        path: 'products/edit/:id',
+        name: 'ProductEdit',
+        component: () => import('@/views/products/ProductForm.vue'),
+        meta: { title: '编辑商品', requiresAuth: true }
+      },
+      // 规格管理
+      {
+        path: 'specifications',
+        name: 'SpecificationList',
+        component: () => import('@/views/specifications/SpecificationList.vue'),
+        meta: { title: '规格列表', requiresAuth: true }
+      },
+      {
+        path: 'specifications/add',
+        name: 'SpecificationAdd',
+        component: () => import('@/views/specifications/SpecificationForm.vue'),
+        meta: { title: '添加规格', requiresAuth: true }
+      },
+      {
+        path: 'specifications/edit/:id',
+        name: 'SpecificationEdit',
+        component: () => import('@/views/specifications/SpecificationForm.vue'),
+        meta: { title: '编辑规格', requiresAuth: true }
       },
       // 用户管理（仅管理员）
       {

@@ -59,20 +59,18 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import type { FormInstance, FormRules } from 'element-plus'
 import { User, Lock } from '@element-plus/icons-vue'
-import { useAppStore } from '@/stores'
-import { safeAuthApi } from '@/services/auth'
-import { Validator } from '@/utils/validate'
+import { useAuthStore } from '@/stores/auth'
+import { authApi } from '@/api/auth'
 import { AppStorage } from '@/utils/storage'
 
 const router = useRouter()
-const appStore = useAppStore()
-const loginFormRef = ref<FormInstance>()
+const authStore = useAuthStore()
+const loginFormRef = ref()
 const loading = ref(false)
 const rememberMe = ref(false)
 
@@ -90,12 +88,12 @@ onMounted(() => {
   }
 })
 
-const loginRules: FormRules = {
+const loginRules = {
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
     { 
       validator: (rule, value, callback) => {
-        if (!Validator.username(value)) {
+        if (!value || value.length < 4 || value.length > 20) {
           callback(new Error('用户名格式不正确（4-20位字母、数字、下划线）'))
         } else {
           callback()
@@ -108,7 +106,7 @@ const loginRules: FormRules = {
     { required: true, message: '请输入密码', trigger: 'blur' },
     { 
       validator: (rule, value, callback) => {
-        if (!Validator.password(value)) {
+        if (!value || value.length < 6 || value.length > 20) {
           callback(new Error('密码格式不正确（6-20位，包含字母和数字）'))
         } else {
           callback()
@@ -126,8 +124,8 @@ const handleLogin = async () => {
     await loginFormRef.value.validate()
     loading.value = true
     
-    // 调用真实API登录
-    const response = await safeAuthApi.login({
+    // 调用API登录
+    const response = await authApi.login({
       username: loginForm.username,
       password: loginForm.password
     })
@@ -136,8 +134,8 @@ const handleLogin = async () => {
       const { token, user } = response.data
       
       // 存储token和用户信息
-      appStore.setToken(token)
-      appStore.setUserInfo(user)
+      authStore.setToken(token)
+      authStore.setUserInfo(user)
       
       // 记住我功能
       if (rememberMe.value) {
@@ -151,7 +149,7 @@ const handleLogin = async () => {
     } else {
       ElMessage.error(response.message || '登录失败')
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('登录失败:', error)
     ElMessage.error(error.message || '登录失败，请检查网络连接')
   } finally {
@@ -204,27 +202,27 @@ const handleForgotPassword = () => {
 }
 
 .login-options {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    
-    .el-checkbox {
-      color: #666;
-    }
-    
-    .el-link {
-      font-size: 14px;
-    }
-  }
-  
-  .register-link {
-    text-align: center;
-    margin-top: 20px;
-    color: #666;
-    
-    .el-link {
-      margin-left: 5px;
-    }
-  }
-}</style>
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.login-options .el-checkbox {
+  color: #666;
+}
+
+.login-options .el-link {
+  font-size: 14px;
+}
+
+.register-link {
+  text-align: center;
+  margin-top: 20px;
+  color: #666;
+}
+
+.register-link .el-link {
+  margin-left: 5px;
+}
+</style>

@@ -1,17 +1,9 @@
 import request from '@/utils/request'
-import type { 
-  CardInfo, 
-  CardQueryParams, 
-  CreateCardParams, 
-  UpdateCardParams,
-  ApiResponse,
-  PaginatedResponse 
-} from '@/types'
 
 // 卡管理API
 export const cardApi = {
   // 获取卡列表
-  getCards(params: CardQueryParams): Promise<ApiResponse<PaginatedResponse<CardInfo>>> {
+  getCards(params) {
     return request({
       url: '/api/cards',
       method: 'get',
@@ -20,7 +12,7 @@ export const cardApi = {
   },
 
   // 获取卡详情
-  getCard(id: string): Promise<ApiResponse<CardInfo>> {
+  getCard(id) {
     return request({
       url: `/api/cards/${id}`,
       method: 'get'
@@ -28,7 +20,7 @@ export const cardApi = {
   },
 
   // 创建卡
-  createCard(data: CreateCardParams): Promise<ApiResponse<CardInfo>> {
+  createCard(data) {
     return request({
       url: '/api/cards',
       method: 'post',
@@ -37,7 +29,7 @@ export const cardApi = {
   },
 
   // 更新卡
-  updateCard(id: string, data: UpdateCardParams): Promise<ApiResponse<CardInfo>> {
+  updateCard(id, data) {
     return request({
       url: `/api/cards/${id}`,
       method: 'put',
@@ -46,7 +38,7 @@ export const cardApi = {
   },
 
   // 删除卡
-  deleteCard(id: string): Promise<ApiResponse<void>> {
+  deleteCard(id) {
     return request({
       url: `/api/cards/${id}`,
       method: 'delete'
@@ -54,7 +46,7 @@ export const cardApi = {
   },
 
   // 上架卡
-  publishCard(id: string): Promise<ApiResponse<CardInfo>> {
+  publishCard(id) {
     return request({
       url: `/api/cards/${id}/publish`,
       method: 'put'
@@ -62,7 +54,7 @@ export const cardApi = {
   },
 
   // 下架卡
-  unpublishCard(id: string): Promise<ApiResponse<CardInfo>> {
+  unpublishCard(id) {
     return request({
       url: `/api/cards/${id}/unpublish`,
       method: 'put'
@@ -70,7 +62,7 @@ export const cardApi = {
   },
 
   // 批量上架
-  batchPublish(ids: string[]): Promise<ApiResponse<void>> {
+  batchPublish(ids) {
     return request({
       url: '/api/cards/batch-publish',
       method: 'put',
@@ -79,7 +71,7 @@ export const cardApi = {
   },
 
   // 批量下架
-  batchUnpublish(ids: string[]): Promise<ApiResponse<void>> {
+  batchUnpublish(ids) {
     return request({
       url: '/api/cards/batch-unpublish',
       method: 'put',
@@ -88,7 +80,7 @@ export const cardApi = {
   },
 
   // 批量删除
-  batchDelete(ids: string[]): Promise<ApiResponse<void>> {
+  batchDelete(ids) {
     return request({
       url: '/api/cards/batch-delete',
       method: 'delete',
@@ -97,9 +89,23 @@ export const cardApi = {
   }
 }
 
+// 导出单独的函数以便在store中使用
+export const getCards = cardApi.getCards
+export const getCardDetail = cardApi.getCard
+export const createCard = cardApi.createCard
+export const updateCard = cardApi.updateCard
+export const deleteCard = cardApi.deleteCard
+export const batchDeleteCards = cardApi.batchDelete
+export const updateCardStatus = (id, status) => {
+  return status === 'active' ? cardApi.publishCard(id) : cardApi.unpublishCard(id)
+}
+export const batchUpdateCardStatus = (ids, status) => {
+  return status === 'active' ? cardApi.batchPublish(ids) : cardApi.batchUnpublish(ids)
+}
+
 // 带错误处理和重试机制的安全API
 export const safeCardApi = {
-  async getCards(params: CardQueryParams, retries = 3) {
+  async getCards(params, retries = 3) {
     try {
       return await cardApi.getCards(params)
     } catch (error) {
@@ -112,7 +118,7 @@ export const safeCardApi = {
     }
   },
 
-  async getCard(id: string, retries = 3) {
+  async getCard(id, retries = 3) {
     try {
       return await cardApi.getCard(id)
     } catch (error) {
@@ -125,7 +131,7 @@ export const safeCardApi = {
     }
   },
 
-  async createCard(data: CreateCardParams, retries = 3) {
+  async createCard(data, retries = 3) {
     try {
       return await cardApi.createCard(data)
     } catch (error) {
@@ -138,7 +144,7 @@ export const safeCardApi = {
     }
   },
 
-  async updateCard(id: string, data: UpdateCardParams, retries = 3) {
+  async updateCard(id, data, retries = 3) {
     try {
       return await cardApi.updateCard(id, data)
     } catch (error) {

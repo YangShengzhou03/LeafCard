@@ -1,7 +1,5 @@
-import type { Router } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { useAppStore } from '@/stores'
-import { AuthUtil } from '@/services/auth'
+import { useAuthStore } from '@/stores/auth'
 import { AppStorage } from '@/utils/storage'
 
 // 白名单路由（不需要登录即可访问）
@@ -9,44 +7,48 @@ const WHITE_LIST = ['/login', '/register', '/forgot-password', '/reset-password'
 
 // 需要特定权限的路由配置
 const PERMISSION_ROUTES = {
-  '/admin': ['admin'],
-  '/user-management': ['admin'],
-  '/system-settings': ['admin', 'manager']
+  '/users': ['admin'],
+  '/settings': ['admin', 'manager']
 }
 
 /**
  * 检查用户是否有权限访问路由
  */
-function checkPermission(routePath: string, userRoles: string[]): boolean {
-  const requiredRoles = PERMISSION_ROUTES[routePath as keyof typeof PERMISSION_ROUTES]
+function checkPermission(routePath, userRoles) {
+  // 检查路由元信息中的权限要求
+  const requiredPermissions = getRoutePermissions(routePath)
   
-  if (!requiredRoles) {
+  if (!requiredPermissions || requiredPermissions.length === 0) {
     return true // 没有权限要求，允许访问
   }
   
-  return requiredRoles.some(role => userRoles.includes(role))
+  return requiredPermissions.some(permission => userRoles.includes(permission))
+}
+
+/**
+ * 获取路由所需的权限
+ */
+function getRoutePermissions(routePath) {
+  // 根据路径匹配权限要求
+  for (const [path, permissions] of Object.entries(PERMISSION_ROUTES)) {
+    if (routePath.startsWith(path)) {
+      return permissions
+    }
+  }
+  return []
 }
 
 /**
  * 路由守卫设置
  */
-export function setupRouterGuards(router: Router) {
+export function setupRouterGuards(router) {
   // 全局前置守卫
   router.beforeEach((to, from, next) => {
-    const appStore = useAppStore()
-    const token = appStore.token
+    const authStore = useAuthStore()
+    const token = authStore.token
     
-    // 检查token是否存在且有效
+    // 检查token是否存在
     if (token) {
-      if (AuthUtil.isTokenExpired(token)) {
-        // token过期，清除存储并跳转到登录页
-        appStore.clearAuth()
-        AppStorage.clearAuth()
-        ElMessage.warning('登录已过期，请重新登录')
-        next('/login')
-        return
-      }
-      
       // 如果已经登录，尝试访问登录页，则重定向到首页
       if (to.path === '/login') {
         next('/dashboard')
@@ -54,7 +56,7 @@ export function setupRouterGuards(router: Router) {
       }
       
       // 检查用户权限
-      const userRoles = appStore.userInfo?.roles || []
+      const userRoles = authStore.userRoles
       if (!checkPermission(to.path, userRoles)) {
         ElMessage.error('您没有权限访问此页面')
         next(from.path || '/dashboard')
@@ -97,9 +99,9 @@ export function setupRouterGuards(router: Router) {
 /**
  * 检查当前用户是否有指定权限
  */
-export function hasPermission(permission: string | string[]): boolean {
-  const appStore = useAppStore()
-  const userRoles = appStore.userInfo?.roles || []
+export function hasPermission(permission) {
+  const authStore = useAuthStore()
+  const userRoles = authStore.userRoles
   
   if (typeof permission === 'string') {
     return userRoles.includes(permission)
@@ -115,9 +117,9 @@ export function hasPermission(permission: string | string[]): boolean {
 /**
  * 检查当前用户是否有任意指定权限
  */
-export function hasAnyPermission(permissions: string[]): boolean {
-  const appStore = useAppStore()
-  const userRoles = appStore.userInfo?.roles || []
+export function hasAnyPermission(permissions) {
+  const authStore = useAuthStore()
+  const userRoles = authStore.userRoles
   
   return permissions.some(permission => userRoles.includes(permission))
 }
@@ -125,9 +127,9 @@ export function hasAnyPermission(permissions: string[]): boolean {
 /**
  * 检查当前用户是否有所有指定权限
  */
-export function hasAllPermissions(permissions: string[]): boolean {
-  const appStore = useAppStore()
-  const userRoles = appStore.userInfo?.roles || []
+export function hasAllPermissions(permissions) {
+  const authStore = useAuthStore()
+  const userRoles = authStore.userRoles
   
   return permissions.every(permission => userRoles.includes(permission))
 }
@@ -136,7 +138,7 @@ export function hasAllPermissions(permissions: string[]): boolean {
  * 权限指令工具函数
  */
 export const permissionDirective = {
-  mounted(el: HTMLElement, binding: any) {
+  mounted(el, binding) {
     const { value } = binding
     
     if (value && !hasPermission(value)) {

@@ -20,28 +20,21 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { ElIcon, ElProgress } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 
 // 加载状态管理
-interface LoadingState {
-  text: string
-  progress: number | null
-  timestamp: number
-}
-
-const loadingStates = ref<LoadingState[]>([])
+const loadingStates = ref([])
 const loadingText = ref('加载中...')
-const progress = ref<number | null>(null)
+const progress = ref(null)
 
 // 计算当前加载状态
 const loading = computed(() => loadingStates.value.length > 0)
 
 // 添加加载状态
-const addLoading = (text: string = '加载中...', initialProgress: number | null = null) => {
-  const state: LoadingState = {
+const addLoading = (text = '加载中...', initialProgress = null) => {
+  const state = {
     text,
     progress: initialProgress,
     timestamp: Date.now()
@@ -52,7 +45,7 @@ const addLoading = (text: string = '加载中...', initialProgress: number | nul
 }
 
 // 移除加载状态
-const removeLoading = (timestamp: number) => {
+const removeLoading = (timestamp) => {
   const index = loadingStates.value.findIndex(state => state.timestamp === timestamp)
   if (index > -1) {
     loadingStates.value.splice(index, 1)
@@ -61,7 +54,7 @@ const removeLoading = (timestamp: number) => {
 }
 
 // 更新进度
-const updateProgress = (timestamp: number, newProgress: number) => {
+const updateProgress = (timestamp, newProgress) => {
   const state = loadingStates.value.find(s => s.timestamp === timestamp)
   if (state) {
     state.progress = Math.min(100, Math.max(0, newProgress))
@@ -85,15 +78,12 @@ const updateDisplay = () => {
 
 // 全局方法 - 通过provide/inject或全局变量方式提供
 const globalLoading = {
-  show: (text?: string) => addLoading(text),
-  hide: (timestamp: number) => removeLoading(timestamp),
-  updateProgress: (timestamp: number, progress: number) => updateProgress(timestamp, progress),
+  show: (text) => addLoading(text),
+  hide: (timestamp) => removeLoading(timestamp),
+  updateProgress: (timestamp, progressValue) => updateProgress(timestamp, progressValue),
   
   // 便捷方法：显示加载并返回关闭函数
-  asyncWithLoading: async <T>(
-    operation: () => Promise<T>,
-    text?: string
-  ): Promise<T> => {
+  asyncWithLoading: async (operation, text) => {
     const timestamp = addLoading(text)
     try {
       const result = await operation()
@@ -106,13 +96,10 @@ const globalLoading = {
   },
   
   // 带进度的异步操作
-  asyncWithProgress: async <T>(
-    operation: (progressCallback: (progress: number) => void) => Promise<T>,
-    text?: string
-  ): Promise<T> => {
+  asyncWithProgress: async (operation, text) => {
     const timestamp = addLoading(text, 0)
     
-    const progressCallback = (progressValue: number) => {
+    const progressCallback = (progressValue) => {
       updateProgress(timestamp, progressValue)
     }
     
@@ -131,7 +118,7 @@ const globalLoading = {
 
 // 将全局方法挂载到window对象，供其他组件使用
 if (typeof window !== 'undefined') {
-  (window as any).$loading = globalLoading
+  window.$loading = globalLoading
 }
 
 // 提供全局方法给其他组件使用

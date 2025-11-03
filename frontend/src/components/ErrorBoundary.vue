@@ -32,12 +32,10 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, onErrorCaptured, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElIcon, ElButton, ElCollapse, ElCollapseItem } from 'element-plus'
 import { Warning, Refresh, HomeFilled, ChatDotRound } from '@element-plus/icons-vue'
-import { errorHandler } from '@/utils/errorHandler'
 
 const router = useRouter()
 const hasError = ref(false)
@@ -45,7 +43,7 @@ const errorDetails = ref('')
 const showDetails = ref(false)
 
 // 错误信息
-let currentError: any = null
+let currentError = null
 
 // 错误捕获
 onErrorCaptured((error, instance, info) => {
