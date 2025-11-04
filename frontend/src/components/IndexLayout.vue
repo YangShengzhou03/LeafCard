@@ -39,7 +39,7 @@
         <div class="container">
           <div class="hero-content">
             <h1 class="hero-title">LeafCard</h1>
-            <p class="hero-description">枫叶卡管系统 - 企业级卡密管理系统</p>
+            <p class="hero-description">枫叶卡管系统 - 卡密管理系统</p>
             <div class="cta-buttons">
             <el-button type="primary" size="large" class="start-btn" @click="handleStart">
               {{ isAuthenticated ? '进入管理后台' : '立即开始使用' }}
@@ -70,7 +70,7 @@
         <div class="footer-content">
           <div class="footer-section">
             <h3>枫叶卡管系统</h3>
-            <p>企业级卡密管理系统</p>
+            <p>卡密管理系统</p>
           </div>
           <div class="footer-section">
             <h4>产品功能</h4>
@@ -95,7 +95,7 @@
           </div>
         </div>
         <div class="footer-bottom">
-          <p>&copy; 2024-2025 LeafCard - 枫叶卡管系统 企业级卡密管理系统</p>
+          <p>&copy; 2024-2025 LeafCard - 枫叶卡管系统</p>
         </div>
       </div>
     </footer>
