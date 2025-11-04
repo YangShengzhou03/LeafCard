@@ -1,116 +1,276 @@
 <template>
-  <div class="card-key-verify">
-    <el-card class="verify-card">
+  <div class="admin-product-management">
+    <el-card class="product-card">
       <template #header>
         <div class="card-header">
           <span>卡密验证</span>
         </div>
       </template>
-      
-      <div class="verify-content">
-        <el-form :model="verifyForm" :rules="verifyRules" ref="verifyFormRef" label-width="100px">
-          <el-form-item label="卡密" prop="cardKey">
-            <el-input 
-              v-model="verifyForm.cardKey" 
-              placeholder="请输入卡密进行验证"
+
+      <!-- 搜索栏 -->
+      <div class="search-bar">
+        <el-row :gutter="16">
+          <el-col :span="6">
+            <el-input
+              v-model="searchQuery"
+              placeholder="卡密名称"
               clearable
-              @keyup.enter="handleVerify"
+              @keyup.enter="handleSearch"
             >
-              <template #append>
-                <el-button @click="handleVerify" :loading="verifying">验证</el-button>
+              <template #prefix>
+                <el-icon><Search /></el-icon>
               </template>
             </el-input>
-          </el-form-item>
-        </el-form>
-        
-        <div v-if="verifyResult" class="result-section">
-          <el-divider />
-          <div class="result-content">
-            <h3>验证结果</h3>
-            <el-descriptions :column="1" border>
-              <el-descriptions-item label="卡密状态">
-                <el-tag :type="verifyResult.status === 'valid' ? 'success' : 'danger'">
-                  {{ verifyResult.status === 'valid' ? '有效' : '无效' }}
-                </el-tag>
-              </el-descriptions-item>
-              <el-descriptions-item label="商品名称">{{ verifyResult.productName || '-' }}</el-descriptions-item>
-              <el-descriptions-item label="规格">{{ verifyResult.specification || '-' }}</el-descriptions-item>
-              <el-descriptions-item label="有效期">{{ verifyResult.validityPeriod || '-' }}</el-descriptions-item>
-              <el-descriptions-item label="使用次数">{{ verifyResult.usageCount || 0 }}/{{ verifyResult.maxUsage || 0 }}</el-descriptions-item>
-              <el-descriptions-item label="创建时间">{{ verifyResult.createTime || '-' }}</el-descriptions-item>
-            </el-descriptions>
-          </div>
-        </div>
+          </el-col>
+          <el-col :span="6">
+            <el-select v-model="categoryFilter" placeholder="卡密分类" clearable>
+              <el-option label="虚拟卡密" value="virtual" />
+              <el-option label="实体卡密" value="physical" />
+              <el-option label="服务类" value="service" />
+            </el-select>
+          </el-col>
+          <el-col :span="6">
+            <el-select v-model="statusFilter" placeholder="卡密状态" clearable>
+              <el-option label="使用中" value="active" />
+              <el-option label="未使用" value="inactive" />
+            </el-select>
+          </el-col>
+          <el-col :span="6">
+            <el-button type="primary" @click="handleSearch">查询</el-button>
+            <el-button @click="resetFilters">重置</el-button>
+          </el-col>
+        </el-row>
+      </div>
+
+      <!-- 卡密列表 -->
+      <div class="table-container">
+        <el-table :data="filteredProducts" v-loading="loading" stripe>
+          <el-table-column prop="id" label="ID" width="80" />
+          <el-table-column prop="name" label="卡密名称" min-width="200" />
+          <el-table-column prop="category" label="分类" width="100">
+            <template #default="{ row }">
+              <el-tag :type="getCategoryTagType(row.category)">
+                {{ getCategoryText(row.category) }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="price" label="价格" width="120">
+            <template #default="{ row }">
+              ¥{{ row.price }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="stock" label="库存" width="100" />
+          <el-table-column prop="status" label="状态" width="100">
+            <template #default="{ row }">
+              <el-tag :type="row.status === 'active' ? 'success' : 'info'">
+                {{ row.status === 'active' ? '使用中' : '未使用' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="createTime" label="创建时间" width="160" />
+          <el-table-column label="操作" width="150" fixed="right">
+            <template #default="{ row }">
+              <el-button size="small" @click="handleEditProduct(row)">编辑</el-button>
+              <el-button size="small" type="danger" @click="handleDeleteProduct(row)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+
+      <!-- 分页 -->
+      <div class="pagination-container">
+        <el-pagination
+          v-model:current-page="currentPage"
+          v-model:page-size="pageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
       </div>
     </el-card>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, onMounted, computed } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus, Search } from '@element-plus/icons-vue'
 
-const verifyFormRef = ref()
-const verifying = ref(false)
-const verifyResult = ref(null)
+// 加载状态
+const loading = ref(false)
 
-const verifyForm = reactive({
-  cardKey: ''
+// 卡密列表数据
+const products = ref([])
+
+// 搜索条件
+const searchQuery = ref('')
+const categoryFilter = ref('')
+const statusFilter = ref('')
+
+// 分页信息
+const currentPage = ref(1)
+const pageSize = ref(10)
+const total = ref(0)
+
+// 计算属性：筛选后的卡密列表
+const filteredProducts = computed(() => {
+  let filtered = products.value
+  
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    filtered = filtered.filter(product => 
+      product.name.toLowerCase().includes(query)
+    )
+  }
+  
+  if (categoryFilter.value) {
+    filtered = filtered.filter(product => product.category === categoryFilter.value)
+  }
+  
+  if (statusFilter.value) {
+    filtered = filtered.filter(product => product.status === statusFilter.value)
+  }
+  
+  return filtered
 })
 
-const verifyRules = {
-  cardKey: [
-    { required: true, message: '请输入卡密', trigger: 'blur' }
-  ]
+// 分类标签类型映射
+const getCategoryTagType = (category) => {
+  const typeMap = {
+    virtual: 'primary',
+    physical: 'success',
+    service: 'warning'
+  }
+  return typeMap[category] || 'info'
 }
 
-const handleVerify = async () => {
+// 分类文本映射
+const getCategoryText = (category) => {
+  const textMap = {
+    virtual: '虚拟卡密',
+    physical: '实体卡密',
+    service: '服务类'
+  }
+  return textMap[category] || '未知'
+}
+
+// 加载卡密数据
+const loadProducts = async () => {
+  loading.value = true
   try {
-    const valid = await verifyFormRef.value.validate()
-    if (!valid) return
-    
-    verifying.value = true
-    
-    // 模拟验证请求
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // 模拟验证结果
-    verifyResult.value = {
-      status: 'valid',
-      productName: '测试商品',
-      specification: '标准版',
-      validityPeriod: '2024-12-31',
-      usageCount: 1,
-      maxUsage: 5,
-      createTime: '2024-01-01 10:00:00'
-    }
-    
-    ElMessage.success('验证成功')
+    // 模拟数据 - 实际项目中应该调用API
+    products.value = [
+      {
+        id: 1,
+        name: 'VIP会员月卡',
+        category: 'virtual',
+        price: 29.99,
+        stock: 1000,
+        status: 'active',
+        createTime: '2024-01-01 10:00:00'
+      },
+      {
+        id: 2,
+        name: '实体礼品卡',
+        category: 'physical',
+        price: 199.99,
+        stock: 50,
+        status: 'active',
+        createTime: '2024-01-02 14:30:00'
+      },
+      {
+        id: 3,
+        name: '在线课程服务',
+        category: 'service',
+        price: 399.99,
+        stock: 200,
+        status: 'inactive',
+        createTime: '2024-01-03 09:15:00'
+      }
+    ]
+    total.value = products.value.length
   } catch (error) {
-    console.error('验证失败:', error)
-    ElMessage.error('验证失败，请重试')
+    ElMessage.error('加载卡密数据失败')
   } finally {
-    verifying.value = false
+    loading.value = false
   }
 }
+
+// 搜索处理
+const handleSearch = () => {
+  currentPage.value = 1
+  // 实际项目中应该重新调用API
+}
+
+// 重置筛选
+const resetFilters = () => {
+  searchQuery.value = ''
+  categoryFilter.value = ''
+  statusFilter.value = ''
+  handleSearch()
+}
+
+// 新增卡密
+const handleAddProduct = () => {
+  ElMessage.info('新增卡密功能开发中')
+}
+
+// 编辑卡密
+const handleEditProduct = (row) => {
+  ElMessage.info(`编辑卡密: ${row.name}`)
+}
+
+// 删除卡密
+const handleDeleteProduct = (row) => {
+  ElMessageBox.confirm(
+    `确定要删除卡密"${row.name}"吗？`,
+    '确认删除',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(() => {
+    ElMessage.success('删除成功')
+    loadProducts()
+  }).catch(() => {
+    // 取消操作
+  })
+}
+
+// 分页处理
+const handleSizeChange = (size) => {
+  pageSize.value = size
+  currentPage.value = 1
+  // 实际项目中应该重新调用API
+}
+
+const handleCurrentChange = (page) => {
+  currentPage.value = page
+  // 实际项目中应该重新调用API
+}
+
+onMounted(() => {
+  loadProducts()
+})
 </script>
 
 <style scoped>
-.card-key-verify {
+.admin-product-management {
   padding: 0;
   background-color: #f0f2f5;
 }
 
-.verify-card {
-  max-width: 600px;
-  margin: 0 auto;
-  border: 1px solid #e6e6e6;
+.product-card {
+  margin-bottom: 16px;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.verify-card :deep(.el-card__body) {
-  padding: 0;
+.product-card :deep(.el-card__body) {
+  padding: 16px;
 }
 
 .card-header {
@@ -122,24 +282,17 @@ const handleVerify = async () => {
   color: #303133;
 }
 
-.verify-content {
-  padding: 12px 0;
-}
-
-.result-section {
-  margin-top: 24px;
-}
-
-.result-content h3 {
+.search-bar {
   margin-bottom: 16px;
-  color: #303133;
 }
 
-:deep(.el-descriptions__label) {
-  width: 100px;
+.table-container {
+  margin-bottom: 16px;
 }
 
-:deep(.el-descriptions__content) {
-  width: calc(100% - 100px);
+.pagination-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
 }
 </style>
