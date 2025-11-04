@@ -98,6 +98,27 @@ export function generateRandomString(length = 8) {
   return result
 }
 
+// 解析JWT token
+export function parseJWT(token) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join('')
+    );
+    
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error('JWT解析错误:', error);
+    return {};
+  }
+}
+
 // 防抖函数
 export function debounce(func, wait) {
   let timeout

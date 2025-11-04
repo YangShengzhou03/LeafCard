@@ -119,7 +119,7 @@ export default {
 }
 
 .page-header {
-  background: #2d3748;
+  background-color: #2d3748;
   color: white;
   padding: 60px 0;
   text-align: center;
@@ -150,13 +150,12 @@ export default {
 
 .author-section {
   background: white;
-  border-radius: 8px;
+  border: 1px solid #ddd;
   padding: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .section-header {
-  background: #2d3748;
+  background-color: #2d3748;
   padding: 24px 32px;
   color: white;
 }
@@ -186,39 +185,17 @@ export default {
 .avatar-circle {
   width: 120px;
   height: 120px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: #667eea;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
   border: 4px solid white;
-  position: relative;
-  overflow: hidden;
-}
-
-.avatar-circle::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-  transform: rotate(45deg);
-  animation: shine 3s infinite;
-}
-
-@keyframes shine {
-  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
 }
 
 .avatar-text {
   font-size: 36px;
   font-weight: 700;
   color: white;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .profile-info {
@@ -237,20 +214,15 @@ export default {
   margin: 0;
   color: #2c3e50;
   font-weight: 700;
-  background: linear-gradient(135deg, #2c3e50 0%, #4a5568 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .developer-badge {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  background-color: #ff6b6b;
   color: white;
   padding: 4px 12px;
-  border-radius: 20px;
+  border-radius: 4px;
   font-size: 14px;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
 }
 
 .profile-title {
@@ -266,7 +238,7 @@ export default {
   line-height: 1.8;
   color: #4a5568;
   margin-bottom: 24px;
-  background: #f8fafc;
+  background-color: #f8fafc;
   padding: 20px;
   text-align: justify;
   text-justify: inter-ideograph;
@@ -280,23 +252,14 @@ export default {
 }
 
 .tag {
-  background: linear-gradient(135deg, #e6f7ff 0%, #f0f9ff 100%);
+  background-color: #e6f7ff;
   color: #1890ff;
   padding: 8px 16px;
-  border-radius: 20px;
+  border-radius: 4px;
   font-size: 14px;
   font-weight: 600;
   border: 1px solid #91d5ff;
-  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.1);
-  transition: all 0.3s ease;
 }
-
-.tag:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
-}
-
-
 
 .timeline {
   position: relative;
@@ -310,7 +273,7 @@ export default {
   top: 0;
   bottom: 0;
   width: 2px;
-  background: #e2e8f0;
+  background-color: #e2e8f0;
 }
 
 .timeline-item {
@@ -324,10 +287,9 @@ export default {
   top: 8px;
   width: 12px;
   height: 12px;
-  background: #3182ce;
+  background-color: #3182ce;
   border-radius: 50%;
   border: 2px solid white;
-  box-shadow: 0 0 0 2px #3182ce;
 }
 
 .timeline-content h3 {
@@ -336,14 +298,10 @@ export default {
   color: #2c3e50;
 }
 
-
-
 .timeline-content p {
   color: #4a5568;
   line-height: 1.6;
 }
-
-
 
 .container {
   max-width: 1000px;
@@ -413,8 +371,6 @@ export default {
   .section-content {
     padding: 24px 20px;
   }
-  
-
   
   .expertise-tags {
     justify-content: center;

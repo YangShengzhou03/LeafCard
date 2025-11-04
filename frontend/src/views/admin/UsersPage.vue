@@ -202,7 +202,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
-import Server from '@/utils/Server.js'
+import { AdminService } from '@/services/api.js'
 
 // 数据状态
 const loading = ref(false)
@@ -296,35 +296,18 @@ const calculateUsagePercentage = (used, quota) => {
 const loadUsers = async () => {
   loading.value = true
   try {
-    // 调用后端API获取真实数据
-    const response = await Server.get('/admin/user/list', {
-      params: {
-        page: currentPage.value - 1,
-        size: pageSize.value
-      }
+    const response = await AdminService.getUserList({
+      page: currentPage.value - 1,
+      size: pageSize.value,
+      keyword: searchQuery.value,
+      status: statusFilter.value,
+      role: roleFilter.value
     })
-    
-    if (response.code === 200) {
-      const userData = response.data
-      users.value = userData.content.map(user => ({
-        id: user.id,
-        email: user.email,
-        avatar: user.avatar || null,
-        gender: user.gender === 1 ? 'MALE' : user.gender === 2 ? 'FEMALE' : 'NOT_SET',
-        phone: user.phone || '',
-        role: user.role === 1 ? 'admin' : 'user',
-        storageQuota: user.storageQuota || 1073741824,
-        storageUsed: user.usedStorage || 0,
-        status: user.status === 1 ? 'active' : 'disabled',
-        lastLoginTime: user.lastLoginTime ? new Date(user.lastLoginTime).toLocaleString('zh-CN') : '从未登录',
-        createdAt: user.createdTime ? new Date(user.createdTime).toLocaleString('zh-CN') : '未知'
-      }))
-      totalUsers.value = userData.totalElements
-    } else {
-      throw new Error(response.message)
-    }
+    users.value = response.content
+    totalUsers.value = response.totalElements
   } catch (error) {
-    ElMessage.error('加载用户数据失败: ' + (error.response?.data?.message || error.message))
+    // 错误已由AdminService处理，这里不需要额外处理
+    console.error('加载用户数据失败:', error)
   } finally {
     loading.value = false
   }
@@ -513,9 +496,7 @@ onMounted(() => {
 
 .users-card {
   margin-bottom: 16px;
-  border-radius: 4px;
   border: 1px solid #e6e6e6;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .card-header {
@@ -555,7 +536,6 @@ onMounted(() => {
 
 /* 表格样式优化 */
 :deep(.el-table) {
-  border-radius: 0;
   min-width: 1200px;
 }
 
@@ -597,38 +577,11 @@ onMounted(() => {
   font-weight: bold;
 }
 
-/* 按钮样式优化 */
-:deep(.el-button) {
-  border-radius: 3px;
-}
-
-:deep(.el-button--primary) {
-  background-color: #409EFF;
-  border-color: #409EFF;
-}
-
-:deep(.el-button--success) {
-  background-color: #67C23A;
-  border-color: #67C23A;
-}
-
-:deep(.el-button--warning) {
-  background-color: #E6A23C;
-  border-color: #E6A23C;
-}
-
-:deep(.el-button--danger) {
-  background-color: #F56C6C;
-  border-color: #F56C6C;
-}
-
 /* 头像显示区域样式 */
 .avatar-section {
   text-align: center;
   margin-bottom: 20px;
   padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
   border: 1px solid #e9ecef;
 }
 

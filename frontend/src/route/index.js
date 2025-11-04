@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import AdminLayout from '@/components/AdminLayout.vue';
+import IndexLayout from '@/components/IndexLayout.vue';
 import LoginPage from '@/views/LoginPage.vue';
 import UserGuidePage from '@/views/index/UserGuidePage.vue';
 import ContactUsPage from '@/views/index/ContactUsPage.vue';
@@ -75,6 +76,28 @@ const routes = [
     ]
   },
 
+  // 首页
+  {
+    path: '/home',
+    name: 'HomePage',
+    component: IndexLayout,
+    meta: {
+      title: '枫叶卡管 - 专业的卡密管理系统',
+      requiresAuth: false
+    }
+  },
+
+  // 首页/分享链接
+  {
+    path: '/share/:id?',
+    name: 'SharePage',
+    component: IndexLayout,
+    meta: {
+      title: '枫叶卡管 - 专业的卡密管理系统',
+      requiresAuth: false
+    }
+  },
+
   // 帮助支持页面
   {
     path: '/user-guide',
@@ -141,7 +164,49 @@ router.beforeEach((to, from, next) => {
     document.title = to.meta.title;
   }
 
-  // 直接放行，无需认证
+  // 检查是否需要认证
+  if (to.meta.requiresAuth) {
+    // 检查是否已登录
+    const token = localStorage.getItem('token');
+    if (!token) {
+      // 未登录，重定向到登录页
+      next('/login');
+      return;
+    }
+    
+    // 验证token是否有效
+    try {
+      const decoded = utils.parseJWT(token);
+      // 检查token是否过期
+      if (decoded.exp * 1000 < Date.now()) {
+        // token已过期，清除并重定向到登录页
+        localStorage.removeItem('token');
+        next('/login');
+        return;
+      }
+      
+      // 更新store中的用户信息
+      if (store.state.user === null) {
+        store.setUser({
+          id: decoded.id,
+          username: decoded.username,
+          role: decoded.role
+        });
+      }
+    } catch (error) {
+      // token无效，清除并重定向到登录页
+      localStorage.removeItem('token');
+      next('/login');
+      return;
+    }
+  }
+  
+  // 如果已登录且访问登录页，重定向到首页
+  if (to.path === '/login' && localStorage.getItem('token')) {
+    next('/');
+    return;
+  }
+
   next();
 });
 

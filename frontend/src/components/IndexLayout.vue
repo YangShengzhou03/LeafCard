@@ -241,7 +241,7 @@ export default {
 /* Header Styles */
 .header {
   background-color: #fff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #ddd;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -269,7 +269,6 @@ export default {
   text-decoration: none;
   color: #333;
   font-weight: 500;
-  transition: color 0.3s;
 }
 
 .nav-menu a:hover {
@@ -317,7 +316,7 @@ export default {
 
 /* Hero Section */
 .hero-section {
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background-color: #f5f7fa;
   padding: 80px 0;
 }
 
@@ -333,14 +332,14 @@ export default {
 }
 
 .hero-content h1 {
-  font-size: 48px;
+  font-size: 36px;
   line-height: 1.2;
   margin-bottom: 20px;
   color: #303133;
 }
 
 .hero-content p {
-  font-size: 18px;
+  font-size: 16px;
   margin-bottom: 30px;
   color: #606266;
   line-height: 1.6;
@@ -370,13 +369,13 @@ export default {
 
 /* Features Section */
 .features-section {
-  padding: 80px 0;
+  padding: 60px 0;
   text-align: center;
 }
 
 .features-section h2 {
-  font-size: 36px;
-  margin-bottom: 50px;
+  font-size: 28px;
+  margin-bottom: 40px;
   color: #303133;
 }
 
@@ -388,25 +387,18 @@ export default {
 
 .feature-card {
   background: #fff;
-  border-radius: 8px;
+  border: 1px solid #ddd;
   padding: 30px 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .feature-icon {
-  font-size: 48px;
+  font-size: 36px;
   color: #409EFF;
   margin-bottom: 20px;
 }
 
 .feature-card h3 {
-  font-size: 20px;
+  font-size: 18px;
   margin-bottom: 15px;
   color: #303133;
 }
@@ -419,13 +411,13 @@ export default {
 /* Features Section */
 .features-section {
   background-color: #f5f7fa;
-  padding: 80px 0;
+  padding: 60px 0;
   text-align: center;
 }
 
 .features-section h2 {
-  font-size: 36px;
-  margin-bottom: 50px;
+  font-size: 28px;
+  margin-bottom: 40px;
   color: #303133;
 }
 
@@ -437,11 +429,9 @@ export default {
 
 .feature-card {
   background: #fff;
-  border-radius: 8px;
+  border: 1px solid #ddd;
   padding: 30px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   position: relative;
-  transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .feature-card.popular {
@@ -461,7 +451,7 @@ export default {
 }
 
 .feature-card h3 {
-  font-size: 24px;
+  font-size: 20px;
   margin-bottom: 15px;
   color: #303133;
 }
@@ -496,7 +486,7 @@ export default {
 .footer {
   background-color: #303133;
   color: #fff;
-  padding: 50px 0 20px;
+  padding: 40px 0 20px;
 }
 
 .footer-content {
@@ -524,7 +514,6 @@ export default {
 .footer-section a {
   color: #bbb;
   text-decoration: none;
-  transition: color 0.3s;
 }
 
 .footer-section a:hover {
@@ -561,7 +550,7 @@ export default {
   }
 
   .hero-content h1 {
-    font-size: 36px;
+    font-size: 28px;
   }
 
   .cta-buttons {

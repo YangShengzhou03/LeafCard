@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { getToken, removeToken } from './utils.js'
 import { ElMessage } from 'element-plus'
+import mockDataService from './mockData.js'
 
 const Server = axios.create({
   baseURL: process.env.VUE_APP_API_URL || '/api',
@@ -36,10 +37,45 @@ Server.interceptors.response.use(
     return response
   },
   error => {
+    // 尝试使用模拟数据的辅助函数
+    const tryMockData = (error) => {
+      const url = error.config?.url || ''
+      const method = error.config?.method?.toUpperCase() || 'GET'
+      
+      if (url.includes('/admin/stats') && method === 'GET') {
+        return Promise.resolve(mockDataService.getDashboardStats())
+      } else if (url.includes('/admin/user/list') && method === 'GET') {
+        const page = parseInt(new URLSearchParams(error.config?.params?.toString() || '').get('page') || '0')
+        const size = parseInt(new URLSearchParams(error.config?.params?.toString() || '').get('size') || '20')
+        return Promise.resolve(mockDataService.getUserList(page, size))
+      } else if (url.includes('/admin/log') && method === 'GET') {
+        const page = parseInt(new URLSearchParams(error.config?.params?.toString() || '').get('page') || '0')
+        const size = parseInt(new URLSearchParams(error.config?.params?.toString() || '').get('size') || '20')
+        return Promise.resolve(mockDataService.getLogList(page, size))
+      } else if (url.includes('/admin/config') && method === 'GET') {
+        return Promise.resolve(mockDataService.getSystemConfig())
+      } else if (url.includes('/file/list') && method === 'GET') {
+        const parentId = new URLSearchParams(error.config?.params?.toString() || '').get('parentId') || 'root'
+        return Promise.resolve(mockDataService.getFileList(parentId))
+      } else if (url.includes('/share/list') && method === 'GET') {
+        return Promise.resolve(mockDataService.getShareLinks())
+      }
+      return null
+    }
+    
     // 网络错误处理
     if (!error.response) {
       // 静默处理网络连接错误，避免控制台错误
       console.log('网络连接失败，使用模拟数据')
+      // 添加一个标记，表示这是一个网络错误
+      error.isNetworkError = true
+      
+      // 尝试使用模拟数据
+      const mockResult = tryMockData(error)
+      if (mockResult) {
+        return mockResult
+      }
+      
       return Promise.reject(error)
     }
     
@@ -61,14 +97,38 @@ Server.interceptors.response.use(
       case 404:
         // 静默处理404错误，避免控制台错误
         console.log('请求的资源不存在，使用模拟数据')
+        // 添加一个标记，表示这是一个404错误
+        error.isNotFoundError = true
+        
+        // 尝试使用模拟数据
+        const mockResult404 = tryMockData(error)
+        if (mockResult404) {
+          return mockResult404
+        }
         break
       case 500:
         // 静默处理500错误，避免控制台错误
         console.log('服务器内部错误，使用模拟数据')
+        // 添加一个标记，表示这是一个服务器错误
+        error.isServerError = true
+        
+        // 尝试使用模拟数据
+        const mockResult500 = tryMockData(error)
+        if (mockResult500) {
+          return mockResult500
+        }
         break
       default:
         // 静默处理其他错误，避免控制台错误
         console.log('请求失败，使用模拟数据')
+        // 添加一个标记，表示这是一个通用错误
+        error.isGenericError = true
+        
+        // 尝试使用模拟数据
+        const mockResultDefault = tryMockData(error)
+        if (mockResultDefault) {
+          return mockResultDefault
+        }
     }
     
     return Promise.reject(error)

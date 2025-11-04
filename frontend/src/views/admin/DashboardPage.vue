@@ -27,11 +27,11 @@
             <el-card shadow="hover" class="stat-card">
               <div class="stat-item">
                 <div class="stat-icon">
-                  <el-icon size="24"><Folder /></el-icon>
+                  <el-icon size="24"><Key /></el-icon>
                 </div>
                 <div class="stat-content">
-                  <div class="stat-title">文件总数</div>
-                  <div class="stat-value">{{ stats.fileCount }}</div>
+                  <div class="stat-title">卡密总数</div>
+                  <div class="stat-value">{{ stats.cardKeyCount }}</div>
                 </div>
               </div>
             </el-card>
@@ -41,11 +41,11 @@
             <el-card shadow="hover" class="stat-card">
               <div class="stat-item">
                 <div class="stat-icon">
-                  <el-icon size="24"><Document /></el-icon>
+                  <el-icon size="24"><CircleCheck /></el-icon>
                 </div>
                 <div class="stat-content">
-                  <div class="stat-title">存储使用</div>
-                  <div class="stat-value">{{ formatStorageSize(stats.usedStorage) }}</div>
+                  <div class="stat-title">已激活卡密</div>
+                  <div class="stat-value">{{ stats.activatedCardKeys }}</div>
                 </div>
               </div>
             </el-card>
@@ -77,15 +77,15 @@
               <div class="system-info">
                 <div class="info-item">
                   <span class="info-label">系统版本：</span>
-                  <span class="info-value">LeafPan v1.0.0</span>
+                  <span class="info-value">枫叶卡管 v1.0.0</span>
                 </div>
                 <div class="info-item">
                   <span class="info-label">运行时间：</span>
                   <span class="info-value">{{ uptime }}</span>
                 </div>
                 <div class="info-item">
-                  <span class="info-label">存储状态：</span>
-                  <span class="info-value">正常</span>
+                  <span class="info-label">系统状态：</span>
+                  <span class="info-value">正常运行</span>
                 </div>
               </div>
             </el-card>
@@ -98,15 +98,15 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { User, Folder, Document, Share } from '@element-plus/icons-vue'
+import { User, Key, CircleCheck, Share } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import Server from '@/utils/Server.js'
+import { AdminService } from '@/services/api.js'
 
 // 统计数据
 const stats = ref({
   userCount: 0,
-  fileCount: 0,
-  usedStorage: 0,
+  cardKeyCount: 0,
+  activatedCardKeys: 0,
   shareCount: 0
 })
 
@@ -135,20 +135,21 @@ const formatDate = (dateString) => {
 const loadDashboardData = async () => {
   try {
     // 调用后端API获取真实数据
-    const response = await Server.get('/admin/stats')
+    const response = await AdminService.getDashboardStats()
     
     // 更新统计数据
     stats.value = {
       userCount: response.data.userCount || 0,
-      fileCount: response.data.fileCount || 0,
-      usedStorage: response.data.usedStorage || 0,
+      cardKeyCount: response.data.cardKeyCount || 0,
+      activatedCardKeys: response.data.activatedCardKeys || 0,
       shareCount: response.data.shareCount || 0
     }
     
     // 更新系统运行时间
-    uptime.value = response.data.uptime || ''
+    uptime.value = response.data.uptime || '系统运行中'
   } catch (error) {
-    ElMessage.error('加载仪表盘数据失败: ' + (error.response?.data?.message || error.message))
+    // 错误已由AdminService处理，这里不需要额外处理
+    console.error('加载仪表盘数据失败:', error)
   }
 }
 
@@ -173,34 +174,44 @@ onMounted(() => {
   font-weight: 600;
 }
 
-/* 统计卡片样式 - 朴素专业风格 */
+/* 统计卡片样式 - 简约风格 */
 .stat-card {
   height: 100%;
-  border-radius: 4px;
-  border: 1px solid #e6e6e6;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ddd;
+  overflow: hidden;
+  position: relative;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background-color: #409EFF;
 }
 
 .stat-item {
   display: flex;
   align-items: center;
-  padding: 16px;
+  padding: 24px;
 }
 
 .stat-icon {
-  margin-right: 12px;
-  width: 40px;
-  height: 40px;
+  margin-right: 16px;
+  width: 56px;
+  height: 56px;
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f5f5f5;
+  background-color: #409EFF;
 }
 
 .stat-icon .el-icon {
-  color: #409EFF;
-  font-size: 20px;
+  color: #fff;
+  font-size: 24px;
 }
 
 .stat-content {
@@ -210,72 +221,133 @@ onMounted(() => {
 .stat-title {
   font-size: 14px;
   color: #909399;
-  margin-bottom: 4px;
-  font-weight: 400;
+  margin-bottom: 8px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
 .stat-value {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 700;
   color: #303133;
+  line-height: 1.2;
 }
 
 /* 系统信息卡片样式 */
 .system-info {
-  padding: 12px 0;
+  padding: 20px 0;
 }
 
 .info-item {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   display: flex;
   align-items: center;
-  padding: 6px 0;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 12px 16px;
+  border-radius: 4px;
+  background-color: #f8f9fa;
 }
 
 .info-item:last-child {
-  border-bottom: none;
   margin-bottom: 0;
 }
 
 .info-label {
-  width: 100px;
-  color: #909399;
-  font-weight: 400;
+  width: 120px;
+  color: #606266;
+  font-weight: 500;
   font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.info-label::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #409EFF;
+  border-radius: 50%;
+  margin-right: 8px;
 }
 
 .info-value {
   color: #303133;
-  font-weight: 500;
-  font-size: 14px;
+  font-weight: 600;
+  font-size: 15px;
+  padding: 4px 12px;
+  background-color: #fff;
+  border-radius: 4px;
 }
 
 /* 响应式设计 */
+@media (max-width: 1024px) {
+  .stat-item {
+    padding: 20px;
+  }
+  
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+  }
+}
+
 @media (max-width: 768px) {
   .stat-item {
     flex-direction: column;
     text-align: center;
-    padding: 12px;
+    padding: 16px;
   }
   
   .stat-icon {
     margin-right: 0;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+  }
+  
+  .stat-value {
+    font-size: 22px;
+  }
+  
+  .info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px 12px;
+  }
+  
+  .info-label {
+    width: auto;
+    margin-bottom: 6px;
+  }
+  
+  .info-value {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .stat-item {
+    padding: 12px;
+  }
+  
+  .stat-icon {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .stat-icon .el-icon {
+    font-size: 20px;
   }
   
   .stat-value {
     font-size: 20px;
   }
   
-  .info-item {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .info-label {
-    width: auto;
-    margin-bottom: 4px;
+  .stat-title {
+    font-size: 13px;
   }
 }
 </style>

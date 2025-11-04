@@ -165,7 +165,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Download, Delete } from '@element-plus/icons-vue'
-import Server from '@/utils/Server.js'
+import { AdminService } from '@/services/api.js'
 
 // 响应式数据
 const loading = ref(false)
@@ -263,22 +263,21 @@ const updateStats = () => {
 const loadLogs = async () => {
   loading.value = true
   try {
-    const response = await Server.get('/admin/log', {
-      params: {
-        page: currentPage.value - 1,
-        size: pageSize.value,
-        operationType: filter.operationType,
-        targetType: filter.targetType,
-        startDate: filter.dateRange?.[0],
-        endDate: filter.dateRange?.[1]
-      }
-    })
-
-    logs.value = response.data.content || []
-    totalLogs.value = response.data.totalElements || 0
+    const params = {
+      page: currentPage.value - 1,
+      size: pageSize.value,
+      operationType: filter.operationType,
+      targetType: filter.targetType,
+      startDate: filter.dateRange?.[0],
+      endDate: filter.dateRange?.[1]
+    }
+    const response = await AdminService.getLogList(params)
+    logs.value = response.content || []
+    totalLogs.value = response.totalElements || 0
     updateStats()
   } catch (error) {
-    ElMessage.error('加载日志数据失败')
+    // 错误已由AdminService处理，这里不需要额外处理
+    console.error('加载日志数据失败:', error)
   } finally {
     loading.value = false
   }
@@ -400,8 +399,7 @@ onMounted(() => {
 .stats-section {
   margin-bottom: 20px;
   padding: 15px;
-  background-color: #f5f7fa;
-  border-radius: 4px;
+  border: 1px solid #ddd;
 }
 
 .stat-item {
@@ -443,7 +441,6 @@ onMounted(() => {
 .log-detail-content {
   background-color: #f5f7fa;
   padding: 15px;
-  border-radius: 4px;
   white-space: pre-wrap;
   font-family: monospace;
   max-height: 300px;

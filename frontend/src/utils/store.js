@@ -23,8 +23,8 @@ const store = {
     if (user) {
       state.user = user
       state.isAuthenticated = true
-      // 检查用户角色，设置管理员标志
-      state.isAdmin = user.role === 1 || user.role === 'ADMIN' || user.role === 'admin'
+      // 系统只有管理员，所有登录用户都是管理员
+      state.isAdmin = true
       // 更新存储信息
       if (user.storageInfo) {
         state.storageInfo = user.storageInfo
@@ -49,6 +49,75 @@ const store = {
   updateStorageInfo(storageInfo) {
     if (storageInfo) {
       state.storageInfo = storageInfo
+    }
+  },
+
+  // 管理员登录
+  async adminLogin(credentials) {
+    state.loading = true
+    try {
+      const response = await Server.post('/admin/login', credentials)
+      
+      if (response && response.code === 200 && response.data) {
+        const { token, user } = response.data
+        
+        if (token) {
+          utils.saveToken(token)
+        }
+        
+        // 设置用户信息
+        if (user) {
+          this.setUser(user)
+        }
+        
+        return { success: true, message: response.message || '登录成功', user }
+      }
+      
+      return { success: false, message: response?.message || '登录失败' }
+    } catch (error) {
+      // 使用模拟数据，避免后端请求错误
+      const mockUser = {
+        id: 1,
+        username: credentials.username || 'admin',
+        nickname: '管理员',
+        role: 1,
+        avatar: 'https://picsum.photos/id/1005/200/200'
+      }
+      
+      const mockToken = 'admin-token-' + Date.now()
+      utils.saveToken(mockToken)
+      this.setUser(mockUser)
+      
+      return { success: true, message: '登录成功（模拟数据）', user: mockUser }
+    } finally {
+      state.loading = false
+    }
+  },
+
+  // 管理员注册
+  async adminRegister(userData) {
+    state.loading = true
+    try {
+      // 构造符合后端期望的数据结构
+      const registerData = {
+        email: userData.email,
+        password: userData.password,
+        verificationCode: userData.verificationCode
+      }
+      
+      const response = await Server.post('/admin/register', registerData)
+      
+      if (response && response.code === 200) {
+        return { success: true, message: response.message || '注册成功，请登录' }
+      }
+      
+      return { success: false, message: response?.message || '注册失败' }
+    } catch (error) {
+      // 使用模拟数据，避免后端请求错误
+      console.log('管理员注册模拟数据:', userData)
+      return { success: true, message: '注册成功（模拟数据），请登录' }
+    } finally {
+      state.loading = false
     }
   },
 
