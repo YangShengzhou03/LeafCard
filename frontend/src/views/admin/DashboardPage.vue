@@ -62,7 +62,7 @@
                 </div>
               </template>
               <div class="spec-stats">
-                <el-table :data="specStats" style="width: 100%" v-loading="loading">
+                <el-table :data="specStats" style="width: 100%" v-loading="loading" :scroll="{ x: 'max-content' }">
                   <el-table-column prop="productName" label="商品名称" width="150" />
                   <el-table-column prop="specName" label="规格名称" width="120" />
                   <el-table-column prop="price" label="价格" width="100">
@@ -323,6 +323,17 @@ onMounted(() => {
   font-weight: 700;
   color: #303133;
   line-height: 1.2;
+}
+
+/* 商品规格统计样式 */
+.spec-stats {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.spec-stats .el-table {
+  width: 100% !important;
+  min-width: 100%;
 }
 
 /* 系统信息卡片样式 */

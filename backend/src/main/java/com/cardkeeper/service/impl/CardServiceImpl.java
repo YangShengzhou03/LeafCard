@@ -136,7 +136,7 @@ public class CardServiceImpl implements CardService {
         
         // 设置默认值
         if (card.getCardStatus() == null) {
-            card.setCardStatus(0); // 默认未激活
+            card.setCardStatus(0); // 默认未使用
         }
         if (card.getRechargeTimes() == null) {
             card.setRechargeTimes(0);
@@ -176,7 +176,7 @@ public class CardServiceImpl implements CardService {
         Card card = getCardById(id);
         
         if (card.getCardStatus() != 0) {
-            throw new IllegalStateException("只有未激活的卡才能激活");
+            throw new IllegalStateException("只有未使用的卡才能使用");
         }
         
         card.activate();
@@ -188,7 +188,7 @@ public class CardServiceImpl implements CardService {
         Card card = getCardById(id);
         
         if (card.getCardStatus() != 1) {
-            throw new IllegalStateException("只有已激活的卡才能使用");
+            throw new IllegalStateException("只有已使用的卡才能继续使用");
         }
         
         if (card.isExpired()) {
@@ -204,7 +204,7 @@ public class CardServiceImpl implements CardService {
         Card card = getCardById(id);
         
         if (card.getCardStatus() != 1 && card.getCardStatus() != 2) {
-            throw new IllegalStateException("只有已激活或已使用的卡才能补充");
+            throw new IllegalStateException("只有已使用的卡才能补充");
         }
         
         card.recharge();

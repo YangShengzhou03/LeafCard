@@ -4,16 +4,6 @@
       <template #header>
         <div class="card-header">
           <span>操作日志</span>
-          <div class="header-actions">
-            <el-button @click="exportLogs" :loading="exporting">
-              <el-icon><Download /></el-icon>
-              导出
-            </el-button>
-            <el-button type="danger" @click="clearLogs" :loading="clearing">
-              <el-icon><Delete /></el-icon>
-              清空
-            </el-button>
-          </div>
         </div>
       </template>
       
@@ -52,6 +42,14 @@
           </el-col>
           <el-col :span="6">
             <el-button @click="resetFilter">重置</el-button>
+                        <el-button @click="exportLogs" :loading="exporting">
+              <el-icon><Download /></el-icon>
+              导出
+            </el-button>
+            <el-button type="danger" @click="clearLogs" :loading="clearing">
+              <el-icon><Delete /></el-icon>
+              清空
+            </el-button>
           </el-col>
         </el-row>
       </div>

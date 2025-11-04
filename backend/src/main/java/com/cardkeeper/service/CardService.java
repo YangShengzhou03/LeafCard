@@ -73,7 +73,7 @@ public interface CardService {
     void deleteCard(Long id);
     
     /**
-     * 激活卡
+     * 使用卡
      */
     Card activateCard(Long id);
     

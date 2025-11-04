@@ -94,7 +94,7 @@
                 >
                   {{ scope.row.status === 'active' ? '禁用' : '启用' }}
                 </el-button>
-                <el-button size="small" type="primary" @click="generateKeys(scope.row)">生成卡密</el-button>
+
               </template>
             </el-table-column>
           </el-table>
@@ -150,24 +150,7 @@
       </template>
     </el-dialog>
     
-    <!-- 生成卡密对话框 -->
-    <el-dialog
-      v-model="showGenerateDialog"
-      title="生成卡密"
-      width="400px"
-    >
-      <el-form :model="generateForm" :rules="generateRules" ref="generateFormRef" label-width="100px">
-        <el-form-item label="生成数量" prop="count">
-          <el-input-number v-model="generateForm.count" :min="1" :max="1000" style="width: 100%" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="showGenerateDialog = false">取消</el-button>
-          <el-button type="primary" @click="submitGenerate">生成</el-button>
-        </span>
-      </template>
-    </el-dialog>
+
   </div>
 </template>
 
@@ -193,7 +176,6 @@ const totalSpecs = ref(0)
 
 // 对话框状态
 const showAddDialog = ref(false)
-const showGenerateDialog = ref(false)
 const editingSpec = ref(null)
 
 // 表单数据
@@ -205,9 +187,7 @@ const specForm = reactive({
   status: 'active'
 })
 
-const generateForm = reactive({
-  count: 10
-})
+
 
 // 表单验证规则
 const specRules = {
@@ -217,9 +197,7 @@ const specRules = {
   validityPeriod: [{ required: true, message: '请输入有效期', trigger: 'blur' }]
 }
 
-const generateRules = {
-  count: [{ required: true, message: '请输入生成数量', trigger: 'blur' }]
-}
+
 
 // 计算属性：筛选后的规格列表
 const filteredSpecs = computed(() => {
@@ -351,12 +329,7 @@ const toggleSpecStatus = async (spec) => {
   }
 }
 
-// 生成卡密
-const generateKeys = (spec) => {
-  editingSpec.value = spec
-  generateForm.count = 10
-  showGenerateDialog.value = true
-}
+
 
 // 保存规格
 const saveSpec = async () => {
@@ -388,16 +361,7 @@ const saveSpec = async () => {
   }
 }
 
-// 提交生成卡密
-const submitGenerate = async () => {
-  try {
-    // 实际项目中应该调用API
-    ElMessage.success(`成功生成 ${generateForm.count} 个卡密`)
-    showGenerateDialog.value = false
-  } catch (error) {
-    ElMessage.error('生成卡密失败')
-  }
-}
+
 
 // 重置表单
 const resetForm = () => {

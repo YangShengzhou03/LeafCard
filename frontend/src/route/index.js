@@ -77,15 +77,6 @@ const routes = [
         }
       },
       {
-        path: 'specifications',
-        name: 'SpecificationManagement',
-        component: () => import('@/views/admin/SpecificationManagement.vue'),
-        meta: {
-          title: '枫叶卡管 - 规格管理',
-          requiresAuth: true
-        }
-      },
-      {
         path: 'card-keys',
         name: 'CardKeyManagement',
         component: () => import('@/views/admin/CardKeyManagement.vue'),
@@ -99,7 +90,7 @@ const routes = [
         name: 'ProductSpecManagement',
         component: () => import('@/views/admin/ProductSpecManagement.vue'),
         meta: {
-          title: '枫叶卡管 - 商品规格管理',
+          title: '枫叶卡管 - 规格管理',
           requiresAuth: true
         }
       },

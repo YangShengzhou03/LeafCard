@@ -1,7 +1,14 @@
 <template>
   <div class="card-key-management">
-    <!-- 搜索和筛选区域 -->
-    <el-card class="filter-card">
+    <el-card class="card-key-card">
+      <template #header>
+        <div class="card-header">
+          <span>卡密管理</span>
+        </div>
+      </template>
+      
+      <!-- 搜索和筛选区域 -->
+      <el-card class="filter-card">
       <el-form :inline="true" :model="searchForm" class="search-form">
         <el-form-item label="卡密">
           <el-input v-model="searchForm.key" placeholder="请输入卡密" clearable />
@@ -18,6 +25,10 @@
         </el-form-item>
 
               <div class="header-actions">
+        <el-button type="primary" @click="handleGenerateKeys">
+          <el-icon><Plus /></el-icon>
+          生成卡密
+        </el-button>
         <el-button type="success" @click="handleVerify">
           <el-icon><Check /></el-icon>
           验证卡密
@@ -166,13 +177,46 @@
         </span>
       </template>
     </el-dialog>
+    
+    <!-- 生成卡密对话框 -->
+    <el-dialog
+      v-model="showGenerateDialog"
+      title="生成卡密"
+      width="500px"
+    >
+      <el-form :model="generateForm" :rules="generateRules" ref="generateFormRef" label-width="100px">
+        <el-form-item label="商品规格" prop="specId">
+          <el-select v-model="generateForm.specId" placeholder="请选择商品规格" style="width: 100%">
+            <el-option
+              v-for="spec in specOptions"
+              :key="spec.id"
+              :label="`${spec.productName} - ${spec.name}`"
+              :value="spec.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="生成数量" prop="count">
+          <el-input-number v-model="generateForm.count" :min="1" :max="1000" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="前缀" prop="prefix">
+          <el-input v-model="generateForm.prefix" placeholder="卡密前缀（可选）" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="showGenerateDialog = false">取消</el-button>
+          <el-button type="primary" @click="submitGenerate">生成</el-button>
+        </span>
+      </template>
+    </el-dialog>
+      </el-card>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Check, Download, CopyDocument } from '@element-plus/icons-vue'
+import { Check, Download, CopyDocument, Plus } from '@element-plus/icons-vue'
 
 // 加载状态
 const loading = ref(false)
@@ -217,6 +261,20 @@ const verifyRules = {
 // 卡密详情对话框
 const detailsVisible = ref(false)
 const currentKey = ref({})
+
+// 生成卡密对话框
+const showGenerateDialog = ref(false)
+const generateFormRef = ref(null)
+const generateForm = reactive({
+  specId: null,
+  count: 10,
+  prefix: ''
+})
+
+const generateRules = {
+  specId: [{ required: true, message: '请选择商品规格', trigger: 'change' }],
+  count: [{ required: true, message: '请输入生成数量', trigger: 'blur' }]
+}
 
 // 获取规格选项
 const fetchSpecOptions = () => {
@@ -392,6 +450,27 @@ const copyKey = (key) => {
 const handleVerify = () => {
   verifyForm.key = ''
   verifyVisible.value = true
+}
+
+// 生成卡密
+const handleGenerateKeys = () => {
+  showGenerateDialog.value = true
+  generateForm.specId = null
+  generateForm.count = 10
+  generateForm.prefix = ''
+}
+
+// 提交生成卡密
+const submitGenerate = () => {
+  generateFormRef.value.validate((valid) => {
+    if (valid) {
+      // 实际项目中应该调用API
+      const spec = specOptions.value.find(s => s.id === generateForm.specId)
+      ElMessage.success(`成功为 ${spec.productName} - ${spec.name} 生成 ${generateForm.count} 个卡密`)
+      showGenerateDialog.value = false
+      fetchKeyList() // 刷新卡密列表
+    }
+  })
 }
 
 // 提交验证

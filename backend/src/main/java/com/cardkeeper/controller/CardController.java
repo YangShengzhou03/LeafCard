@@ -71,12 +71,12 @@ public class CardController {
     }
     
     /**
-     * 激活卡
+     * 使用卡
      */
     @PostMapping("/{id}/activate")
     public Result<Card> activateCard(@PathVariable Long id) {
         Card activatedCard = cardService.activateCard(id);
-        return Result.success("激活成功", activatedCard);
+        return Result.success("使用成功", activatedCard);
     }
     
     /**

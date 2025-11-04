@@ -94,7 +94,7 @@ public class Card {
         this.productCategory = productCategory;
         this.productType = productType;
         this.productSpec = productSpec;
-        this.cardStatus = 0; // 默认未激活
+        this.cardStatus = 0; // 默认未使用
     }
     
     // Getter和Setter方法
@@ -228,7 +228,7 @@ public class Card {
     
     // 业务方法
     public void activate() {
-        this.cardStatus = 1; // 已激活
+        this.cardStatus = 1; // 已使用
         this.activateTime = LocalDateTime.now();
     }
     
@@ -242,7 +242,7 @@ public class Card {
     public void recharge() {
         this.rechargeTimes++;
         this.lastRechargeTime = LocalDateTime.now();
-        this.cardStatus = 1; // 重新激活
+        this.cardStatus = 1; // 重新使用
     }
     
     public void expire() {

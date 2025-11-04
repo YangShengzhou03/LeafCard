@@ -63,17 +63,11 @@
                 </el-icon>
                 <template #title>商品列表</template>
               </el-menu-item>
-              <el-menu-item index="/admin/specifications">
+              <el-menu-item index="/admin/product-specs">
                 <el-icon>
                   <Operation />
                 </el-icon>
                 <template #title>规格管理</template>
-              </el-menu-item>
-              <el-menu-item index="/admin/product-specs">
-                <el-icon>
-                  <Goods />
-                </el-icon>
-                <template #title>商品规格管理</template>
               </el-menu-item>
             </el-sub-menu>
 
@@ -131,7 +125,7 @@ import store from '@/utils/store.js'
 const router = useRouter()
 const route = useRoute()
 
-// 当前激活的菜单项
+// 当前使用的菜单项
 const activeMenu = computed(() => route.path)
 
 // 用户头像

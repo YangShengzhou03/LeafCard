@@ -1,16 +1,13 @@
+```
 <template>
   <div class="admin-users">
     <el-card class="users-card">
       <template #header>
         <div class="card-header">
           <span>用户管理</span>
-          <el-button type="primary" @click="showAddUserDialog = true">
-            <el-icon><Plus /></el-icon>
-            添加用户
-          </el-button>
         </div>
       </template>
-      
+```   
       <div class="users-content">
         <!-- 搜索和筛选 -->
         <div class="search-bar">
@@ -46,6 +43,10 @@
             </el-col>
             <el-col :span="4">
               <el-button @click="resetFilters">重置</el-button>
+                        <el-button type="primary" @click="showAddUserDialog = true">
+            <el-icon><Plus /></el-icon>
+            添加用户
+          </el-button>
             </el-col>
           </el-row>
         </div>
@@ -77,7 +78,7 @@
                 {{ scope.row.cardKeyCount || 0 }}
               </template>
             </el-table-column>
-            <el-table-column prop="activatedCardKeys" label="已激活" width="80">
+            <el-table-column prop="activatedCardKeys" label="已使用" width="80">
               <template #default="scope">
                 {{ scope.row.activatedCardKeys || 0 }}
               </template>
