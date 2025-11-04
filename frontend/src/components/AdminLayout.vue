@@ -1,5 +1,12 @@
 <template>
-  <div class="admin-layout">
+  <el-watermark 
+    :content="watermarkText"
+    :font="{ color: 'rgba(0, 0, 0, 0.15)', fontSize: 16 }"
+    :z-index="9"
+    :rotate="-15"
+    :gap="[100, 100]"
+  >
+    <div class="admin-layout">
       <!-- 顶部导航栏 -->
       <header class="admin-header">
         <div class="header-left">
@@ -29,12 +36,7 @@
       <div class="admin-container">
         <!-- 侧边栏 -->
         <aside class="admin-sidebar">
-          <el-menu 
-            :default-active="activeMenu" 
-            class="admin-menu" 
-            router 
-            unique-opened
-          >
+          <el-menu :default-active="activeMenu" class="admin-menu" router unique-opened>
             <el-menu-item index="/admin">
               <el-icon>
                 <Monitor />
@@ -120,6 +122,7 @@
         </main>
       </div>
     </div>
+  </el-watermark>
 </template>
 
 <script setup>
@@ -140,6 +143,15 @@ const userAvatar = computed(() => {
   return store.state.user?.avatar || ''
 })
 
+// 水印文本 - 优先使用邮箱，如果邮箱为空就显示"LeafCard"
+const watermarkText = computed(() => {
+  const user = store.state.user
+  if (user?.email) {
+    return user.email
+  }
+  return 'LeafCard'
+})
+
 // 处理下拉菜单命令
 const handleCommand = async (command) => {
   try {
@@ -154,7 +166,7 @@ const handleCommand = async (command) => {
           type: 'warning'
         }
       )
-      
+
       await store.logout()
       ElMessage.success('已退出登录')
       router.push('/login')
@@ -178,7 +190,7 @@ onMounted(async () => {
     if (!store.state.user) {
       await store.fetchCurrentUser()
     }
-    
+
     // 等待用户信息加载完成
     await nextTick()
   } catch (error) {
@@ -362,7 +374,7 @@ onMounted(async () => {
   .admin-sidebar {
     width: 200px;
   }
-  
+
   .admin-menu :deep(.el-menu-item) {
     margin: 0;
   }
@@ -377,24 +389,24 @@ onMounted(async () => {
   .header-left .logo {
     font-size: 18px;
   }
-  
+
   .username {
     display: none;
   }
-  
+
   .admin-sidebar {
     width: 240px;
   }
-  
+
   .admin-menu :deep(.el-menu-item) {
     margin: 0;
     padding: 0 20px !important;
   }
-  
+
   .admin-menu :deep(.el-menu-item span) {
     display: inline;
   }
-  
+
   .admin-menu :deep(.el-menu-item .el-icon) {
     margin-right: 12px;
     font-size: 18px;
@@ -403,19 +415,19 @@ onMounted(async () => {
   .admin-main {
     padding: 16px;
   }
-  
+
   .admin-main :deep(.el-card) {
     margin-bottom: 12px;
   }
-  
+
   .admin-main :deep(.el-card__header) {
     padding: 14px 16px;
   }
-  
+
   .admin-main :deep(.el-card__body) {
     padding: 16px;
   }
-  
+
   .admin-main :deep(.el-form-item) {
     margin-bottom: 12px;
   }
@@ -425,27 +437,27 @@ onMounted(async () => {
   .admin-header {
     padding: 0 12px;
   }
-  
+
   .header-left .logo {
     font-size: 16px;
   }
-  
+
   .admin-main {
     padding: 12px;
   }
-  
+
   .admin-main :deep(.el-card) {
     margin-bottom: 8px;
   }
-  
+
   .admin-main :deep(.el-card__header) {
     padding: 12px;
   }
-  
+
   .admin-main :deep(.el-card__body) {
     padding: 12px;
   }
-  
+
   .admin-main :deep(.el-form-item) {
     margin-bottom: 8px;
   }
