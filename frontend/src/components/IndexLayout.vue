@@ -69,7 +69,7 @@
       <div class="container">
         <div class="footer-content">
           <div class="footer-section">
-            <h3>关于LeafCard - 枫叶卡管系统</h3>
+            <h3>枫叶卡管系统</h3>
             <p>企业级卡密管理系统</p>
           </div>
           <div class="footer-section">

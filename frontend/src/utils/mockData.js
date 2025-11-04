@@ -2,15 +2,6 @@
 // 当后端API不可用时，提供模拟数据以保持前端功能可用
 
 /**
- * 生成随机ID
- * @param {string} prefix ID前缀
- * @returns {string} 随机ID
- */
-const generateId = (prefix = 'mock') => {
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-}
-
-/**
  * 生成随机日期
  * @param {number} daysAgo 多少天前
  * @returns {string} 格式化的日期字符串

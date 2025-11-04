@@ -44,8 +44,9 @@ public class Card {
     private String productSpec;
     
     @NotNull(message = "卡状态不能为空")
-    @Column(name = "card_status", nullable = false)
-    private Integer cardStatus;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "card_status", nullable = false, length = 20)
+    private CardStatus cardStatus = CardStatus.未使用;
     
     @Column(name = "create_time", nullable = false, updatable = false)
     private LocalDateTime createTime;
@@ -94,7 +95,7 @@ public class Card {
         this.productCategory = productCategory;
         this.productType = productType;
         this.productSpec = productSpec;
-        this.cardStatus = 0; // 默认未使用
+        this.cardStatus = CardStatus.未使用; // 默认未使用
     }
     
     // Getter和Setter方法
@@ -138,11 +139,11 @@ public class Card {
         this.productCategory = productCategory;
     }
     
-    public Integer getCardStatus() {
+    public CardStatus getCardStatus() {
         return cardStatus;
     }
     
-    public void setCardStatus(Integer cardStatus) {
+    public void setCardStatus(CardStatus cardStatus) {
         this.cardStatus = cardStatus;
     }
     
@@ -228,12 +229,12 @@ public class Card {
     
     // 业务方法
     public void activate() {
-        this.cardStatus = 1; // 已使用
+        this.cardStatus = CardStatus.已激活;
         this.activateTime = LocalDateTime.now();
     }
     
     public void use(String userId, String userIp) {
-        this.cardStatus = 2; // 已使用
+        this.cardStatus = CardStatus.已使用;
         this.userId = userId;
         this.userIp = userIp;
         this.useTime = LocalDateTime.now();
@@ -242,15 +243,15 @@ public class Card {
     public void recharge() {
         this.rechargeTimes++;
         this.lastRechargeTime = LocalDateTime.now();
-        this.cardStatus = 1; // 重新使用
+        this.cardStatus = CardStatus.已激活; // 重新激活
     }
     
     public void expire() {
-        this.cardStatus = 3; // 已过期
+        this.cardStatus = CardStatus.已过期;
     }
     
     public void freeze() {
-        this.cardStatus = 4; // 已冻结
+        this.cardStatus = CardStatus.已冻结;
     }
     
     public boolean isExpired() {

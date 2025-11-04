@@ -171,42 +171,6 @@ const store = {
     }
   },
 
-  // 获取当前用户信息
-  async fetchCurrentUser() {
-    try {
-      // 模拟获取用户信息
-      const mockUser = {
-        id: 1,
-        username: 'admin',
-        nickname: '管理员',
-        email: 'admin@leafcard.com',
-        role: 'admin',
-        avatar: 'https://picsum.photos/id/1005/200/200',
-        createTime: '2024-01-01 00:00:00',
-        lastLoginTime: new Date().toISOString()
-      }
-      
-      this.setUser(mockUser)
-      return mockUser
-    } catch (error) {
-      console.error('获取用户信息失败:', error)
-      throw error
-    }
-  },
-
-  // 退出登录
-  async logout() {
-    try {
-      // 清除本地存储
-      this.clearUser()
-      
-      // 调用后端退出接口（如果有）
-      await Server.post('/auth/logout')
-    } catch (error) {
-      console.warn('退出登录API调用失败:', error.message)
-    }
-  },
-
   // 更新用户信息
   async updateUserProfile(userData) {
     try {
