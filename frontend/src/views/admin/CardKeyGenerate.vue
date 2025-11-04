@@ -92,8 +92,9 @@
       <!-- 生成结果 -->
       <div v-if="generatedKeys.length > 0" class="result-section">
         <div class="result-header">
-          <span class="result-title">生成结果 ({{ generatedKeys.length }} 条)</span>
-          <div class="result-actions">
+          <div class="result-header-content">
+            <span class="result-title">生成结果 ({{ generatedKeys.length }} 条)</span>
+            
             <!-- 商品规格信息 -->
             <div v-if="generateForm.productId && generateForm.specId" class="product-spec-info">
               <span class="info-label">商品：</span>
@@ -122,7 +123,7 @@
           </div>
         </div>
         
-        <el-table :data="generatedKeys" border stripe class="result-table">
+        <el-table :data="paginatedKeys" border stripe class="result-table">
           <el-table-column type="index" label="序号" width="80" align="center" />
           <el-table-column prop="key" label="卡密代码" min-width="220" align="center" />
           <el-table-column prop="productName" label="商品" width="120" align="center" />
@@ -138,13 +139,26 @@
             </template>
           </el-table-column>
         </el-table>
+        
+        <!-- 分页 -->
+        <div class="pagination-container" v-if="generatedKeys.length > 10">
+          <el-pagination
+            v-model:current-page="currentPage"
+            v-model:page-size="pageSize"
+            :page-sizes="[10, 20, 50, 100]"
+            :total="generatedKeys.length"
+            layout="total, sizes, prev, pager, next, jumper"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+          />
+        </div>
       </div>
     </el-card>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { CopyDocument, Download, Upload } from '@element-plus/icons-vue'
 
@@ -168,6 +182,27 @@ const specList = ref([])
 
 // 生成的卡密列表
 const generatedKeys = ref([])
+
+// 分页相关
+const currentPage = ref(1)
+const pageSize = ref(10)
+
+// 计算当前页显示的数据
+const paginatedKeys = computed(() => {
+  const startIndex = (currentPage.value - 1) * pageSize.value
+  const endIndex = startIndex + pageSize.value
+  return generatedKeys.value.slice(startIndex, endIndex)
+})
+
+// 分页事件处理
+const handleSizeChange = (size) => {
+  pageSize.value = size
+  currentPage.value = 1
+}
+
+const handleCurrentChange = (page) => {
+  currentPage.value = page
+}
 
 // 加载商品列表
 const loadProducts = async () => {
@@ -441,40 +476,47 @@ onMounted(() => {
   padding-top: 16px;
 }
 
-.result-header {
+.result-header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.result-title {
   font-weight: 600;
+  font-size: 16px;
   color: #303133;
+  white-space: nowrap;
 }
 
 .result-actions {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: flex-end;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .product-spec-info {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 12px;
+  padding: 6px 12px;
   background-color: #f5f7fa;
-  border-radius: 4px;
+  border-radius: 6px;
   border: 1px solid #e6e8eb;
+  white-space: nowrap;
 }
 
 .info-label {
-  font-size: 14px;
+  font-size: 13px;
   color: #606266;
   font-weight: 500;
 }
 
 .info-value {
-  font-size: 14px;
+  font-size: 13px;
   color: #303133;
   font-weight: 600;
 }
@@ -538,5 +580,30 @@ onMounted(() => {
 
 .copy-btn:hover {
   background-color: #f5f7fa;
+}
+
+.pagination-container {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 0;
+}
+
+.pagination-container :deep(.el-pagination) {
+  justify-content: flex-end;
+}
+
+.pagination-container :deep(.el-pagination__total) {
+  margin-right: 16px;
+  font-size: 14px;
+  color: #606266;
+}
+
+.pagination-container :deep(.el-pagination__sizes) {
+  margin-right: 16px;
+}
+
+.pagination-container :deep(.el-pagination__jump) {
+  margin-left: 16px;
 }
 </style>
