@@ -29,8 +29,8 @@ onMounted(() => {
 
 <style scoped>
 .admin-system {
-  padding: 0px;
-  min-height: calc(100vh - 64px);
+  padding: 0;
+  min-height: 100vh;
   background-color: #f0f2f5;
 }
 

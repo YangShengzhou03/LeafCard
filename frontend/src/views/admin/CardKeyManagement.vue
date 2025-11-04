@@ -512,9 +512,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.card-key-management {
-  padding: 16px;
-  min-height: calc(100vh - 64px);
+.admin-card-keys {
+  padding: 0;
+  min-height: 100vh;
   background-color: #f0f2f5;
 }
 

@@ -76,6 +76,15 @@ const routes = [
           requiresAuth: true
         }
       },
+      {
+        path: 'product-specs',
+        name: 'ProductSpecManagement',
+        component: () => import('@/views/admin/ProductSpecManagement.vue'),
+        meta: {
+          title: '枫叶卡管 - 商品规格管理',
+          requiresAuth: true
+        }
+      },
     ]
   },
   
@@ -139,6 +148,17 @@ const routes = [
     }
   },
 
+  // 卡密验证页面
+  {
+    path: '/verify',
+    name: 'CardKeyVerify',
+    component: () => import('@/views/CardKeyVerify.vue'),
+    meta: {
+      title: '枫叶卡管 - 卡密验证',
+      requiresAuth: false
+    }
+  },
+  
   // 错误路径重定向（仅保留这一条）
   { path: '/:pathMatch(.*)*', redirect: '/' }
 ];

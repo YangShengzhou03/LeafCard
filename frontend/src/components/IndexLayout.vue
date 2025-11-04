@@ -41,10 +41,10 @@
             <h1 class="hero-title">LeafAuto卡密系统</h1>
             <p class="hero-description">内部卡密管理系统，用于数字产品授权管理</p>
             <div class="cta-buttons">
-              <el-button type="primary" size="large" class="start-btn" @click="handleStart">
-                {{ isAuthenticated ? '进入管理后台' : '立即开始使用' }}
-              </el-button>
-            </div>
+            <el-button type="primary" size="large" class="start-btn" @click="handleStart">
+              {{ isAuthenticated ? '进入管理后台' : '立即开始使用' }}
+            </el-button>
+          </div>
           </div>
         </div>
       </section>
@@ -208,6 +208,8 @@ const handleStart = () => {
     ElMessage.error('页面跳转失败，请重试')
   }
 }
+
+
 </script>
 
 <style scoped>

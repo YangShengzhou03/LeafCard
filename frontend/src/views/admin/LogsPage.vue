@@ -24,12 +24,9 @@
             <el-select v-model="filter.operationType" placeholder="操作类型" clearable @change="handleFilter">
               <el-option label="全部" value="" />
               <el-option label="登录" value="LOGIN" />
-              <el-option label="上传文件" value="UPLOAD_FILE" />
-              <el-option label="下载文件" value="DOWNLOAD_FILE" />
-              <el-option label="删除文件" value="DELETE_FILE" />
-              <el-option label="创建分享" value="CREATE_SHARE" />
-              <el-option label="删除分享" value="DELETE_SHARE" />
-              <el-option label="更新用户状态" value="UPDATE_USER_STATUS" />
+              <el-option label="卡密管理" value="CARD_KEY_MANAGE" />
+              <el-option label="用户管理" value="USER_MANAGE" />
+              <el-option label="系统设置" value="SYSTEM_SETTING" />
               <el-option label="清空日志" value="CLEAR_LOGS" />
             </el-select>
           </el-col>
@@ -37,9 +34,7 @@
             <el-select v-model="filter.targetType" placeholder="目标类型" clearable @change="handleFilter">
               <el-option label="全部" value="" />
               <el-option label="用户" value="USER" />
-              <el-option label="文件" value="FILE" />
-              <el-option label="文件夹" value="FOLDER" />
-              <el-option label="分享" value="SHARE" />
+              <el-option label="卡密" value="CARD_KEY" />
               <el-option label="系统" value="SYSTEM" />
             </el-select>
           </el-col>
@@ -66,32 +61,32 @@
         <el-row :gutter="20">
           <el-col :span="4">
             <div class="stat-item">
-              <span class="stat-label">上传：</span>
-              <span class="stat-value primary">{{ stats.uploadCount }}</span>
-            </div>
-          </el-col>
-          <el-col :span="4">
-            <div class="stat-item">
-              <span class="stat-label">下载：</span>
-              <span class="stat-value info">{{ stats.downloadCount }}</span>
-            </div>
-          </el-col>
-          <el-col :span="4">
-            <div class="stat-item">
-              <span class="stat-label">删除：</span>
-              <span class="stat-value warning">{{ stats.deleteCount }}</span>
-            </div>
-          </el-col>
-          <el-col :span="4">
-            <div class="stat-item">
               <span class="stat-label">登录：</span>
               <span class="stat-value success">{{ stats.loginCount }}</span>
             </div>
           </el-col>
           <el-col :span="4">
             <div class="stat-item">
-              <span class="stat-label">分享：</span>
-              <span class="stat-value">{{ logs.filter(log => log.operationType === 'CREATE_SHARE' || log.operationType === 'DELETE_SHARE').length }}</span>
+              <span class="stat-label">卡密：</span>
+              <span class="stat-value primary">{{ stats.cardKeyCount }}</span>
+            </div>
+          </el-col>
+          <el-col :span="4">
+            <div class="stat-item">
+              <span class="stat-label">用户：</span>
+              <span class="stat-value info">{{ stats.userCount }}</span>
+            </div>
+          </el-col>
+          <el-col :span="4">
+            <div class="stat-item">
+              <span class="stat-label">系统：</span>
+              <span class="stat-value warning">{{ stats.systemCount }}</span>
+            </div>
+          </el-col>
+          <el-col :span="4">
+            <div class="stat-item">
+              <span class="stat-label">其他：</span>
+              <span class="stat-value">{{ stats.otherCount }}</span>
             </div>
           </el-col>
           <el-col :span="4">
@@ -374,8 +369,8 @@ onMounted(() => {
 
 <style scoped>
 .admin-logs {
-  padding: 16px;
-  min-height: calc(100vh - 64px);
+  padding: 0;
+  min-height: 100vh;
   background-color: #f0f2f5;
 }
 

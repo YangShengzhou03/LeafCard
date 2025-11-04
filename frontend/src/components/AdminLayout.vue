@@ -72,7 +72,7 @@
             </el-sub-menu>
 
             <!-- 卡密管理展开菜单 -->
-            <el-sub-menu index="card-key-management">
+            <el-sub-menu index="card-management">
               <template #title>
                 <el-icon>
                   <Key />
@@ -85,11 +85,11 @@
                 </el-icon>
                 <template #title>卡密列表</template>
               </el-menu-item>
-              <el-menu-item index="/admin/card-verification">
+              <el-menu-item index="/admin/product-specs">
                 <el-icon>
-                  <Check />
+                  <Goods />
                 </el-icon>
-                <template #title>卡密验证</template>
+                <template #title>商品规格管理</template>
               </el-menu-item>
             </el-sub-menu>
 
@@ -125,7 +125,7 @@
 import { computed, onMounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { User, ArrowDown, Monitor, Setting, Document, Key, Goods, List, Operation, Check } from '@element-plus/icons-vue'
+import { User, ArrowDown, Monitor, Setting, Document, Key, Goods, List, Operation } from '@element-plus/icons-vue'
 import store from '@/utils/store.js'
 
 const router = useRouter()
@@ -296,7 +296,7 @@ onMounted(async () => {
 
 .admin-main {
   flex: 1;
-  padding: 24px;
+  padding: 9px;
   overflow-y: auto;
   background-color: #f0f2f5;
 }

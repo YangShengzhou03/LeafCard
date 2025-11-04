@@ -72,23 +72,16 @@
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="storageQuota" label="总配额" width="100">
+            <el-table-column prop="cardKeyCount" label="卡密数量" width="100">
               <template #default="scope">
-                {{ formatStorage(scope.row.storageQuota) }}
+                {{ scope.row.cardKeyCount || 0 }}
               </template>
             </el-table-column>
-            <el-table-column prop="storageUsed" label="存储使用" width="140">
-          <template #default="{ row }">
-            {{ formatStorage(row.storageUsed) }} / {{ formatStorage(row.storageQuota) }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="usagePercentage" label="使用率" width="80">
-          <template #default="{ row }">
-            <span :class="getUsageClass(row.storageUsed, row.storageQuota)">
-              {{ calculateUsagePercentage(row.storageUsed, row.storageQuota) }}%
-            </span>
-          </template>
-        </el-table-column>
+            <el-table-column prop="activatedCardKeys" label="已激活" width="80">
+              <template #default="scope">
+                {{ scope.row.activatedCardKeys || 0 }}
+              </template>
+            </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
               <template #default="scope">
                 <el-tag :type="scope.row.status === 'active' ? 'success' : 'danger'">
@@ -182,10 +175,7 @@
             <el-radio label="disabled">禁用</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="存储配额" prop="storageQuota">
-          <el-input-number v-model="userForm.storageQuota" :min="1" :max="1000" />
-          <span style="margin-left: 10px">GB</span>
-        </el-form-item>
+
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -490,8 +480,8 @@ onMounted(() => {
 
 <style scoped>
 .admin-users {
-  padding: 16px;
-  min-height: calc(100vh - 64px);
+  padding: 0;
+  min-height: 100vh;
   background-color: #f0f2f5;
 }
 

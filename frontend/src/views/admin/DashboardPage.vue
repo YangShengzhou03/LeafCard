@@ -9,21 +9,7 @@
       
       <div class="dashboard-content">
         <el-row :gutter="20">
-          <el-col :span="6">
-            <el-card shadow="hover" class="stat-card">
-              <div class="stat-item">
-                <div class="stat-icon">
-                  <el-icon size="24"><User /></el-icon>
-                </div>
-                <div class="stat-content">
-                  <div class="stat-title">用户总数</div>
-                  <div class="stat-value">{{ stats.userCount }}</div>
-                </div>
-              </div>
-            </el-card>
-          </el-col>
-          
-          <el-col :span="6">
+          <el-col :span="8">
             <el-card shadow="hover" class="stat-card">
               <div class="stat-item">
                 <div class="stat-icon">
@@ -37,30 +23,79 @@
             </el-card>
           </el-col>
           
-          <el-col :span="6">
+          <el-col :span="8">
             <el-card shadow="hover" class="stat-card">
               <div class="stat-item">
                 <div class="stat-icon">
                   <el-icon size="24"><CircleCheck /></el-icon>
                 </div>
                 <div class="stat-content">
-                  <div class="stat-title">已激活卡密</div>
-                  <div class="stat-value">{{ stats.activatedCardKeys }}</div>
+                  <div class="stat-title">已使用卡密</div>
+                  <div class="stat-value">{{ stats.usedCardKeys }}</div>
                 </div>
               </div>
             </el-card>
           </el-col>
           
-          <el-col :span="6">
+          <el-col :span="8">
             <el-card shadow="hover" class="stat-card">
               <div class="stat-item">
                 <div class="stat-icon">
-                  <el-icon size="24"><Share /></el-icon>
+                  <el-icon size="24"><Document /></el-icon>
                 </div>
                 <div class="stat-content">
-                  <div class="stat-title">分享链接</div>
-                  <div class="stat-value">{{ stats.shareCount }}</div>
+                  <div class="stat-title">操作日志</div>
+                  <div class="stat-value">{{ stats.logCount }}</div>
                 </div>
+              </div>
+            </el-card>
+          </el-col>
+        </el-row>
+        
+        <!-- 商品规格使用统计 -->
+        <el-row :gutter="20" style="margin-top: 20px">
+          <el-col :span="24">
+            <el-card shadow="hover">
+              <template #header>
+                <div class="card-header">
+                  <span>商品规格使用统计</span>
+                </div>
+              </template>
+              <div class="spec-stats">
+                <el-table :data="specStats" style="width: 100%" v-loading="loading">
+                  <el-table-column prop="productName" label="商品名称" width="150" />
+                  <el-table-column prop="specName" label="规格名称" width="120" />
+                  <el-table-column prop="price" label="价格" width="100">
+                    <template #default="scope">
+                      ¥{{ scope.row.price }}
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="totalKeys" label="卡密总数" width="100" />
+                  <el-table-column prop="usedKeys" label="已使用" width="80" />
+                  <el-table-column prop="usageRate" label="使用率" width="100">
+                    <template #default="scope">
+                      <el-progress 
+                        :percentage="scope.row.usageRate" 
+                        :show-text="false"
+                        :color="getUsageColor(scope.row.usageRate)"
+                      />
+                      <span style="margin-left: 8px">{{ scope.row.usageRate }}%</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="revenue" label="收入" width="120">
+                    <template #default="scope">
+                      ¥{{ scope.row.revenue }}
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="趋势" width="100">
+                    <template #default="scope">
+                      <el-tag :type="scope.row.trend > 0 ? 'success' : scope.row.trend < 0 ? 'danger' : 'info'">
+                        {{ scope.row.trend > 0 ? '↑' : scope.row.trend < 0 ? '↓' : '→' }}
+                        {{ Math.abs(scope.row.trend) }}%
+                      </el-tag>
+                    </template>
+                  </el-table-column>
+                </el-table>
               </div>
             </el-card>
           </el-col>
@@ -98,39 +133,97 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { User, Key, CircleCheck, Share } from '@element-plus/icons-vue'
-import { AdminService } from '@/services/api.js'
+import { ElMessage } from 'element-plus'
+import { User, Key, CircleCheck, Document } from '@element-plus/icons-vue'
 
 // 统计数据
 const stats = ref({
-  userCount: 0,
   cardKeyCount: 0,
-  activatedCardKeys: 0,
-  shareCount: 0
+  usedCardKeys: 0,
+  logCount: 0
 })
 
 // 系统运行时间
-const uptime = ref('')
+const uptime = ref('0天0小时0分钟')
+const loading = ref(false)
+
+// 商品规格使用统计
+const specStats = ref([
+  {
+    productName: 'VIP会员',
+    specName: '月卡',
+    price: 29.9,
+    totalKeys: 200,
+    usedKeys: 156,
+    usageRate: 78,
+    revenue: 4680,
+    trend: 12
+  },
+  {
+    productName: 'VIP会员',
+    specName: '季卡',
+    price: 79.9,
+    totalKeys: 150,
+    usedKeys: 89,
+    usageRate: 59,
+    revenue: 7111,
+    trend: 8
+  },
+  {
+    productName: 'VIP会员',
+    specName: '年卡',
+    price: 199.9,
+    totalKeys: 80,
+    usedKeys: 45,
+    usageRate: 56,
+    revenue: 8995,
+    trend: 5
+  },
+  {
+    productName: '高级功能',
+    specName: '基础版',
+    price: 49.9,
+    totalKeys: 120,
+    usedKeys: 67,
+    usageRate: 56,
+    revenue: 3343,
+    trend: -3
+  },
+  {
+    productName: '高级功能',
+    specName: '专业版',
+    price: 99.9,
+    totalKeys: 60,
+    usedKeys: 28,
+    usageRate: 47,
+    revenue: 2797,
+    trend: 15
+  }
+])
+
+const getUsageColor = (rate) => {
+  if (rate >= 80) return '#67C23A'
+  if (rate >= 60) return '#E6A23C'
+  if (rate >= 40) return '#409EFF'
+  return '#F56C6C'
+}
 
 // 加载仪表盘数据
 const loadDashboardData = async () => {
   try {
-    // 调用后端API获取真实数据
-    const response = await AdminService.getDashboardStats()
-    
-    // 更新统计数据
+    loading.value = true
+    // 模拟数据加载
     stats.value = {
-      userCount: response.data.userCount || 0,
-      cardKeyCount: response.data.cardKeyCount || 0,
-      activatedCardKeys: response.data.activatedCardKeys || 0,
-      shareCount: response.data.shareCount || 0
+      cardKeyCount: 500,
+      usedCardKeys: 325,
+      logCount: 1200
     }
     
-    // 更新系统运行时间
-    uptime.value = response.data.uptime || '系统运行中'
+    uptime.value = '15天8小时30分钟'
   } catch (error) {
-    // 错误已由AdminService处理，这里不需要额外处理
-    console.error('加载仪表盘数据失败:', error)
+    ElMessage.error('加载仪表盘数据失败')
+  } finally {
+    loading.value = false
   }
 }
 
@@ -141,8 +234,8 @@ onMounted(() => {
 
 <style scoped>
 .admin-dashboard {
-  padding: 16px;
-  min-height: calc(100vh - 64px);
+  padding: 0;
+  min-height: 100vh;
   background-color: #f0f2f5;
 }
 
