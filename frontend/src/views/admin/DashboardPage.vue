@@ -63,66 +63,7 @@ const stats = ref({
 const uptime = ref('0天0小时0分钟')
 const loading = ref(false)
 
-// 商品规格使用统计
-const specStats = ref([
-  {
-    productName: 'VIP会员',
-    specName: '月卡',
-    price: 29.9,
-    totalKeys: 200,
-    usedKeys: 156,
-    usageRate: 78,
-    revenue: 4680,
-    trend: 12
-  },
-  {
-    productName: 'VIP会员',
-    specName: '季卡',
-    price: 79.9,
-    totalKeys: 150,
-    usedKeys: 89,
-    usageRate: 59,
-    revenue: 7111,
-    trend: 8
-  },
-  {
-    productName: 'VIP会员',
-    specName: '年卡',
-    price: 199.9,
-    totalKeys: 80,
-    usedKeys: 45,
-    usageRate: 56,
-    revenue: 8995,
-    trend: 5
-  },
-  {
-    productName: '高级功能',
-    specName: '基础版',
-    price: 49.9,
-    totalKeys: 120,
-    usedKeys: 67,
-    usageRate: 56,
-    revenue: 3343,
-    trend: -3
-  },
-  {
-    productName: '高级功能',
-    specName: '专业版',
-    price: 99.9,
-    totalKeys: 60,
-    usedKeys: 28,
-    usageRate: 47,
-    revenue: 2797,
-    trend: 15
-  }
-])
-
-const getUsageColor = (rate) => {
-  if (rate >= 80) return '#67C23A'
-  if (rate >= 60) return '#E6A23C'
-  if (rate >= 40) return '#409EFF'
-  return '#F56C6C'
-}
+// 商品规格使用统计和getUsageColor函数已移除，因为模板中没有使用
 
 // 加载仪表盘数据
 const loadDashboardData = async () => {

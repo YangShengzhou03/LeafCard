@@ -87,6 +87,24 @@ const routes = [
         }
       },
       {
+        path: 'card-generate',
+        name: 'CardKeyGenerate',
+        component: () => import('@/views/admin/CardKeyGenerate.vue'),
+        meta: {
+          title: '枫叶卡管 - 卡密生成',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'profile',
+        name: 'ProfilePage',
+        component: () => import('@/views/admin/ProfilePage.vue'),
+        meta: {
+          title: '枫叶卡管 - 个人资料',
+          requiresAuth: true
+        }
+      },
+      {
         path: 'product-specs',
         name: 'ProductSpecManagement',
         component: () => import('@/views/admin/ProductSpecManagement.vue'),

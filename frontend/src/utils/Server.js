@@ -86,8 +86,9 @@ Server.interceptors.response.use(
     }
     
     const status = error.response.status
-    const message = error.response.data?.message || '请求失败'
+    // const message = error.response.data?.message || '请求失败' // 未使用的变量
     
+    let mockResult
     switch (status) {
       case 401:
         ElMessage.error('登录已过期，请重新登录')
@@ -107,9 +108,9 @@ Server.interceptors.response.use(
         error.isNotFoundError = true
         
         // 尝试使用模拟数据
-        const mockResult404 = tryMockData(error)
-        if (mockResult404) {
-          return mockResult404
+        mockResult = tryMockData(error)
+        if (mockResult) {
+          return mockResult
         }
         break
       case 500:
@@ -119,9 +120,9 @@ Server.interceptors.response.use(
         error.isServerError = true
         
         // 尝试使用模拟数据
-        const mockResult500 = tryMockData(error)
-        if (mockResult500) {
-          return mockResult500
+        mockResult = tryMockData(error)
+        if (mockResult) {
+          return mockResult
         }
         break
       default:
@@ -131,9 +132,9 @@ Server.interceptors.response.use(
         error.isGenericError = true
         
         // 尝试使用模拟数据
-        const mockResultDefault = tryMockData(error)
-        if (mockResultDefault) {
-          return mockResultDefault
+        mockResult = tryMockData(error)
+        if (mockResult) {
+          return mockResult
         }
     }
     

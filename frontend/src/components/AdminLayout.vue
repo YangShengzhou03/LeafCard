@@ -91,6 +91,12 @@
                 </el-icon>
                 <template #title>卡密验证</template>
               </el-menu-item>
+              <el-menu-item index="/admin/card-generate">
+                <el-icon>
+                  <Plus />
+                </el-icon>
+                <template #title>卡密生成</template>
+              </el-menu-item>
             </el-sub-menu>
 
 
@@ -120,7 +126,7 @@
 import { computed, onMounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { User, ArrowDown, Monitor, Document, Key, Goods, List, Operation, Check } from '@element-plus/icons-vue'
+import { User, ArrowDown, Monitor, Document, Key, Goods, List, Operation, Check, Plus } from '@element-plus/icons-vue'
 import store from '@/utils/store.js'
 
 const router = useRouter()
@@ -154,7 +160,7 @@ const handleCommand = async (command) => {
       router.push('/login')
     } else if (command === 'profile') {
       // 跳转到个人资料页面
-      router.push('/profile')
+      router.push('/admin/profile')
     }
   } catch (error) {
     // 用户取消操作或发生错误

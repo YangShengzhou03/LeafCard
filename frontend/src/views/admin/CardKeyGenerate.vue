@@ -1,0 +1,420 @@
+<template>
+  <div class="admin-cardkey-generate">
+    <el-card class="generate-card">
+      <template #header>
+        <div class="card-header">
+          <span>卡密生成</span>
+        </div>
+      </template>
+
+      <!-- 生成配置 -->
+      <div class="config-section">
+        <el-form :model="generateForm" label-width="120px">
+          <el-row :gutter="20">
+            <el-col :span="8">
+              <el-form-item label="生成数量">
+                <el-input-number 
+                  v-model="generateForm.count" 
+                  :min="1" 
+                  :max="10000" 
+                  controls-position="right"
+                  placeholder="请输入生成数量"
+                />
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="卡密长度">
+                <el-input-number 
+                  v-model="generateForm.length" 
+                  :min="8" 
+                  :max="32" 
+                  controls-position="right"
+                  placeholder="请输入卡密长度"
+                />
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="商品规格">
+                <el-select v-model="generateForm.productId" placeholder="请选择商品规格" clearable>
+                  <el-option 
+                    v-for="product in productList" 
+                    :key="product.id" 
+                    :label="product.name" 
+                    :value="product.id"
+                  />
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          
+          <el-row :gutter="20">
+            <el-col :span="8">
+              <el-form-item label="前缀">
+                <el-input v-model="generateForm.prefix" placeholder="卡密前缀（可选）" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="后缀">
+                <el-input v-model="generateForm.suffix" placeholder="卡密后缀（可选）" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="分隔符">
+                <el-input v-model="generateForm.separator" placeholder="分隔符（默认无）" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          
+          <el-form-item label="字符集">
+            <el-checkbox-group v-model="generateForm.charset">
+              <el-checkbox label="numbers">数字 (0-9)</el-checkbox>
+              <el-checkbox label="uppercase">大写字母 (A-Z)</el-checkbox>
+              <el-checkbox label="lowercase">小写字母 (a-z)</el-checkbox>
+            </el-checkbox-group>
+          </el-form-item>
+          
+          <el-form-item>
+            <el-button type="primary" @click="generateCardKeys" :loading="generating">
+              <el-icon><Plus /></el-icon>
+              生成卡密
+            </el-button>
+            <el-button @click="resetForm">重置</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+
+      <!-- 生成结果 -->
+      <div class="result-section" v-if="generatedKeys.length > 0">
+        <div class="result-header">
+          <span>生成结果（共 {{ generatedKeys.length }} 个卡密）</span>
+          <div class="action-buttons">
+            <el-button size="small" @click="copyAllKeys">
+              <el-icon><CopyDocument /></el-icon>
+              复制全部
+            </el-button>
+            <el-button size="small" type="success" @click="exportToTxt">
+              <el-icon><Download /></el-icon>
+              导出TXT
+            </el-button>
+            <el-button size="small" type="primary" @click="importToSystem" :disabled="!generateForm.productId">
+              <el-icon><Upload /></el-icon>
+              导入系统
+            </el-button>
+          </div>
+        </div>
+        
+        <div class="keys-container">
+          <div 
+            v-for="(key, index) in generatedKeys" 
+            :key="index" 
+            class="key-item"
+          >
+            <span class="key-text">{{ key }}</span>
+            <el-button 
+              size="small" 
+              type="text" 
+              @click="copySingleKey(key)"
+              class="copy-btn"
+            >
+              <el-icon><CopyDocument /></el-icon>
+            </el-button>
+          </div>
+        </div>
+      </div>
+    </el-card>
+  </div>
+</template>
+
+<script setup>
+import { ref, reactive, onMounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus, CopyDocument, Download, Upload } from '@element-plus/icons-vue'
+
+// 生成状态
+const generating = ref(false)
+
+// 生成表单
+const generateForm = reactive({
+  count: 10,
+  length: 16,
+  productId: '',
+  prefix: '',
+  suffix: '',
+  separator: '',
+  charset: ['numbers', 'uppercase', 'lowercase']
+})
+
+// 商品列表
+const productList = ref([])
+
+// 生成的卡密列表
+const generatedKeys = ref([])
+
+// 加载商品列表
+const loadProducts = async () => {
+  try {
+    // 模拟商品数据
+    productList.value = [
+      { id: 1, name: 'VIP会员月卡' },
+      { id: 2, name: '实体礼品卡' },
+      { id: 3, name: '在线课程服务' }
+    ]
+  } catch (error) {
+    ElMessage.error('加载商品列表失败')
+  }
+}
+
+// 生成随机卡密
+const generateRandomKey = () => {
+  let charset = ''
+  
+  if (generateForm.charset.includes('numbers')) {
+    charset += '0123456789'
+  }
+  if (generateForm.charset.includes('uppercase')) {
+    charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  }
+  if (generateForm.charset.includes('lowercase')) {
+    charset += 'abcdefghijklmnopqrstuvwxyz'
+  }
+  
+  if (charset === '') {
+    charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  }
+  
+  let result = ''
+  const charsetLength = charset.length
+  
+  for (let i = 0; i < generateForm.length; i++) {
+    result += charset.charAt(Math.floor(Math.random() * charsetLength))
+  }
+  
+  // 添加前缀和后缀
+  if (generateForm.prefix) {
+    result = generateForm.prefix + (generateForm.separator || '') + result
+  }
+  if (generateForm.suffix) {
+    result = result + (generateForm.separator || '') + generateForm.suffix
+  }
+  
+  return result
+}
+
+// 生成卡密
+const generateCardKeys = async () => {
+  if (generateForm.count <= 0) {
+    ElMessage.warning('请设置生成数量')
+    return
+  }
+  
+  if (generateForm.length < 8) {
+    ElMessage.warning('卡密长度不能小于8位')
+    return
+  }
+  
+  generating.value = true
+  
+  try {
+    generatedKeys.value = []
+    
+    for (let i = 0; i < generateForm.count; i++) {
+      const key = generateRandomKey()
+      generatedKeys.value.push(key)
+    }
+    
+    ElMessage.success(`成功生成 ${generateForm.count} 个卡密`)
+  } catch (error) {
+    ElMessage.error('生成卡密失败')
+  } finally {
+    generating.value = false
+  }
+}
+
+// 复制单个卡密
+const copySingleKey = async (key) => {
+  try {
+    await navigator.clipboard.writeText(key)
+    ElMessage.success('卡密已复制到剪贴板')
+  } catch (error) {
+    // 降级方案
+    const textArea = document.createElement('textarea')
+    textArea.value = key
+    document.body.appendChild(textArea)
+    textArea.select()
+    document.execCommand('copy')
+    document.body.removeChild(textArea)
+    ElMessage.success('卡密已复制到剪贴板')
+  }
+}
+
+// 复制全部卡密
+const copyAllKeys = async () => {
+  const allKeys = generatedKeys.value.join('\n')
+  try {
+    await navigator.clipboard.writeText(allKeys)
+    ElMessage.success('所有卡密已复制到剪贴板')
+  } catch (error) {
+    // 降级方案
+    const textArea = document.createElement('textarea')
+    textArea.value = allKeys
+    document.body.appendChild(textArea)
+    textArea.select()
+    document.execCommand('copy')
+    document.body.removeChild(textArea)
+    ElMessage.success('所有卡密已复制到剪贴板')
+  }
+}
+
+// 导出为TXT文件
+const exportToTxt = () => {
+  const content = generatedKeys.value.join('\n')
+  const blob = new Blob([content], { type: 'text/plain' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `cardkeys_${new Date().getTime()}.txt`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+  ElMessage.success('卡密已导出为TXT文件')
+}
+
+// 导入到系统
+const importToSystem = async () => {
+  if (!generateForm.productId) {
+    ElMessage.warning('请先选择商品规格')
+    return
+  }
+  
+  try {
+    await ElMessageBox.confirm(
+      `确定要将 ${generatedKeys.value.length} 个卡密导入到系统吗？`,
+      '确认导入',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    
+    // 模拟导入操作
+    ElMessage.success('卡密导入成功')
+    
+    // 清空生成的卡密
+    generatedKeys.value = []
+    
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('导入失败')
+    }
+  }
+}
+
+// 重置表单
+const resetForm = () => {
+  Object.assign(generateForm, {
+    count: 10,
+    length: 16,
+    productId: '',
+    prefix: '',
+    suffix: '',
+    separator: '',
+    charset: ['numbers', 'uppercase', 'lowercase']
+  })
+  generatedKeys.value = []
+}
+
+onMounted(() => {
+  loadProducts()
+})
+</script>
+
+<style scoped>
+.admin-cardkey-generate {
+  padding: 0;
+  background-color: #f0f2f5;
+}
+
+.generate-card {
+  margin-bottom: 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.generate-card :deep(.el-card__body) {
+  padding: 16px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 16px;
+  color: #303133;
+}
+
+.config-section {
+  margin-bottom: 24px;
+}
+
+.result-section {
+  border-top: 1px solid #e6e8eb;
+  padding-top: 16px;
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.keys-container {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #e6e8eb;
+  border-radius: 4px;
+  padding: 12px;
+  background-color: #fafafa;
+}
+
+.key-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background-color: white;
+  border-radius: 4px;
+  border: 1px solid #e6e8eb;
+}
+
+.key-item:last-child {
+  margin-bottom: 0;
+}
+
+.key-text {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  color: #333;
+  user-select: all;
+}
+
+.copy-btn {
+  padding: 4px;
+  min-width: auto;
+}
+
+.copy-btn:hover {
+  background-color: #f5f7fa;
+}
+</style>

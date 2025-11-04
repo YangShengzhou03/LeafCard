@@ -96,7 +96,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Search } from '@element-plus/icons-vue'
+import { Search } from '@element-plus/icons-vue'
 
 // 加载状态
 const loading = ref(false)
@@ -212,10 +212,7 @@ const resetFilters = () => {
   handleSearch()
 }
 
-// 新增卡密
-const handleAddProduct = () => {
-  ElMessage.info('新增卡密功能开发中')
-}
+// 新增卡密功能已移除，因为模板中没有使用
 
 // 编辑卡密
 const handleEditProduct = (row) => {

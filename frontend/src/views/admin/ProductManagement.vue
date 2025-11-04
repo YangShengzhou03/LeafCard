@@ -3,7 +3,7 @@
     <el-card class="product-card">
       <template #header>
         <div class="card-header">
-          <span>商品管理</span>
+          <span>商品列表</span>
           <el-button type="primary" @click="handleAddProduct">
             <el-icon><Plus /></el-icon>
             新增商品
@@ -14,7 +14,7 @@
       <!-- 搜索栏 -->
       <div class="search-bar">
         <el-row :gutter="16">
-          <el-col :span="6">
+          <el-col :span="5">
             <el-input
               v-model="searchQuery"
               placeholder="商品名称"
@@ -26,20 +26,13 @@
               </template>
             </el-input>
           </el-col>
-          <el-col :span="6">
-            <el-select v-model="categoryFilter" placeholder="商品分类" clearable>
-              <el-option label="虚拟商品" value="virtual" />
-              <el-option label="实体商品" value="physical" />
-              <el-option label="服务类" value="service" />
-            </el-select>
-          </el-col>
-          <el-col :span="6">
+          <el-col :span="3">
             <el-select v-model="statusFilter" placeholder="商品状态" clearable>
-              <el-option label="使用中" value="active" />
-              <el-option label="未使用" value="inactive" />
+              <el-option label="在售" value="active" />
+              <el-option label="下架" value="inactive" />
             </el-select>
           </el-col>
-          <el-col :span="6">
+          <el-col :span="16" class="button-group">
             <el-button type="primary" @click="handleSearch">查询</el-button>
             <el-button @click="resetFilters">重置</el-button>
           </el-col>
@@ -51,23 +44,16 @@
         <el-table :data="filteredProducts" v-loading="loading" stripe>
           <el-table-column prop="id" label="ID" width="80" />
           <el-table-column prop="name" label="商品名称" min-width="200" />
-          <el-table-column prop="category" label="分类" width="100">
+          <el-table-column prop="description" label="描述" min-width="250">
             <template #default="{ row }">
-              <el-tag :type="getCategoryTagType(row.category)">
-                {{ getCategoryText(row.category) }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column prop="price" label="价格" width="120">
-            <template #default="{ row }">
-              ¥{{ row.price }}
+              {{ row.description || '暂无描述' }}
             </template>
           </el-table-column>
           <el-table-column prop="stock" label="库存" width="100" />
           <el-table-column prop="status" label="状态" width="100">
             <template #default="{ row }">
               <el-tag :type="row.status === 'active' ? 'success' : 'info'">
-                {{ row.status === 'active' ? '使用中' : '未使用' }}
+                {{ row.status === 'active' ? '在售' : '下架' }}
               </el-tag>
             </template>
           </el-table-column>
@@ -110,7 +96,6 @@ const products = ref([])
 
 // 搜索条件
 const searchQuery = ref('')
-const categoryFilter = ref('')
 const statusFilter = ref('')
 
 // 分页信息
@@ -129,10 +114,6 @@ const filteredProducts = computed(() => {
     )
   }
   
-  if (categoryFilter.value) {
-    filtered = filtered.filter(product => product.category === categoryFilter.value)
-  }
-  
   if (statusFilter.value) {
     filtered = filtered.filter(product => product.status === statusFilter.value)
   }
@@ -140,25 +121,8 @@ const filteredProducts = computed(() => {
   return filtered
 })
 
-// 分类标签类型映射
-const getCategoryTagType = (category) => {
-  const typeMap = {
-    virtual: 'primary',
-    physical: 'success',
-    service: 'warning'
-  }
-  return typeMap[category] || 'info'
-}
-
-// 分类文本映射
-const getCategoryText = (category) => {
-  const textMap = {
-    virtual: '虚拟商品',
-    physical: '实体商品',
-    service: '服务类'
-  }
-  return textMap[category] || '未知'
-}
+// 分类标签类型映射函数已移除，因为所有商品都是虚拟卡密，不需要分类
+// 分类文本映射函数已移除，因为所有商品都是虚拟卡密，不需要分类
 
 // 加载商品数据
 const loadProducts = async () => {
@@ -170,7 +134,7 @@ const loadProducts = async () => {
         id: 1,
         name: 'VIP会员月卡',
         category: 'virtual',
-        price: 29.99,
+        description: 'VIP会员专属月卡，享受专属权益',
         stock: 1000,
         status: 'active',
         createTime: '2024-01-01 10:00:00'
@@ -179,7 +143,7 @@ const loadProducts = async () => {
         id: 2,
         name: '实体礼品卡',
         category: 'physical',
-        price: 199.99,
+        description: '精美实体礼品卡，适合各种场合赠送',
         stock: 50,
         status: 'active',
         createTime: '2024-01-02 14:30:00'
@@ -188,7 +152,7 @@ const loadProducts = async () => {
         id: 3,
         name: '在线课程服务',
         category: 'service',
-        price: 399.99,
+        description: '专业在线课程服务，提供优质学习体验',
         stock: 200,
         status: 'inactive',
         createTime: '2024-01-03 09:15:00'
@@ -211,7 +175,6 @@ const handleSearch = () => {
 // 重置筛选
 const resetFilters = () => {
   searchQuery.value = ''
-  categoryFilter.value = ''
   statusFilter.value = ''
   handleSearch()
 }

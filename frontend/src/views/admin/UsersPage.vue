@@ -12,7 +12,7 @@
         <!-- 搜索和筛选 -->
         <div class="search-bar">
           <el-row :gutter="20">
-            <el-col :span="8">
+            <el-col :span="5">
               <el-input
                 v-model="searchQuery"
                 placeholder="搜索邮箱"
@@ -27,71 +27,63 @@
                 </template>
               </el-input>
             </el-col>
-            <el-col :span="6">
+            <el-col :span="3">
               <el-select v-model="statusFilter" placeholder="用户状态" clearable @change="handleSearch">
                 <el-option label="全部" value="" />
-                <el-option label="使用中" value="active" />
-                <el-option label="未使用" value="disabled" />
+                <el-option label="正常" value="active" />
+                <el-option label="禁用" value="disabled" />
               </el-select>
             </el-col>
-            <el-col :span="6">
-              <el-select v-model="roleFilter" placeholder="用户角色" clearable @change="handleSearch">
-                <el-option label="全部" value="" />
-                <el-option label="普通用户" value="user" />
-                <el-option label="管理员" value="admin" />
-              </el-select>
-            </el-col>
-            <el-col :span="4">
-              <el-button @click="resetFilters">重置</el-button>
-                        <el-button type="primary" @click="showAddUserDialog = true">
-            <el-icon><Plus /></el-icon>
-            添加用户
-          </el-button>
+            <el-col :span="16" class="button-group">
+              <el-button type="primary" @click="showAddUserDialog = true">
+                <el-icon><Plus /></el-icon>
+                添加用户
+              </el-button>
             </el-col>
           </el-row>
         </div>
         
         <!-- 用户表格 -->
         <div class="table-container">
-          <el-table :data="filteredUsers" style="width: 100%" v-loading="loading" :scroll="{ x: 1000 }">
-            <el-table-column prop="id" label="ID" width="120" :show-overflow-tooltip="true">
+          <el-table 
+            :data="filteredUsers" 
+            style="width: 100%" 
+            v-loading="loading" 
+            :scroll="{ x: 1200 }"
+            :header-cell-style="{ textAlign: 'center', background: '#f5f7fa' }"
+            :cell-style="{ textAlign: 'center' }"
+            stripe
+          >
+            <el-table-column prop="id" label="ID" width="120" align="center" :show-overflow-tooltip="true">
               <template #default="scope">
                 <span class="truncate-id">{{ scope.row.id }}</span>
               </template>
             </el-table-column>
-            <el-table-column prop="email" label="邮箱" width="200" :show-overflow-tooltip="true" />
-            <el-table-column prop="gender" label="性别" width="80">
+            <el-table-column prop="username" label="用户名" min-width="150" align="center" :show-overflow-tooltip="true">
               <template #default="scope">
-                {{ scope.row.gender === 'MALE' ? '男' : scope.row.gender === 'FEMALE' ? '女' : '未设置' }}
+                {{ scope.row.username || scope.row.email.split('@')[0] }}
               </template>
             </el-table-column>
-            <el-table-column prop="phone" label="手机号" width="120" :show-overflow-tooltip="true" />
-            <el-table-column prop="role" label="角色" width="100">
-              <template #default="scope">
-                <el-tag :type="scope.row.role === 'admin' ? 'danger' : 'primary'">
-                  {{ scope.row.role === 'admin' ? '管理员' : '普通用户' }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column prop="cardKeyCount" label="卡密数量" width="100">
+            <el-table-column prop="email" label="邮箱" min-width="200" align="left" :show-overflow-tooltip="true" class-name="email-column" />
+            <el-table-column prop="cardKeyCount" label="卡密数量" width="120" align="center">
               <template #default="scope">
                 {{ scope.row.cardKeyCount || 0 }}
               </template>
             </el-table-column>
-            <el-table-column prop="activatedCardKeys" label="已使用" width="80">
+            <el-table-column prop="activatedCardKeys" label="已使用" width="100" align="center">
               <template #default="scope">
                 {{ scope.row.activatedCardKeys || 0 }}
               </template>
             </el-table-column>
-        <el-table-column prop="status" label="状态" width="100">
+            <el-table-column prop="status" label="状态" width="120" align="center">
               <template #default="scope">
                 <el-tag :type="scope.row.status === 'active' ? 'success' : 'danger'">
-                  {{ scope.row.status === 'active' ? '使用中' : '未使用' }}
+                  {{ scope.row.status === 'active' ? '正常' : '禁用' }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="lastLoginTime" label="最后上线时间" width="160" :show-overflow-tooltip="true" />
-            <el-table-column label="操作" width="200" fixed="right">
+            <el-table-column prop="lastLoginTime" label="最后上线时间" width="180" align="center" :show-overflow-tooltip="true" />
+            <el-table-column label="操作" width="220" fixed="right" align="center">
               <template #default="scope">
                 <el-button size="small" @click="editUser(scope.row)">编辑</el-button>
                 <el-button 
@@ -154,26 +146,10 @@
         <el-form-item label="密码" prop="password" v-if="!editingUser">
           <el-input v-model="userForm.password" type="password" show-password />
         </el-form-item>
-        <el-form-item label="性别" prop="gender">
-          <el-select v-model="userForm.gender" style="width: 100%">
-            <el-option label="男" value="MALE" />
-            <el-option label="女" value="FEMALE" />
-            <el-option label="未设置" value="NOT_SET" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="手机号" prop="phone">
-          <el-input v-model="userForm.phone" />
-        </el-form-item>
-        <el-form-item label="角色" prop="role">
-          <el-select v-model="userForm.role" style="width: 100%">
-            <el-option label="普通用户" value="user" />
-            <el-option label="管理员" value="admin" />
-          </el-select>
-        </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-radio-group v-model="userForm.status">
-              <el-radio label="active">使用中</el-radio>
-              <el-radio label="disabled">未使用</el-radio>
+              <el-radio label="active">正常</el-radio>
+              <el-radio label="disabled">禁用</el-radio>
             </el-radio-group>
         </el-form-item>
 
@@ -193,13 +169,14 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
 import { AdminService } from '@/services/api.js'
+import Server from '@/utils/Server.js'
 
 // 数据状态
 const loading = ref(false)
 const users = ref([])
+// 搜索条件
 const searchQuery = ref('')
 const statusFilter = ref('')
-const roleFilter = ref('')
 const currentPage = ref(1)
 const pageSize = ref(20)
 const totalUsers = ref(0)
@@ -211,9 +188,6 @@ const userFormRef = ref(null)
 const userForm = reactive({
   email: '',
   password: '',
-  gender: 'NOT_SET',
-  phone: '',
-  role: 'user',
   status: 'active',
   storageQuota: 1 // 默认1GB，单位GB
 })
@@ -227,15 +201,6 @@ const userRules = {
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' }
-  ],
-  gender: [
-    { required: true, message: '请选择性别', trigger: 'change' }
-  ],
-  phone: [
-    { pattern: /^1[3456789]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
-  ],
-  role: [
-    { required: true, message: '请选择用户角色', trigger: 'change' }
   ],
   status: [
     { required: true, message: '请选择用户状态', trigger: 'change' }
@@ -260,27 +225,8 @@ const filteredUsers = computed(() => {
     result = result.filter(user => user.status === statusFilter.value)
   }
   
-  if (roleFilter.value) {
-    result = result.filter(user => user.role === roleFilter.value)
-  }
-  
   return result
 })
-
-// 格式化存储大小
-const formatStorage = (bytes) => {
-  if (bytes === 0) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
-
-// 计算存储使用率
-const calculateUsagePercentage = (used, quota) => {
-  if (!quota || quota === 0) return 0
-  return Math.round((used / quota) * 100)
-}
 
 // 加载用户数据
 const loadUsers = async () => {
@@ -290,8 +236,7 @@ const loadUsers = async () => {
       page: currentPage.value - 1,
       size: pageSize.value,
       keyword: searchQuery.value,
-      status: statusFilter.value,
-      role: roleFilter.value
+      status: statusFilter.value
     })
     users.value = response.content
     totalUsers.value = response.totalElements
@@ -305,15 +250,6 @@ const loadUsers = async () => {
 
 // 搜索处理
 const handleSearch = () => {
-  currentPage.value = 1
-  loadUsers()
-}
-
-// 重置筛选条件
-const resetFilters = () => {
-  searchQuery.value = ''
-  statusFilter.value = ''
-  roleFilter.value = ''
   currentPage.value = 1
   loadUsers()
 }
@@ -355,9 +291,6 @@ const handleCurrentChange = (page) => {
 const editUser = (user) => {
   editingUser.value = user
   userForm.email = user.email
-  userForm.gender = user.gender
-  userForm.phone = user.phone
-  userForm.role = user.role
   userForm.status = user.status
   // 将字节转换为GB显示
   userForm.storageQuota = Math.round(user.storageQuota / (1024 * 1024 * 1024))
@@ -379,9 +312,6 @@ const saveUser = async () => {
     const userData = {
       email: userForm.email,
       password: userForm.password,
-      gender: userForm.gender === 'MALE' ? 1 : userForm.gender === 'FEMALE' ? 2 : 0,
-      phone: userForm.phone,
-      role: userForm.role === 'admin' ? 1 : 0,
       status: userForm.status === 'active' ? 1 : 0,
       storageQuota: storageQuotaInBytes
     }
@@ -395,9 +325,6 @@ const saveUser = async () => {
         email: userForm.email,
         password: userForm.password,
         nickname: userForm.email.split('@')[0], // 默认昵称
-        gender: userForm.gender === 'MALE' ? 1 : userForm.gender === 'FEMALE' ? 2 : 0,
-        phone: userForm.phone,
-        role: userForm.role === 'admin' ? 1 : 0,
         status: userForm.status === 'active' ? 1 : 0,
         storageQuota: storageQuotaInBytes
       }
@@ -430,45 +357,11 @@ const toggleUserStatus = async (user) => {
   }
 }
 
-// 删除用户
-const deleteUser = async (user) => {
-  try {
-    await ElMessageBox.confirm(
-      `确定要删除用户 "${user.email}" 吗？此操作不可恢复。`,
-      '确认删除',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }
-    )
-    
-    await Server.delete(`/admin/user/${user.id}`)
-    ElMessage.success('用户删除成功')
-    loadUsers()
-  } catch (error) {
-    if (error !== 'cancel') {
-      ElMessage.error('删除用户失败: ' + (error.response?.data?.message || error.message))
-    }
-  }
-}
-
-// 获取使用率颜色类
-const getUsageClass = (used, quota) => {
-  const percentage = calculateUsagePercentage(used, quota)
-  if (percentage >= 90) return 'usage-high'
-  if (percentage >= 70) return 'usage-medium'
-  return 'usage-low'
-}
-
 // 重置用户表单
 const resetUserForm = () => {
   Object.assign(userForm, {
     email: '',
     password: '',
-    gender: 'NOT_SET',
-    phone: '',
-    role: 'user',
     status: 'active',
     storageQuota: 1 // 默认1GB，单位GB
   })
@@ -508,11 +401,31 @@ onMounted(() => {
 .search-bar {
   margin-bottom: 16px;
   padding: 16px;
+  background-color: #fafafa;
+  border-bottom: 1px solid #e6e8eb;
+}
+
+.search-bar :deep(.el-col) {
+  display: flex;
+  align-items: center;
+}
+
+.search-bar :deep(.el-input) {
+  flex: 1;
+}
+
+.search-bar :deep(.button-group) {
+  justify-content: flex-end;
+}
+
+.search-bar :deep(.button-group .el-button) {
+  margin-left: 8px;
 }
 
 .table-container {
   width: 100%;
   overflow-x: auto;
+  min-height: 400px;
 }
 
 .truncate-id {
@@ -534,21 +447,24 @@ onMounted(() => {
 
 /* 表格样式优化 */
 :deep(.el-table) {
-  min-width: 1200px;
+  min-width: 100%;
+  font-size: 14px;
 }
 
 :deep(.el-table__header) {
-  background-color: #fafafa;
+  background-color: #f8f9fa;
 }
 
 :deep(.el-table th) {
-  background-color: #fafafa;
-  color: #606266;
-  font-weight: 500;
+  background-color: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+  border-bottom: 2px solid #dee2e6;
 }
 
 :deep(.el-table td) {
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #e9ecef;
+  padding: 12px 8px;
 }
 
 :deep(.el-table__body-wrapper) {
@@ -557,6 +473,22 @@ onMounted(() => {
 
 :deep(.el-table .cell) {
   white-space: nowrap;
+  line-height: 1.4;
+}
+
+:deep(.el-table .el-table__row:hover) {
+  background-color: #f8f9fa;
+}
+
+/* 邮箱列特殊样式 */
+:deep(.el-table .email-column .cell) {
+  text-align: left;
+  padding-left: 12px;
+}
+
+/* 操作按钮样式 */
+:deep(.el-table .el-button) {
+  margin: 2px;
 }
 
 /* 使用率颜色样式 */

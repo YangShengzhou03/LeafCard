@@ -14,8 +14,8 @@
       <div class="product-spec-content">
         <!-- 搜索和筛选 -->
         <div class="search-bar">
-          <el-row :gutter="20">
-            <el-col :span="8">
+          <el-row :gutter="16">
+            <el-col :span="6">
               <el-input
                 v-model="searchQuery"
                 placeholder="搜索商品名称或规格名称"
@@ -30,14 +30,14 @@
                 </template>
               </el-input>
             </el-col>
-            <el-col :span="6">
+            <el-col :span="3">
               <el-select v-model="statusFilter" placeholder="状态" clearable @change="handleSearch">
                 <el-option label="全部" value="" />
-                <el-option label="使用中" value="active" />
-                <el-option label="未使用" value="disabled" />
+                <el-option label="发放中" value="active" />
+                <el-option label="已停用" value="disabled" />
               </el-select>
             </el-col>
-            <el-col :span="4">
+            <el-col :span="6">
               <el-button @click="resetFilters">重置</el-button>
             </el-col>
           </el-row>
@@ -45,46 +45,41 @@
         
         <!-- 商品规格列表 -->
         <div class="table-container">
-          <el-table :data="filteredSpecs" style="width: 100%" v-loading="loading">
-            <el-table-column prop="id" label="ID" width="80" />
-            <el-table-column prop="productName" label="商品名称" min-width="150" />
-            <el-table-column prop="name" label="规格名称" min-width="120" />
-            <el-table-column prop="price" label="价格" width="100">
+          <el-table :data="filteredSpecs" style="width: 100%" v-loading="loading" :scroll="{ x: 1200 }">
+            <el-table-column prop="id" label="ID" width="80" align="center" />
+            <el-table-column prop="productName" label="商品名称" min-width="180" align="left" :show-overflow-tooltip="true" />
+            <el-table-column prop="name" label="规格名称" min-width="150" align="left" :show-overflow-tooltip="true" />
+            <el-table-column prop="price" label="价格" width="120" align="center">
               <template #default="scope">
                 ¥{{ scope.row.price }}
               </template>
             </el-table-column>
-            <el-table-column prop="validityPeriod" label="有效期" width="100">
-              <template #default="scope">
-                {{ scope.row.validityPeriod }}天
-              </template>
-            </el-table-column>
-            <el-table-column prop="totalKeys" label="卡密总数" width="100">
+            <el-table-column prop="totalKeys" label="卡密总数" width="120" align="center">
               <template #default="scope">
                 {{ scope.row.totalKeys || 0 }}
               </template>
             </el-table-column>
-            <el-table-column prop="usedKeys" label="已使用" width="80">
+            <el-table-column prop="usedKeys" label="已使用" width="100" align="center">
               <template #default="scope">
                 {{ scope.row.usedKeys || 0 }}
               </template>
             </el-table-column>
-            <el-table-column prop="usageRate" label="使用率" width="100">
+            <el-table-column prop="usageRate" label="使用率" width="120" align="center">
               <template #default="scope">
                 <span :class="getUsageRateClass(scope.row.usedKeys, scope.row.totalKeys)">
                   {{ calculateUsageRate(scope.row.usedKeys, scope.row.totalKeys) }}%
                 </span>
               </template>
             </el-table-column>
-            <el-table-column prop="status" label="状态" width="100">
+            <el-table-column prop="status" label="状态" width="120" align="center">
               <template #default="scope">
                 <el-tag :type="scope.row.status === 'active' ? 'success' : 'danger'">
-                  {{ scope.row.status === 'active' ? '使用中' : '未使用' }}
+                  {{ scope.row.status === 'active' ? '发放中' : '已停用' }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="createTime" label="创建时间" width="160" />
-            <el-table-column label="操作" width="200" fixed="right">
+            <el-table-column prop="createTime" label="创建时间" width="180" align="center" :show-overflow-tooltip="true" />
+            <el-table-column label="操作" width="200" fixed="right" align="center">
               <template #default="scope">
                 <el-button size="small" @click="editSpec(scope.row)">编辑</el-button>
                 <el-button 
@@ -131,14 +126,10 @@
         <el-form-item label="价格" prop="price">
           <el-input-number v-model="specForm.price" :min="0" :precision="2" style="width: 100%" />
         </el-form-item>
-        <el-form-item label="有效期" prop="validityPeriod">
-          <el-input-number v-model="specForm.validityPeriod" :min="1" :max="365" style="width: 100%" />
-          <span style="margin-left: 10px">天</span>
-        </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-radio-group v-model="specForm.status">
-              <el-radio label="active">使用中</el-radio>
-              <el-radio label="disabled">未使用</el-radio>
+              <el-radio label="active">发放中</el-radio>
+              <el-radio label="disabled">停用中</el-radio>
             </el-radio-group>
         </el-form-item>
       </el-form>
@@ -183,7 +174,6 @@ const specForm = reactive({
   productName: '',
   name: '',
   price: 0,
-  validityPeriod: 30,
   status: 'active'
 })
 
@@ -193,8 +183,7 @@ const specForm = reactive({
 const specRules = {
   productName: [{ required: true, message: '请输入商品名称', trigger: 'blur' }],
   name: [{ required: true, message: '请输入规格名称', trigger: 'blur' }],
-  price: [{ required: true, message: '请输入价格', trigger: 'blur' }],
-  validityPeriod: [{ required: true, message: '请输入有效期', trigger: 'blur' }]
+  price: [{ required: true, message: '请输入价格', trigger: 'blur' }]
 }
 
 
@@ -243,7 +232,6 @@ const loadSpecs = async () => {
         productName: 'VIP会员',
         name: '月卡',
         price: 29.9,
-        validityPeriod: 30,
         totalKeys: 100,
         usedKeys: 75,
         status: 'active',
@@ -254,7 +242,6 @@ const loadSpecs = async () => {
         productName: 'VIP会员',
         name: '季卡',
         price: 79.9,
-        validityPeriod: 90,
         totalKeys: 50,
         usedKeys: 30,
         status: 'active',
@@ -265,7 +252,6 @@ const loadSpecs = async () => {
         productName: '超级会员',
         name: '年卡',
         price: 299.9,
-        validityPeriod: 365,
         totalKeys: 20,
         usedKeys: 5,
         status: 'active',
@@ -316,7 +302,7 @@ const editSpec = (spec) => {
 const toggleSpecStatus = async (spec) => {
   try {
     await ElMessageBox.confirm(
-      `确定要${spec.status === 'active' ? '禁用' : '启用'}该规格吗？`,
+      `确定要${spec.status === 'active' ? '停用' : '启用'}该规格吗？`,
       '提示',
       { type: 'warning' }
     )
@@ -370,7 +356,6 @@ const resetForm = () => {
     productName: '',
     name: '',
     price: 0,
-    validityPeriod: 30,
     status: 'active'
   })
 }
@@ -381,7 +366,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.admin-product-specs {
+.admin-product-spec {
   padding: 0;
   background-color: #f0f2f5;
 }
@@ -393,7 +378,7 @@ onMounted(() => {
 }
 
 .product-spec-card :deep(.el-card__body) {
-  padding: 16px;
+  padding: 0;
 }
 
 .card-header {
@@ -407,16 +392,38 @@ onMounted(() => {
 
 .search-bar {
   margin-bottom: 16px;
+  padding: 16px;
+  background-color: #fafafa;
+  border-bottom: 1px solid #e6e8eb;
 }
 
 .table-container {
-  margin-bottom: 16px;
+  width: 100%;
+  overflow-x: auto;
+  min-height: 400px;
+}
+
+.table-container :deep(.el-table) {
+  width: 100% !important;
+}
+
+.table-container :deep(.el-table__header-wrapper),
+.table-container :deep(.el-table__body-wrapper) {
+  width: 100% !important;
+}
+
+.table-container :deep(.el-table th),
+.table-container :deep(.el-table td) {
+  white-space: nowrap;
 }
 
 .pagination-container {
   display: flex;
   justify-content: flex-end;
   margin-top: 16px;
+  padding: 16px;
+  background-color: #fafafa;
+  border-top: 1px solid #e6e8eb;
 }
 
 .high-usage {
