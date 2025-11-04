@@ -51,3 +51,34 @@ export function parseJWT(token) {
     return {};
   }
 }
+
+// 保存登录凭据到localStorage
+export function saveCredentials(username, password) {
+  const credentials = {
+    username: username,
+    password: password,
+    timestamp: Date.now()
+  }
+  localStorage.setItem('rememberedCredentials', JSON.stringify(credentials))
+}
+
+// 获取保存的登录凭据
+export function getCredentials() {
+  const saved = localStorage.getItem('rememberedCredentials')
+  if (saved) {
+    const credentials = JSON.parse(saved)
+    // 检查凭据是否在7天内保存的
+    if (Date.now() - credentials.timestamp < 7 * 24 * 60 * 60 * 1000) {
+      return credentials
+    } else {
+      // 超过7天，清除凭据
+      removeCredentials()
+    }
+  }
+  return null
+}
+
+// 清除保存的登录凭据
+export function removeCredentials() {
+  localStorage.removeItem('rememberedCredentials')
+}
