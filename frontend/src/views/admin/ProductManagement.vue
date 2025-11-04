@@ -4,10 +4,6 @@
       <template #header>
         <div class="card-header">
           <span>商品列表</span>
-          <el-button type="primary" @click="handleAddProduct">
-            <el-icon><Plus /></el-icon>
-            新增商品
-          </el-button>
         </div>
       </template>
 
@@ -35,6 +31,10 @@
           <el-col :span="16" class="button-group">
             <el-button type="primary" @click="handleSearch">查询</el-button>
             <el-button @click="resetFilters">重置</el-button>
+                              <el-button type="primary" @click="handleAddProduct">
+            <el-icon><Plus /></el-icon>
+            新增商品
+          </el-button>
           </el-col>
         </el-row>
       </div>

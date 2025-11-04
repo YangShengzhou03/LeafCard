@@ -4,10 +4,6 @@
       <template #header>
         <div class="card-header">
           <span>商品规格管理</span>
-          <el-button type="primary" @click="showAddDialog = true">
-            <el-icon><Plus /></el-icon>
-            添加规格
-          </el-button>
         </div>
       </template>
       
@@ -39,6 +35,10 @@
             </el-col>
             <el-col :span="6">
               <el-button @click="resetFilters">重置</el-button>
+                        <el-button type="primary" @click="showAddDialog = true">
+            <el-icon><Plus /></el-icon>
+            添加规格
+          </el-button>
             </el-col>
           </el-row>
         </div>

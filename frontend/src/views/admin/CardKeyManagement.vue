@@ -4,10 +4,6 @@
       <template #header>
         <div class="card-header">
           <span>卡密管理</span>
-          <el-button type="primary" @click="handleAddCardKey">
-            <el-icon><Plus /></el-icon>
-            生成卡密
-          </el-button>
         </div>
       </template>
 
@@ -37,6 +33,10 @@
             <el-button type="primary" @click="handleSearch">查询</el-button>
             <el-button @click="resetFilter">重置</el-button>
             <el-button type="danger" @click="handleClearUsed">清空已使用</el-button>
+                      <el-button type="primary" @click="handleAddCardKey">
+            <el-icon><Plus /></el-icon>
+            生成卡密
+          </el-button>
           </el-col>
         </el-row>
       </div>
