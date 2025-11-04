@@ -134,7 +134,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { User, Key, CircleCheck, Document } from '@element-plus/icons-vue'
+import { Key, CircleCheck, Document } from '@element-plus/icons-vue'
 
 // 统计数据
 const stats = ref({

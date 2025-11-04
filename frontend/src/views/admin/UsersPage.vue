@@ -1,4 +1,4 @@
-```
+
 <template>
   <div class="admin-users">
     <el-card class="users-card">
@@ -7,7 +7,7 @@
           <span>用户管理</span>
         </div>
       </template>
-```   
+
       <div class="users-content">
         <!-- 搜索和筛选 -->
         <div class="search-bar">
@@ -502,8 +502,8 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   font-weight: 600;
-  padding: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  font-size: 16px;
+  color: #303133;
 }
 
 .search-bar {
