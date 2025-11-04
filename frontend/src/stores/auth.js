@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
-import api from '@/api'
+import http from '@/utils/http'
 
 export const useAuthStore = defineStore('auth', () => {
   // 状态
@@ -34,8 +34,8 @@ export const useAuthStore = defineStore('auth', () => {
       // 保存token到本地存储
       localStorage.setItem('token', authToken)
       
-      // 设置API默认请求头
-      api.defaults.headers.common['Authorization'] = `Bearer ${authToken}`
+      // 设置HTTP默认请求头
+      http.defaults.headers.common['Authorization'] = `Bearer ${authToken}`
       
       ElMessage.success('登录成功')
       return { success: true }
@@ -52,14 +52,13 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = ''
     user.value = null
     localStorage.removeItem('token')
-    delete api.defaults.headers.common['Authorization']
     ElMessage.success('已退出登录')
   }
   
   // 初始化认证状态
   const initAuth = () => {
     if (token.value) {
-      api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
+      http.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
       // 这里可以调用API获取用户信息
       // fetchUserInfo()
     }

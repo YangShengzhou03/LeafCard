@@ -1,19 +1,5 @@
 <template>
   <div class="spec-container">
-    <!-- 页面标题和操作区域 -->
-    <div class="page-header">
-      <div class="header-content">
-        <h1 class="page-title">规格管理</h1>
-        <p class="page-description">管理系统中的商品规格信息，包括规格代码、价格和状态等</p>
-      </div>
-      <div class="header-actions">
-        <el-button type="primary" @click="handleAdd" size="large">
-          <el-icon><Plus /></el-icon>
-          添加规格
-        </el-button>
-      </div>
-    </div>
-
     <!-- 搜索筛选区域 -->
     <el-card class="filter-card" shadow="never">
       <template #header>
@@ -228,7 +214,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted, watch, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, Refresh, List, Edit, Delete } from '@element-plus/icons-vue'
 
@@ -241,6 +227,25 @@ const pageSize = ref(10)
 const showAddDialog = ref(false)
 const isEditing = ref(false)
 const specForm = ref()
+
+// 表单验证规则
+const formRules = {
+  name: [
+    { required: true, message: '请输入规格名称', trigger: 'blur' },
+    { min: 1, max: 50, message: '规格名称长度在 1 到 50 个字符', trigger: 'blur' }
+  ],
+  goodsId: [
+    { required: true, message: '请选择所属商品', trigger: 'change' }
+  ],
+  spec_code: [
+    { required: true, message: '请输入规格代码', trigger: 'blur' },
+    { min: 1, max: 20, message: '规格代码长度在 1 到 20 个字符', trigger: 'blur' }
+  ],
+  price: [
+    { required: true, message: '请输入价格', trigger: 'blur' },
+    { type: 'number', min: 0, message: '价格不能为负数', trigger: 'blur' }
+  ]
+}
 
 // 当前编辑的规格数据
 const currentSpec = reactive({
@@ -341,6 +346,21 @@ const specifications = ref([
     status: 'active'
   }
 ])
+
+const handleAdd = () => {
+  isEditing.value = false
+  showAddDialog.value = true
+}
+
+const handleSearch = () => {
+  // 搜索逻辑已经在filteredSpecs计算属性中实现
+}
+
+const handleReset = () => {
+  searchKeyword.value = ''
+  filterStatus.value = ''
+  currentPage.value = 1
+}
 
 const editSpec = (spec) => {
   isEditing.value = true
@@ -459,6 +479,27 @@ const resetForm = () => {
 // 监听筛选条件变化
 watch([filterStatus], () => {
   currentPage.value = 1
+})
+
+// 过滤后的规格数据
+const filteredSpecs = computed(() => {
+  let filtered = specifications.value
+  
+  // 根据搜索关键词过滤
+  if (searchKeyword.value) {
+    const keyword = searchKeyword.value.toLowerCase()
+    filtered = filtered.filter(spec => 
+      spec.name.toLowerCase().includes(keyword) ||
+      spec.spec_code.toLowerCase().includes(keyword)
+    )
+  }
+  
+  // 根据状态过滤
+  if (filterStatus.value) {
+    filtered = filtered.filter(spec => spec.status === filterStatus.value)
+  }
+  
+  return filtered
 })
 
 // 监听搜索关键词变化

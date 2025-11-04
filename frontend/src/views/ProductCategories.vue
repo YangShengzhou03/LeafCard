@@ -1,17 +1,5 @@
 <template>
   <div class="categories-container">
-    <!-- 页面标题和操作区域 -->
-    <div class="page-header">
-      <div class="header-content">
-        <h1 class="page-title">商品分类管理</h1>
-        <p class="page-description">管理系统中的商品分类，支持分类的增删改查和状态管理</p>
-      </div>
-      <el-button type="primary" size="large" @click="showAddDialog = true" class="add-button">
-        <el-icon><Plus /></el-icon>
-        添加分类
-      </el-button>
-    </div>
-
     <!-- 搜索和筛选区域 -->
     <el-card class="filter-card" shadow="never">
       <div class="filter-content">

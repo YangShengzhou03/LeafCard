@@ -84,18 +84,15 @@ const hasBreadcrumb = computed(() => props.breadcrumb.length > 0)
 }
 
 .page-header {
-  background-color: var(--bg-primary);
-  border-bottom: 1px solid var(--border-light);
+  background-color: #fff;
+  border-bottom: 1px solid #e6e6e6;
   padding: 20px 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
 }
 
 .header-left {
@@ -108,7 +105,7 @@ const hasBreadcrumb = computed(() => props.breadcrumb.length > 0)
   margin: 0;
   font-size: 20px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #303133;
 }
 
 .breadcrumb {
@@ -136,10 +133,9 @@ const hasBreadcrumb = computed(() => props.breadcrumb.length > 0)
 }
 
 .filter-card {
-  background-color: var(--bg-tertiary);
-  border: 1px solid var(--border-light);
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background-color: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
 }
 
 .stats-section {
@@ -153,8 +149,7 @@ const hasBreadcrumb = computed(() => props.breadcrumb.length > 0)
 
 .main-card {
   min-height: 400px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
 }
 
 .toolbar {
@@ -170,7 +165,6 @@ const hasBreadcrumb = computed(() => props.breadcrumb.length > 0)
   margin-top: 16px;
 }
 
-/* 响应式设计 */
 @media (max-width: 768px) {
   .page-header {
     padding: 16px;

@@ -1,17 +1,5 @@
 <template>
   <div class="cards-container">
-    <!-- 页面标题和操作区域 -->
-    <div class="page-header">
-      <div class="header-content">
-        <h1 class="page-title">卡密管理</h1>
-        <p class="page-description">管理系统中的卡密信息，支持搜索、筛选和批量操作</p>
-      </div>
-      <el-button type="primary" size="large" @click="showAddDialog = true" class="add-button">
-        <el-icon><Plus /></el-icon>
-        添加卡密
-      </el-button>
-    </div>
-
     <!-- 搜索和筛选区域 -->
     <el-card class="filter-card" shadow="never">
       <div class="filter-content">
@@ -158,7 +146,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Search, View, Delete } from '@element-plus/icons-vue'
+import { Search, View, Delete } from '@element-plus/icons-vue'
 
 // 响应式数据
 const loading = ref(false)

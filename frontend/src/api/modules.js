@@ -53,7 +53,6 @@ export const cardService = {
   
   // 添加卡密
   async addCard(data) {
-    const cardStore = useCardStore()
     const notificationStore = useNotificationStore()
     
     try {
@@ -72,7 +71,6 @@ export const cardService = {
   
   // 批量添加卡密
   async batchAddCards(data) {
-    const cardStore = useCardStore()
     const notificationStore = useNotificationStore()
     
     try {

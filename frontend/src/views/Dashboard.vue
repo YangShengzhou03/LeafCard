@@ -1,762 +1,450 @@
 <template>
   <div class="dashboard">
-    <!-- 统计卡片区域 -->
-    <el-row :gutter="20" class="stats-grid">
-      <el-col :xs="24" :sm="12" :md="6" v-for="stat in stats" :key="stat.title">
-        <el-card class="stat-card" shadow="hover">
-          <div class="stat-content">
-            <div class="stat-icon" :class="stat.iconClass">
-              <i :class="stat.icon"></i>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value">{{ stat.value }}</div>
-              <div class="stat-title">{{ stat.title }}</div>
-              <div v-if="stat.trend" class="stat-trend" :class="stat.trend > 0 ? 'trend-up' : 'trend-down'">
-                <i :class="stat.trend > 0 ? 'el-icon-top' : 'el-icon-bottom'"></i>
-                {{ Math.abs(stat.trend) }}%
-              </div>
-            </div>
+    <div class="stats-grid">
+      <div class="stat-card" v-for="(stat, index) in stats" :key="index">
+        <div class="stat-content">
+          <div class="stat-icon" :style="{ backgroundColor: '#f5f7fa', color: '#606266' }">
+            <el-icon><component :is="stat.icon" /></el-icon>
           </div>
-        </el-card>
-      </el-col>
-    </el-row>
+          <div class="stat-info">
+            <div class="stat-value">{{ stat.value }}</div>
+            <div class="stat-label">{{ stat.label }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <!-- 图表区域 -->
-    <el-row :gutter="20" class="charts-section">
-      <el-col :xs="24" :lg="12">
-        <el-card class="chart-card">
-          <template #header>
-            <div class="chart-header">
-              <h3 class="chart-title">卡密激活趋势</h3>
-              <el-radio-group v-model="activationPeriod" size="small" @change="updateActivationChart">
-                <el-radio-button label="day">日</el-radio-button>
-                <el-radio-button label="week">周</el-radio-button>
-                <el-radio-button label="month">月</el-radio-button>
-              </el-radio-group>
-            </div>
-          </template>
-          <div id="activationChart" class="chart-container"></div>
-        </el-card>
-      </el-col>
-      <el-col :xs="24" :lg="12">
-        <el-card class="chart-card">
-          <template #header>
-            <div class="chart-header">
-              <h3 class="chart-title">收入趋势</h3>
-              <el-radio-group v-model="revenuePeriod" size="small" @change="updateRevenueChart">
-                <el-radio-button label="day">日</el-radio-button>
-                <el-radio-button label="week">周</el-radio-button>
-                <el-radio-button label="month">月</el-radio-button>
-              </el-radio-group>
-            </div>
-          </template>
-          <div id="revenueChart" class="chart-container"></div>
-        </el-card>
-      </el-col>
-    </el-row>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">销售趋势</h3>
+        </div>
+        <div class="chart-container">
+          <div ref="salesChart" class="chart"></div>
+        </div>
+      </div>
 
-    <!-- 信息区域 -->
-    <el-row :gutter="20" class="info-section">
-      <el-col :xs="24" :lg="12">
-        <el-card class="info-card">
-          <template #header>
-            <h3 class="info-title">系统信息</h3>
-          </template>
-          <div class="system-info">
-            <div class="info-item" v-for="item in systemInfo" :key="item.label">
-              <div class="info-label">
-                <i :class="item.icon" class="info-icon"></i>
-                {{ item.label }}:
-              </div>
-              <div class="info-value">{{ item.value }}</div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">商品分类统计</h3>
+        </div>
+        <div class="chart-container">
+          <div ref="categoryChart" class="chart"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-header">
+          <h3 class="info-title">系统信息</h3>
+        </div>
+        <div class="system-info">
+          <div class="info-item">
+            <div class="info-label">
+              <el-icon><Monitor /></el-icon>
+              <span>系统版本</span>
+            </div>
+            <div class="info-value">v1.0.0</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">
+              <el-icon><Clock /></el-icon>
+              <span>运行时间</span>
+            </div>
+            <div class="info-value">7天12小时</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">
+              <el-icon><Cpu /></el-icon>
+              <span>CPU使用率</span>
+            </div>
+            <div class="info-value">25%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-header">
+          <h3 class="info-title">分类统计</h3>
+        </div>
+        <div class="category-stats">
+          <div class="category-item" v-for="(category, index) in categories" :key="index">
+            <div class="category-info">
+              <span class="category-name">{{ category.name }}</span>
+              <span class="category-count">{{ category.count }} 个</span>
             </div>
           </div>
-        </el-card>
-      </el-col>
-      <el-col :xs="24" :lg="12">
-        <el-card class="info-card">
-          <template #header>
-            <h3 class="info-title">产品分类统计</h3>
-          </template>
-          <div class="category-stats">
-            <div class="category-item" v-for="category in categories" :key="category.name">
-              <div class="category-info">
-                <span class="category-name">{{ category.name }}</span>
-                <el-progress 
-                  :percentage="category.percentage" 
-                  :show-text="false" 
-                  :stroke-width="8"
-                  :color="category.color">
-                </el-progress>
-              </div>
-              <span class="category-count">{{ category.count }}</span>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch, computed, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { Monitor, Clock, Cpu } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
-import { ElMessage } from 'element-plus'
-import api from '@/api'
+import { statsService } from '@/api/modules'
 
-// 响应式数据
-const stats = reactive([
-  {
-    title: '用户总数',
-    value: '1,524',
-    icon: 'el-icon-user',
-    iconClass: 'user-icon',
-    trend: 12.5
-  },
-  {
-    title: '卡密总数',
-    value: '8,923',
-    icon: 'el-icon-credit-card',
-    iconClass: 'card-icon',
-    trend: 8.3
-  },
-  {
-    title: '已激活卡密',
-    value: '6,542',
-    icon: 'el-icon-check',
-    iconClass: 'active-icon',
-    trend: 73.2
-  },
-  {
-    title: '总收入',
-    value: '¥152,400',
-    icon: 'el-icon-money',
-    iconClass: 'revenue-icon',
-    trend: 15.8
-  }
+// 统计数据
+const stats = ref([
+  { label: '总用户数', value: '1,234', icon: 'User' },
+  { label: '总商品数', value: '567', icon: 'ShoppingBag' },
+  { label: '总卡密数', value: '890', icon: 'CreditCard' },
+  { label: '今日销售', value: '123', icon: 'TrendCharts' }
 ])
 
-const activationPeriod = ref('week')
-const revenuePeriod = ref('week')
-
-// 系统信息
-const systemInfo = reactive([
-  { label: '系统版本', value: 'v1.0.0', icon: 'el-icon-monitor' },
-  { label: '运行时间', value: '15天8小时32分钟', icon: 'el-icon-time' },
-  { label: '存储状态', value: '正常', icon: 'el-icon-folder-checked' },
-  { label: '最后更新', value: '2024-01-15 14:30', icon: 'el-icon-refresh' }
+// 分类数据
+const categories = ref([
+  { name: '游戏点卡', count: 120 },
+  { name: '软件激活码', count: 85 },
+  { name: '会员卡', count: 156 },
+  { name: '其他', count: 45 }
 ])
 
-// 产品分类统计
-const categories = reactive([
-  { name: '软件授权', count: '2,345', percentage: 65, color: '#409EFF' },
-  { name: '游戏道具', count: '1,892', percentage: 52, color: '#67C23A' },
-  { name: '会员服务', count: '1,567', percentage: 43, color: '#E6A23C' },
-  { name: '其他产品', count: '876', percentage: 24, color: '#909399' }
-])
+// 图表引用
+const salesChart = ref(null)
+const categoryChart = ref(null)
 
 // 图表实例
-let activationChart = null
-let revenueChart = null
+let salesChartInstance = null
+let categoryChartInstance = null
 
-// 格式化金额
-const formatMoney = (amount) => {
-  return amount.toLocaleString('zh-CN', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })
-}
-
-// 初始化激活趋势图表
-const initActivationChart = () => {
-  const chartDom = document.getElementById('activationChart')
-  if (!chartDom) return
+// 初始化销售趋势图
+const initSalesChart = () => {
+  if (!salesChart.value) return
   
-  activationChart = echarts.init(chartDom)
-  updateActivationChart()
-}
-
-// 更新激活趋势图表
-const updateActivationChart = async () => {
-  if (!activationChart) return
+  salesChartInstance = echarts.init(salesChart.value)
   
-  try {
-    // 获取图表数据
-    const response = await api.get('/admin/charts/activation', {
-      params: { period: activationPeriod.value }
-    })
-    
-    const data = response.data || generateMockActivationData(activationPeriod.value)
-    
-    const option = {
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: {
-          type: 'cross'
+  const option = {
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+      axisLine: {
+        lineStyle: {
+          color: '#dcdfe6'
         }
       },
-      grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        containLabel: true
-      },
-      xAxis: {
-        type: 'category',
-        boundaryGap: false,
-        data: data.dates
-      },
-      yAxis: {
-        type: 'value'
-      },
-      series: [
-        {
-          name: '激活数量',
-          type: 'line',
-          smooth: true,
-          areaStyle: {
-            opacity: 0.3
-          },
-          emphasis: {
-            focus: 'series'
-          },
-          data: data.values,
-          itemStyle: {
-            color: '#409EFF'
-          },
-          areaStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              {
-                offset: 0,
-                color: 'rgba(64, 158, 255, 0.3)'
-              },
-              {
-                offset: 1,
-                color: 'rgba(64, 158, 255, 0.05)'
-              }
-            ])
-          }
-        }
-      ]
-    }
-    
-    activationChart.setOption(option)
-  } catch (error) {
-    console.error('获取激活趋势数据失败:', error)
-    // 使用模拟数据
-    const data = generateMockActivationData(activationPeriod.value)
-    const option = {
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: {
-          type: 'cross'
+      axisLabel: {
+        color: '#606266'
+      }
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: {
+        lineStyle: {
+          color: '#dcdfe6'
         }
       },
-      grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        containLabel: true
+      axisLabel: {
+        color: '#606266'
       },
-      xAxis: {
-        type: 'category',
-        boundaryGap: false,
-        data: data.dates
-      },
-      yAxis: {
-        type: 'value'
-      },
-      series: [
-        {
-          name: '激活数量',
-          type: 'line',
-          smooth: true,
-          areaStyle: {
-            opacity: 0.3
-          },
-          emphasis: {
-            focus: 'series'
-          },
-          data: data.values,
-          itemStyle: {
-            color: '#409EFF'
-          },
-          areaStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              {
-                offset: 0,
-                color: 'rgba(64, 158, 255, 0.3)'
-              },
-              {
-                offset: 1,
-                color: 'rgba(64, 158, 255, 0.05)'
-              }
-            ])
-          }
+      splitLine: {
+        lineStyle: {
+          color: '#ebeef5'
         }
-      ]
-    }
-    
-    activationChart.setOption(option)
-  }
-}
-
-// 初始化收入趋势图表
-const initRevenueChart = () => {
-  const chartDom = document.getElementById('revenueChart')
-  if (!chartDom) return
-  
-  revenueChart = echarts.init(chartDom)
-  updateRevenueChart()
-}
-
-// 更新收入趋势图表
-const updateRevenueChart = async () => {
-  if (!revenueChart) return
-  
-  try {
-    // 获取图表数据
-    const response = await api.get('/admin/charts/revenue', {
-      params: { period: revenuePeriod.value }
-    })
-    
-    const data = response.data || generateMockRevenueData(revenuePeriod.value)
-    
-    const option = {
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: {
-          type: 'cross'
+      }
+    },
+    series: [
+      {
+        name: '销售额',
+        type: 'line',
+        smooth: true,
+        data: [120, 132, 101, 134, 90, 230, 210],
+        itemStyle: {
+          color: '#409eff'
         },
-        formatter: function (params) {
-          const value = params[0].value
-          return `${params[0].name}<br/>收入: ¥${formatMoney(value)}`
-        }
-      },
-      grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        containLabel: true
-      },
-      xAxis: {
-        type: 'category',
-        boundaryGap: false,
-        data: data.dates
-      },
-      yAxis: {
-        type: 'value',
-        axisLabel: {
-          formatter: '¥{value}'
-        }
-      },
-      series: [
-        {
-          name: '收入',
-          type: 'line',
-          smooth: true,
-          areaStyle: {
-            opacity: 0.3
-          },
-          emphasis: {
-            focus: 'series'
-          },
-          data: data.values,
-          itemStyle: {
-            color: '#67C23A'
-          },
-          areaStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              {
-                offset: 0,
-                color: 'rgba(103, 194, 58, 0.3)'
-              },
-              {
-                offset: 1,
-                color: 'rgba(103, 194, 58, 0.05)'
-              }
-            ])
-          }
-        }
-      ]
-    }
-    
-    revenueChart.setOption(option)
-  } catch (error) {
-    console.error('获取收入趋势数据失败:', error)
-    // 使用模拟数据
-    const data = generateMockRevenueData(revenuePeriod.value)
-    const option = {
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: {
-          type: 'cross'
+        lineStyle: {
+          color: '#409eff'
         },
-        formatter: function (params) {
-          const value = params[0].value
-          return `${params[0].name}<br/>收入: ¥${formatMoney(value)}`
+        areaStyle: {
+          color: 'rgba(64, 158, 255, 0.1)'
         }
-      },
-      grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        containLabel: true
-      },
-      xAxis: {
-        type: 'category',
-        boundaryGap: false,
-        data: data.dates
-      },
-      yAxis: {
-        type: 'value',
-        axisLabel: {
-          formatter: '¥{value}'
-        }
-      },
-      series: [
-        {
-          name: '收入',
-          type: 'line',
-          smooth: true,
-          areaStyle: {
-            opacity: 0.3
-          },
-          emphasis: {
-            focus: 'series'
-          },
-          data: data.values,
+      }
+    ]
+  }
+  
+  salesChartInstance.setOption(option)
+}
+
+// 初始化分类统计图
+const initCategoryChart = () => {
+  if (!categoryChart.value) return
+  
+  categoryChartInstance = echarts.init(categoryChart.value)
+  
+  const option = {
+    tooltip: {
+      trigger: 'item'
+    },
+    series: [
+      {
+        name: '分类统计',
+        type: 'pie',
+        radius: '70%',
+        data: [
+          { value: 120, name: '游戏点卡' },
+          { value: 85, name: '软件激活码' },
+          { value: 156, name: '会员卡' },
+          { value: 45, name: '其他' }
+        ],
+        emphasis: {
           itemStyle: {
-            color: '#67C23A'
-          },
-          areaStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              {
-                offset: 0,
-                color: 'rgba(103, 194, 58, 0.3)'
-              },
-              {
-                offset: 1,
-                color: 'rgba(103, 194, 58, 0.05)'
-              }
-            ])
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
           }
         }
-      ]
-    }
-    
-    revenueChart.setOption(option)
-  }
-}
-
-// 生成模拟激活数据
-const generateMockActivationData = (period) => {
-  let dates = []
-  let values = []
-  
-  if (period === 'week') {
-    // 本周数据
-    const weekDays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
-    dates = weekDays
-    values = [12, 19, 15, 25, 32, 28, 42]
-  } else if (period === 'month') {
-    // 本月数据
-    for (let i = 1; i <= 30; i++) {
-      dates.push(`${i}日`)
-      values.push(Math.floor(Math.random() * 50) + 10)
-    }
-  } else {
-    // 本年数据
-    const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
-    dates = months
-    values = [320, 402, 301, 434, 490, 530, 610, 734, 820, 932, 901, 1034]
+      }
+    ]
   }
   
-  return { dates, values }
+  categoryChartInstance.setOption(option)
 }
 
-// 生成模拟收入数据
-const generateMockRevenueData = (period) => {
-  let dates = []
-  let values = []
-  
-  if (period === 'week') {
-    // 本周数据
-    const weekDays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
-    dates = weekDays
-    values = [1200, 1900, 1500, 2500, 3200, 2800, 4200]
-  } else if (period === 'month') {
-    // 本月数据
-    for (let i = 1; i <= 30; i++) {
-      dates.push(`${i}日`)
-      values.push(Math.floor(Math.random() * 5000) + 1000)
-    }
-  } else {
-    // 本年数据
-    const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
-    dates = months
-    values = [12000, 19000, 15000, 25000, 32000, 28000, 42000, 38000, 45000, 52000, 48000, 61000]
-  }
-  
-  return { dates, values }
-}
-
-// 窗口大小改变时重新调整图表大小
-const resizeCharts = () => {
-  if (activationChart) activationChart.resize()
-  if (revenueChart) revenueChart.resize()
-}
-
-
-
-// 加载仪表盘数据
-const loadDashboardData = async () => {
+// 获取仪表盘数据
+const fetchDashboardData = async () => {
   try {
-    // 调用后端API获取真实数据
-    const response = await api.get('/admin/stats')
-    
-    // 更新统计数据
-    stats.value = {
-      userCount: response.data.userCount || 0,
-      userGrowth: response.data.userGrowth || 0,
-      cardCount: response.data.cardCount || 0,
-      cardGrowth: response.data.cardGrowth || 0,
-      activeCardCount: response.data.activeCardCount || 0,
-      activeRate: response.data.activeRate || 0,
-      totalRevenue: response.data.totalRevenue || 0,
-      revenueGrowth: response.data.revenueGrowth || 0,
-      specCount: response.data.specCount || 0,
-      activeSpecCount: response.data.activeSpecCount || 0,
-      categoryCount: response.data.categoryCount || 0,
-      activeCategoryCount: response.data.activeCategoryCount || 0,
-      todayActiveCount: response.data.todayActiveCount || 0,
-      todayGrowth: response.data.todayGrowth || 0
+    const response = await statsService.getDashboardStats()
+    if (response.success) {
+      // 更新统计数据
+      stats.value[0].value = response.data.totalUsers || '1,234'
+      stats.value[1].value = response.data.totalProducts || '567'
+      stats.value[2].value = response.data.totalCards || '890'
+      stats.value[3].value = response.data.todaySales || '123'
+      
+      // 更新分类数据
+      if (response.data.categories) {
+        categories.value = response.data.categories
+      }
+      
+      // 更新图表数据
+      if (response.data.salesData) {
+        updateSalesChart(response.data.salesData)
+      }
+      
+      if (response.data.categoryData) {
+        updateCategoryChart(response.data.categoryData)
+      }
     }
-    
-    // 更新系统运行时间
-    uptime.value = response.data.uptime || ''
   } catch (error) {
-    ElMessage.error('加载仪表盘数据失败: ' + (error.response?.data?.message || error.message))
-    
-    // 如果API调用失败，使用模拟数据
-    stats.value = {
-      userCount: 1286,
-      userGrowth: 12.5,
-      cardCount: 5420,
-      cardGrowth: 18.3,
-      activeCardCount: 3896,
-      activeRate: 71.9,
-      totalRevenue: 128560,
-      revenueGrowth: 25.8,
-      specCount: 15,
-      activeSpecCount: 12,
-      categoryCount: 8,
-      activeCategoryCount: 7,
-      todayActiveCount: 42,
-      todayGrowth: 8.5
-    }
-    
-    uptime.value = '15天 8小时 32分钟'
+    console.error('获取仪表盘数据失败:', error)
   }
 }
 
-onMounted(() => {
-  loadDashboardData()
+// 更新销售趋势图
+const updateSalesChart = (data) => {
+  if (!salesChartInstance) return
   
-  // 等待DOM渲染完成后初始化图表
-  nextTick(() => {
-    initActivationChart()
-    initRevenueChart()
-    
-    // 监听窗口大小变化
-    window.addEventListener('resize', resizeCharts)
-  })
+  const option = {
+    xAxis: {
+      data: data.dates || ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+    },
+    series: [
+      {
+        data: data.values || [120, 132, 101, 134, 90, 230, 210]
+      }
+    ]
+  }
+  
+  salesChartInstance.setOption(option)
+}
+
+// 更新分类统计图
+const updateCategoryChart = (data) => {
+  if (!categoryChartInstance) return
+  
+  const option = {
+    series: [
+      {
+        data: data || [
+          { value: 120, name: '游戏点卡' },
+          { value: 85, name: '软件激活码' },
+          { value: 156, name: '会员卡' },
+          { value: 45, name: '其他' }
+        ]
+      }
+    ]
+  }
+  
+  categoryChartInstance.setOption(option)
+}
+
+// 窗口大小改变时重新调整图表
+const handleResize = () => {
+  if (salesChartInstance) {
+    salesChartInstance.resize()
+  }
+  if (categoryChartInstance) {
+    categoryChartInstance.resize()
+  }
+}
+
+onMounted(async () => {
+  await nextTick()
+  
+  // 初始化图表
+  initSalesChart()
+  initCategoryChart()
+  
+  // 获取仪表盘数据
+  fetchDashboardData()
+  
+  // 监听窗口大小变化
+  window.addEventListener('resize', handleResize)
 })
 
-// 监听周期选择变化
-watch(activationPeriod, () => {
-  updateActivationChart()
-})
-
-watch(revenuePeriod, () => {
-  updateRevenueChart()
+// 组件卸载时清理
+onUnmounted(() => {
+  if (salesChartInstance) {
+    salesChartInstance.dispose()
+  }
+  if (categoryChartInstance) {
+    categoryChartInstance.dispose()
+  }
+  window.removeEventListener('resize', handleResize)
 })
 </script>
 
 <style scoped>
 .dashboard {
-  padding: 24px;
-  background-color: var(--bg-secondary);
-  min-height: calc(100vh - 64px);
+  padding: 20px;
+  background-color: #f5f7fa;
+  min-height: 100vh;
 }
 
-/* 统计卡片区域 */
 .stats-grid {
-  margin-bottom: 32px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
 }
 
 .stat-card {
-  border-radius: var(--border-radius-large);
-  border: 1px solid var(--border-light);
-  box-shadow: var(--shadow-light);
-  transition: all 0.3s ease;
-  overflow: hidden;
+  background-color: #fff;
+  border-radius: 4px;
+  padding: 20px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s;
 }
 
 .stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-dark);
-  border-color: var(--primary-light);
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
 }
 
 .stat-content {
   display: flex;
   align-items: center;
-  padding: var(--spacing-lg);
 }
 
 .stat-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: var(--border-radius-large);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: var(--spacing-lg);
   font-size: 28px;
-  color: white;
-  flex-shrink: 0;
-}
-
-.user-icon { 
-  background: linear-gradient(135deg, #409EFF, #66b1ff); 
-  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
-}
-
-.card-icon { 
-  background: linear-gradient(135deg, #67C23A, #85ce61); 
-  box-shadow: 0 4px 12px rgba(103, 194, 58, 0.3);
-}
-
-.active-icon { 
-  background: linear-gradient(135deg, #E6A23C, #ebb563); 
-  box-shadow: 0 4px 12px rgba(230, 162, 60, 0.3);
-}
-
-.revenue-icon { 
-  background: linear-gradient(135deg, #F56C6C, #f78989); 
-  box-shadow: 0 4px 12px rgba(245, 108, 108, 0.3);
+  margin-right: 16px;
 }
 
 .stat-info {
   flex: 1;
-  min-width: 0;
 }
 
 .stat-value {
   font-size: 28px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-xs);
-  line-height: 1.2;
-}
-
-.stat-title {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  margin-bottom: var(--spacing-sm);
-  font-weight: 500;
-}
-
-.stat-trend {
-  display: inline-flex;
-  align-items: center;
-  font-size: var(--font-size-xs);
   font-weight: 600;
-  padding: 4px 8px;
-  border-radius: var(--border-radius-small);
-  background-color: rgba(103, 194, 58, 0.1);
+  color: #303133;
+  margin-bottom: 8px;
 }
 
-.trend-up {
-  color: var(--success-color);
-  background-color: rgba(103, 194, 58, 0.1);
+.stat-label {
+  font-size: 14px;
+  color: #909399;
 }
 
-.trend-down {
-  color: var(--danger-color);
-  background-color: rgba(245, 108, 108, 0.1);
-}
-
-/* 图表区域 */
-.charts-section {
-  margin-bottom: 32px;
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
 }
 
 .chart-card {
-  border-radius: var(--border-radius-large);
-  border: 1px solid var(--border-light);
-  box-shadow: var(--shadow-light);
-  transition: all 0.3s ease;
-}
-
-.chart-card:hover {
-  box-shadow: var(--shadow-base);
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .chart-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #ebeef5;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-lg) var(--spacing-lg) 0;
+  justify-content: space-between;
 }
 
 .chart-title {
   margin: 0;
-  font-size: var(--font-size-lg);
+  font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #303133;
 }
 
 .chart-container {
-  height: 320px;
-  width: 100%;
-  padding: var(--spacing-lg);
+  padding: 20px;
+  height: 300px;
 }
 
-/* 信息区域 */
-.info-section {
-  margin-bottom: 32px;
+.chart {
+  width: 100%;
+  height: 100%;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
 }
 
 .info-card {
-  border-radius: var(--border-radius-large);
-  border: 1px solid var(--border-light);
-  box-shadow: var(--shadow-light);
-  transition: all 0.3s ease;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
-.info-card:hover {
-  box-shadow: var(--shadow-base);
+.info-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #ebeef5;
 }
 
 .info-title {
   margin: 0;
-  font-size: var(--font-size-lg);
+  font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #303133;
 }
 
 .system-info {
-  padding: var(--spacing-sm) 0;
+  padding: 16px 20px;
 }
 
 .info-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-base) 0;
-  border-bottom: 1px solid var(--border-light);
+  padding: 12px 0;
+  border-bottom: 1px solid #ebeef5;
 }
 
 .info-item:last-child {
@@ -766,33 +454,33 @@ watch(revenuePeriod, () => {
 .info-label {
   display: flex;
   align-items: center;
-  font-size: var(--font-size-sm);
-  color: var(--text-regular);
+  font-size: 14px;
+  color: #606266;
   font-weight: 500;
 }
 
-.info-icon {
-  margin-right: var(--spacing-sm);
-  font-size: var(--font-size-base);
-  color: var(--primary-color);
+.info-label .el-icon {
+  margin-right: 8px;
+  font-size: 16px;
+  color: #409eff;
 }
 
 .info-value {
-  font-size: var(--font-size-sm);
+  font-size: 14px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #303133;
 }
 
 .category-stats {
-  padding: var(--spacing-sm) 0;
+  padding: 16px 20px;
 }
 
 .category-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-base) 0;
-  border-bottom: 1px solid var(--border-light);
+  padding: 12px 0;
+  border-bottom: 1px solid #ebeef5;
 }
 
 .category-item:last-child {
@@ -801,142 +489,47 @@ watch(revenuePeriod, () => {
 
 .category-info {
   flex: 1;
-  margin-right: var(--spacing-lg);
 }
 
 .category-name {
   display: block;
-  font-size: var(--font-size-sm);
-  color: var(--text-regular);
-  margin-bottom: var(--spacing-xs);
+  font-size: 14px;
+  color: #606266;
+  margin-bottom: 4px;
   font-weight: 500;
 }
 
 .category-count {
-  font-size: var(--font-size-sm);
+  font-size: 14px;
   font-weight: 600;
-  color: var(--text-primary);
-  min-width: 60px;
-  text-align: right;
-}
-
-/* 响应式设计 */
-@media (max-width: 1200px) {
-  .stat-value {
-    font-size: 24px;
-  }
-  
-  .chart-container {
-    height: 280px;
-  }
+  color: #303133;
 }
 
 @media (max-width: 768px) {
   .dashboard {
-    padding: var(--spacing-lg);
+    padding: 16px;
   }
   
   .stats-grid {
-    margin-bottom: var(--spacing-lg);
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
   }
   
-  .stat-content {
-    padding: var(--spacing-base);
+  .charts-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
   }
   
-  .stat-icon {
-    width: 48px;
-    height: 48px;
-    font-size: 24px;
-    margin-right: var(--spacing-base);
-  }
-  
-  .stat-value {
-    font-size: 20px;
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
   
   .chart-container {
-    height: 240px;
-    padding: var(--spacing-base);
+    height: 250px;
+    padding: 16px;
   }
-  
-  .chart-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-base);
-    padding: var(--spacing-base) var(--spacing-base) 0;
-  }
-  
-  .info-item, .category-item {
-    padding: var(--spacing-sm) 0;
-  }
-}
-
-@media (max-width: 480px) {
-  .dashboard {
-    padding: var(--spacing-base);
-  }
-  
-  .stat-content {
-    flex-direction: column;
-    text-align: center;
-    padding: var(--spacing-lg);
-  }
-  
-  .stat-icon {
-    margin-right: 0;
-    margin-bottom: var(--spacing-base);
-  }
-  
-  .stat-value {
-    font-size: 18px;
-  }
-  
-  .chart-container {
-    height: 200px;
-    padding: var(--spacing-sm);
-  }
-  
-  .category-info {
-    margin-right: var(--spacing-base);
-  }
-}
-
-/* 动画效果 */
-.stat-card,
-.chart-card,
-.info-card {
-  animation: fadeInUp 0.6s ease-out;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* 滚动条样式 */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border-base);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--border-dark);
 }
 </style>

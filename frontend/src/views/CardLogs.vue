@@ -1,20 +1,5 @@
 <template>
   <div class="logs-container">
-    <!-- 页面标题 -->
-    <div class="card-header">
-      <span class="page-title">卡密操作记录</span>
-      <div class="header-actions">
-        <el-button @click="exportLogs" :loading="exporting">
-          <el-icon><Download /></el-icon>
-          导出日志
-        </el-button>
-        <el-button type="danger" @click="clearLogs" :loading="clearing">
-          <el-icon><Delete /></el-icon>
-          清理日志
-        </el-button>
-      </div>
-    </div>
-
     <!-- 搜索和筛选 -->
     <div class="filter-container">
       <el-input
@@ -194,7 +179,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { cardLogAPI } from '@/api'
 
 // 响应式数据
 const loading = ref(false)

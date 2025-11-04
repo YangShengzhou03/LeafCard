@@ -1,21 +1,5 @@
 <template>
   <div class="product-goods-container">
-    <!-- 页面标题和操作区域 -->
-    <div class="page-header">
-      <div class="header-content">
-        <h1 class="page-title">商品管理</h1>
-        <p class="page-description">管理您的商品信息，包括商品名称、描述、状态和规格配置</p>
-      </div>
-      <el-button 
-        type="primary" 
-        class="add-button"
-        @click="handleAdd"
-        :icon="Plus"
-      >
-        新增商品
-      </el-button>
-    </div>
-
     <!-- 搜索筛选区域 -->
     <el-card class="filter-card" shadow="never">
       <div class="filter-content">

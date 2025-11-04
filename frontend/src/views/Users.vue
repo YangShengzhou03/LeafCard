@@ -1,14 +1,5 @@
 <template>
   <div class="users-container">
-    <!-- 搜索和筛选 -->
-    <div class="card-header">
-      <span>用户管理</span>
-      <el-button type="primary" @click="showAddDialog = true">
-        <el-icon><Plus /></el-icon>
-        添加用户
-      </el-button>
-    </div>
-
     <div class="filter-container">
       <el-row :gutter="20">
         <el-col :span="6">

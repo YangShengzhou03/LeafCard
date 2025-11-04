@@ -206,7 +206,7 @@ defineExpose({
 .filter-form {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-base);
+  gap: 16px;
   align-items: flex-end;
 }
 
@@ -216,14 +216,13 @@ defineExpose({
 
 :deep(.el-form-item__label) {
   font-weight: 500;
-  color: var(--text-regular);
+  color: #606266;
 }
 
 .action-buttons {
   margin-left: auto;
 }
 
-/* 响应式设计 */
 @media (max-width: 768px) {
   .filter-form {
     flex-direction: column;
@@ -237,7 +236,7 @@ defineExpose({
   .action-buttons {
     margin-left: 0;
     display: flex;
-    gap: var(--spacing-sm);
+    gap: 8px;
   }
   
   :deep(.action-buttons .el-button) {
@@ -247,7 +246,7 @@ defineExpose({
 
 @media (min-width: 769px) and (max-width: 1024px) {
   .filter-form {
-    gap: var(--spacing-sm);
+    gap: 8px;
   }
   
   :deep(.el-form-item) {

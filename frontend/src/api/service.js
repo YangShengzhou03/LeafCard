@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { ElMessage, ElLoading } from 'element-plus'
-import api from '@/api'
+import http from '@/utils/http'
 
 // 请求状态管理
 export const useApiStore = defineStore('api', () => {
@@ -91,7 +91,32 @@ export const useApiStore = defineStore('api', () => {
 // API服务封装
 export class ApiService {
   constructor() {
-    this.apiStore = useApiStore()
+    // 延迟初始化store，避免在Pinia未初始化时调用
+    this.apiStore = null
+  }
+  
+  // 获取store实例（延迟初始化）
+  getStore() {
+    if (!this.apiStore) {
+      try {
+        this.apiStore = useApiStore()
+      } catch (error) {
+        // 如果Pinia未初始化，返回一个模拟的store
+        console.warn('Pinia store not available, using fallback store')
+        this.apiStore = this.createFallbackStore()
+      }
+    }
+    return this.apiStore
+  }
+  
+  // 创建备用store
+  createFallbackStore() {
+    return {
+      showLoading: () => {},
+      hideLoading: () => {},
+      setError: () => {},
+      clearError: () => {}
+    }
   }
   
   // 通用请求方法
@@ -106,29 +131,29 @@ export class ApiService {
     try {
       // 显示加载状态
       if (showLoading && !silent) {
-        this.apiStore.showLoading(loadingText)
+        this.getStore().showLoading(loadingText)
       }
       
       // 清除之前的错误
-      this.apiStore.clearError()
+      this.getStore().clearError()
       
       // 执行请求
-      const response = await api(config)
+      const response = await http(config)
       
       // 隐藏加载状态
       if (showLoading) {
-        this.apiStore.hideLoading()
+        this.getStore().hideLoading()
       }
       
       return response
     } catch (error) {
       // 隐藏加载状态
       if (showLoading) {
-        this.apiStore.hideLoading()
+        this.getStore().hideLoading()
       }
       
       // 设置错误状态
-      this.apiStore.setError(error)
+      this.getStore().setError(error)
       
       // 显示错误消息
       if (showError && !silent) {
@@ -283,4 +308,4 @@ export class ApiService {
 export const apiService = new ApiService()
 
 // 导出默认API实例
-export default api
+export default apiService

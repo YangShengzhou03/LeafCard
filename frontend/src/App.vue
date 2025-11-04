@@ -68,27 +68,6 @@
           </el-breadcrumb>
         </div>
         <div class="header-right">
-          <!-- 通知图标 -->
-          <el-badge :value="3" :max="99" class="notification-badge">
-            <el-button text circle class="header-icon">
-              <el-icon><Bell /></el-icon>
-            </el-button>
-          </el-badge>
-          
-          <!-- 全屏切换 -->
-          <el-tooltip content="全屏" placement="bottom">
-            <el-button text circle class="header-icon">
-              <el-icon><FullScreen /></el-icon>
-            </el-button>
-          </el-tooltip>
-          
-          <!-- 主题切换 -->
-          <el-tooltip content="切换主题" placement="bottom">
-            <el-button text circle class="header-icon">
-              <el-icon><Moon /></el-icon>
-            </el-button>
-          </el-tooltip>
-          
           <!-- 用户信息 -->
           <el-dropdown trigger="click" class="user-dropdown">
             <div class="user-info">
@@ -111,11 +90,7 @@
                   <el-icon><Setting /></el-icon>
                   <span>系统设置</span>
                 </el-dropdown-item>
-                <el-dropdown-item class="menu-item">
-                  <el-icon><Help /></el-icon>
-                  <span>帮助文档</span>
-                </el-dropdown-item>
-                <el-dropdown-item divided class="menu-item logout">
+                <el-dropdown-item divided class="menu-item logout" @click="handleLogout">
                   <el-icon><SwitchButton /></el-icon>
                   <span>退出登录</span>
                 </el-dropdown-item>
@@ -135,25 +110,44 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { ElMessageBox, ElMessage } from 'element-plus'
 import {
-  Bell,
-  FullScreen,
-  Moon,
   User,
   ArrowDown,
   Setting,
-  Help,
   SwitchButton
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
+const router = useRouter()
+const authStore = useAuthStore()
 
 const activeMenu = computed(() => route.path)
 const currentRouteTitle = computed(() => route.meta.title || '页面')
 
 // 用户信息
 const userAvatar = ref('')
+
+// 退出登录
+const handleLogout = async () => {
+  try {
+    await ElMessageBox.confirm('确定要退出登录吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    
+    await authStore.logout()
+    ElMessage.success('退出登录成功')
+    router.push('/login')
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('退出登录失败')
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -199,54 +193,17 @@ const userAvatar = ref('')
   background-color: #fff;
   border-bottom: 1px solid #e6e6e6;
   padding: 0 20px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-  position: relative;
-  z-index: 10;
   height: 60px;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 16px;
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-
-.header-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  color: #606266;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.header-icon:hover {
-  background-color: #f5f7fa;
-  color: #409eff;
-  transform: scale(1.05);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.header-icon:active {
-  transform: scale(0.95);
-}
-
-.notification-badge {
-  margin-right: 0;
-}
-
-.notification-badge :deep(.el-badge__content) {
-  border: 2px solid #fff;
-  box-shadow: 0 0 0 1px #409eff;
 }
 
 .user-dropdown {
@@ -259,28 +216,15 @@ const userAvatar = ref('')
   gap: 12px;
   cursor: pointer;
   padding: 8px 16px;
-  border-radius: 8px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 4px;
   min-width: 160px;
   background-color: #f8f9fa;
   border: 1px solid #e9ecef;
 }
 
-.user-info:hover {
-  background-color: #f0f2f5;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
-}
-
 .user-avatar {
   flex-shrink: 0;
   border: 2px solid #e6e6e6;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.user-info:hover .user-avatar {
-  border-color: #409eff;
-  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
 }
 
 .user-details {
@@ -306,12 +250,7 @@ const userAvatar = ref('')
 
 .dropdown-arrow {
   color: #c0c4cc;
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
-}
-
-.user-dropdown:hover .dropdown-arrow {
-  transform: rotate(180deg);
 }
 
 .main-content {
@@ -334,8 +273,8 @@ const userAvatar = ref('')
 
 /* 用户下拉菜单样式 */
 :deep(.user-menu) {
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   border: 1px solid #e4e7ed;
   padding: 8px 0;
   min-width: 160px;
@@ -344,7 +283,6 @@ const userAvatar = ref('')
 :deep(.user-menu .menu-item) {
   padding: 10px 16px;
   line-height: 1.4;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   gap: 12px;

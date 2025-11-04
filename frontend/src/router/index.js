@@ -1,15 +1,22 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const routes = [
   {
     path: '/',
-    redirect: '/dashboard'
+    redirect: '/login'
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('@/views/Login.vue'),
+    meta: { title: '登录' }
   },
   {
     path: '/dashboard',
     name: 'Dashboard',
     component: () => import('@/views/Dashboard.vue'),
-    meta: { title: '仪表盘' }
+    meta: { title: '仪表盘', requiresAuth: true }
   },
   {
     path: '/product',
@@ -19,19 +26,19 @@ const routes = [
     path: '/product/goods',
     name: 'ProductGoods',
     component: () => import('@/views/ProductGoods.vue'),
-    meta: { title: '商品管理' }
+    meta: { title: '商品管理', requiresAuth: true }
   },
   {
     path: '/product/categories',
     name: 'ProductCategories',
     component: () => import('@/views/ProductCategories.vue'),
-    meta: { title: '商品分类' }
+    meta: { title: '商品分类', requiresAuth: true }
   },
   {
     path: '/product/specifications',
     name: 'ProductSpecifications',
     component: () => import('@/views/ProductSpecifications.vue'),
-    meta: { title: '规格管理' }
+    meta: { title: '规格管理', requiresAuth: true }
   },
   {
     path: '/cards',
@@ -41,25 +48,25 @@ const routes = [
     path: '/cards/list',
     name: 'CardsList',
     component: () => import('@/views/Cards.vue'),
-    meta: { title: '卡密列表' }
+    meta: { title: '卡密列表', requiresAuth: true }
   },
   {
     path: '/cards/validation',
     name: 'CardsValidation',
     component: () => import('@/views/Validation.vue'),
-    meta: { title: '卡密验证' }
+    meta: { title: '卡密验证', requiresAuth: true }
   },
   {
     path: '/cards/logs',
     name: 'CardLogs',
     component: () => import('@/views/CardLogs.vue'),
-    meta: { title: '卡密记录' }
+    meta: { title: '卡密记录', requiresAuth: true }
   },
   {
     path: '/users',
     name: 'Users',
     component: () => import('@/views/Users.vue'),
-    meta: { title: '用户管理' }
+    meta: { title: '用户管理', requiresAuth: true }
   }
 ]
 
@@ -68,12 +75,25 @@ const router = createRouter({
   routes
 })
 
-// 路由守卫 - 设置页面标题
+// 路由守卫 - 认证检查和设置页面标题
 router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  
+  // 设置页面标题
   if (to.meta.title) {
     document.title = `${to.meta.title} - Leaf Card`
   }
-  next()
+  
+  // 检查是否需要认证
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    // 如果未认证且不是登录页面，重定向到登录页
+    next('/login')
+  } else if (to.path === '/login' && authStore.isAuthenticated) {
+    // 如果已认证但访问登录页，重定向到仪表盘
+    next('/dashboard')
+  } else {
+    next()
+  }
 })
 
 export default router

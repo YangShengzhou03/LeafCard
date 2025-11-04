@@ -1,10 +1,5 @@
 <template>
   <div class="validation-container">
-    <!-- 页面标题 -->
-    <div class="card-header">
-      <span>卡密验证</span>
-    </div>
-
     <!-- 验证表单 -->
     <div class="validation-form">
       <el-form :model="validationForm" label-width="80px">
