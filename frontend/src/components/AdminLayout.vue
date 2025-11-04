@@ -72,7 +72,7 @@
                 </el-icon>
                 <span>商品列表</span>
               </el-menu-item>
-              <el-menu-item index="/admin/product-specs">
+              <el-menu-item index="/admin/product-spec-management">
                 <el-icon>
                   <List />
                 </el-icon>

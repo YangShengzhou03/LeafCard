@@ -33,12 +33,11 @@
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="name" label="商品名称" min-width="150" />
         <el-table-column prop="category" label="商品类别" width="120" />
-        <el-table-column prop="price" label="价格" width="100">
+        <el-table-column prop="specCount" label="规格数量" width="100">
           <template #default="scope">
-            ¥{{ scope.row.price }}
+            {{ scope.row.specCount || 0 }}
           </template>
         </el-table-column>
-        <el-table-column prop="stock" label="库存" width="100" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="scope">
             <el-tag :type="scope.row.status === 'active' ? 'success' : 'danger'">
@@ -205,8 +204,7 @@ const fetchProductList = () => {
         id: 1,
         name: '游戏点卡100元',
         category: 'game',
-        price: 85.00,
-        stock: 500,
+        specCount: 2,
         status: 'active',
         createTime: '2023-11-15 10:30:00'
       },
@@ -214,8 +212,7 @@ const fetchProductList = () => {
         id: 2,
         name: '视频会员月卡',
         category: 'video',
-        price: 15.00,
-        stock: 1000,
+        specCount: 3,
         status: 'active',
         createTime: '2023-11-14 14:20:00'
       },
@@ -223,8 +220,7 @@ const fetchProductList = () => {
         id: 3,
         name: '音乐会员季卡',
         category: 'music',
-        price: 30.00,
-        stock: 0,
+        specCount: 1,
         status: 'inactive',
         createTime: '2023-11-13 09:15:00'
       },
@@ -232,8 +228,7 @@ const fetchProductList = () => {
         id: 4,
         name: '办公软件年卡',
         category: 'software',
-        price: 365.00,
-        stock: 200,
+        specCount: 2,
         status: 'active',
         createTime: '2023-11-12 16:45:00'
       },
@@ -241,8 +236,7 @@ const fetchProductList = () => {
         id: 5,
         name: '学习资料包',
         category: 'other',
-        price: 50.00,
-        stock: 100,
+        specCount: 4,
         status: 'active',
         createTime: '2023-11-11 11:30:00'
       }
@@ -344,7 +338,7 @@ const handleDelete = (row) => {
 
 // 管理规格
 const manageSpecs = (row) => {
-  router.push(`/admin/product-specs?productId=${row.id}`)
+  router.push(`/admin/product-spec-management?productId=${row.id}`)
 }
 
 // 图片上传处理

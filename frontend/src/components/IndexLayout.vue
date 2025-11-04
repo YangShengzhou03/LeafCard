@@ -4,7 +4,7 @@
     <header class="header">
       <div class="container">
         <div class="logo-area">
-          <h1>枫叶网盘</h1>
+          <h1>枫叶卡管</h1>
         </div>
         <div class="auth-buttons" v-if="!isAuthenticated">
           <ElButton type="default" class="register-btn" @click="handleRegister">注册</ElButton>
@@ -24,11 +24,11 @@
       <section class="hero-section">
         <div class="container">
           <div class="hero-content">
-            <h1>安全可靠的云存储</h1>
-            <p>轻松存储，随时访问，让您的数据安全无忧</p>
+            <h1>专业的卡密管理系统</h1>
+            <p>安全可靠的卡密生成与管理，让您的数字产品销售更便捷</p>
             <div class="cta-buttons">
               <ElButton type="primary" size="large" class="start-btn" @click="handleStart">
-                {{ isAuthenticated ? '进入我的网盘' : '免费开始使用' }}
+                {{ isAuthenticated ? '进入管理后台' : '立即开始使用' }}
               </ElButton>
               <ElButton type="default" size="large" class="demo-btn" @click="handleDemo">查看演示</ElButton>
             </div>
@@ -43,35 +43,35 @@
 
       <section id="features" class="features-section">
         <div class="container">
-          <h2>枫叶的竞争力在哪？</h2>
+          <h2>枫叶卡管的特色功能</h2>
           <div class="features-grid">
             <div class="feature-card">
               <div class="feature-icon">
-                <i class="el-icon-cloudy"></i>
+                <i class="el-icon-key"></i>
               </div>
-              <h3>数据安全</h3>
-              <p>三重加密保护，数据安全是我们的生命。</p>
+              <h3>卡密管理</h3>
+              <p>批量生成、验证和管理卡密，支持多种格式和自定义规则。</p>
             </div>
             <div class="feature-card">
               <div class="feature-icon">
-                <i class="el-icon-share"></i>
+                <i class="el-icon-box"></i>
               </div>
-              <h3>便捷分享</h3>
-              <p>一键分享文件给朋友，自由查看和编辑。</p>
+              <h3>商品管理</h3>
+              <p>灵活的商品和规格管理，支持多种产品类型和定价策略。</p>
             </div>
             <div class="feature-card">
               <div class="feature-icon">
-                <i class="el-icon-mobile-phone"></i>
+                <i class="el-icon-data-line"></i>
               </div>
-              <h3>多设备同步</h3>
-              <p>电脑、手机浏览器随时访问，无需APP。</p>
+              <h3>数据分析</h3>
+              <p>详细的销售数据统计和分析，帮助您做出更好的商业决策。</p>
             </div>
             <div class="feature-card">
               <div class="feature-icon">
-                <i class="el-icon-download"></i>
+                <i class="el-icon-lock"></i>
               </div>
-              <h3>全速下载</h3>
-              <p>免费用户也能全速下载，您的时间比会员更宝贵。</p>
+              <h3>安全可靠</h3>
+              <p>多重安全防护，确保您的卡密和用户数据安全无忧。</p>
             </div>
           </div>
         </div>
@@ -79,37 +79,37 @@
 
       <section class="pricing-section" id="pricing">
         <div class="container">
-          <h2>选择适合您的方案</h2>
+          <h2>选择适合您的版本</h2>
           <div class="pricing-cards">
             <div class="pricing-card">
-              <h3>入门体验</h3>
+              <h3>基础版</h3>
               <div class="price">免费</div>
               <ul class="features-list">
-                <li>1GB 存储空间</li>
-                <li>基础文件管理功能</li>
-                <li>高速下载速度</li>
+                <li>支持1000个卡密管理</li>
+                <li>基础商品管理功能</li>
+                <li>简单数据统计</li>
               </ul>
             </div>
             <div class="pricing-card popular">
               <div class="badge">热门选择</div>
-              <h3>会员套餐</h3>
-              <div class="price">¥0.99<span>/月</span></div>
+              <h3>专业版</h3>
+              <div class="price">¥99<span>/月</span></div>
               <ul class="features-list">
-                <li>500GB 存储空间</li>
-                <li>高级文件管理工具</li>
-                <li>高速下载通道</li>
-                <li>文件分享功能</li>
+                <li>无限卡密管理</li>
+                <li>高级商品管理工具</li>
+                <li>详细数据分析报表</li>
+                <li>API接口支持</li>
               </ul>
             </div>
             <div class="pricing-card">
-              <h3>至尊套餐</h3>
-              <div class="price">¥2.99<span>/月</span></div>
+              <h3>企业版</h3>
+              <div class="price">¥299<span>/月</span></div>
               <ul class="features-list">
-                <li>2TB 存储空间</li>
-                <li>专业文件管理工具</li>
-                <li>高速下载通道</li>
-                <li>文件分享功能</li>
-                <li>团队协作工具</li>
+                <li>无限卡密管理</li>
+                <li>企业级管理工具</li>
+                <li>高级数据分析与报表</li>
+                <li>专属API接口</li>
+                <li>定制化功能支持</li>
               </ul>
             </div>
           </div>
@@ -121,14 +121,14 @@
       <div class="container">
         <div class="footer-content">
           <div class="footer-section">
-            <h3>关于枫叶网盘</h3>
-            <p>让每个人都能轻松享受云存储的便利</p>
+            <h3>关于枫叶卡管</h3>
+            <p>专业的卡密管理系统，为您的数字产品销售提供全方位支持</p>
           </div>
           <div class="footer-section">
-            <h4>产品服务</h4>
+            <h4>产品功能</h4>
             <ul>
               <li><a href="#features">功能特色</a></li>
-              <li><a href="#pricing">价格方案</a></li>
+              <li><a href="#pricing">版本对比</a></li>
             </ul>
           </div>
           <div class="footer-section">
@@ -150,7 +150,7 @@
         </div>
         <div class="footer-bottom">
           <p>&copy; 2024-2025 Jasun.xyz 版权所有 | ICP证：还在申请中 | 公网安备 还在备案中</p>
-          <p>枫叶网盘 - 安全可靠的云存储服务</p>
+          <p>枫叶卡管 - 专业的卡密管理系统</p>
         </div>
       </div>
     </footer>
@@ -194,16 +194,21 @@ export default {
     };
 
     const handleStart = () => {
-      if (isAuthenticated.value) {
-        // 已登录，根据用户角色跳转到对应页面
-        if (store.state.isAdmin) {
-          router.push('/admin');
+      try {
+        if (isAuthenticated.value) {
+          // 已登录，根据用户角色跳转到对应页面
+          if (store.state.isAdmin) {
+            router.push('/admin');
+          } else {
+            router.push('/user');
+          }
         } else {
-          router.push('/user');
+          // 未登录，跳转到登录页面
+          router.push('/login');
         }
-      } else {
-        // 未登录，跳转到登录页面
-        router.push('/login');
+      } catch (error) {
+        console.error('Navigation error:', error);
+        ElMessage.error('页面跳转失败，请重试');
       }
     };
 
