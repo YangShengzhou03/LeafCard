@@ -809,6 +809,7 @@ onMounted(() => {
 /* 验证码输入区域样式优化 */
 .verification-code-container {
   display: flex;
+  justify-content: space-between; /* 分散对齐 */
   gap: 8px;
   align-items: center;
 }
