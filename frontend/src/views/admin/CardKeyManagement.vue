@@ -49,8 +49,6 @@
           stripe
           style="width: 100%"
           :scroll="{ x: 800 }"
-          :header-cell-style="{ textAlign: 'center', background: '#f5f7fa' }"
-          :cell-style="{ textAlign: 'center' }"
         >
           <el-table-column prop="cardKey" label="卡密代码" width="180" align="center" :show-overflow-tooltip="true">
             <template #default="{ row }">
@@ -474,5 +472,15 @@ onMounted(() => {
 
 :deep(.el-table .cell) {
   white-space: nowrap;
+  text-align: center;
+}
+
+:deep(.el-table th) {
+  text-align: center !important;
+  background-color: #f5f7fa !important;
+}
+
+:deep(.el-table td) {
+  text-align: center !important;
 }
 </style>

@@ -9,59 +9,61 @@
 
       <!-- 搜索栏 -->
       <div class="search-bar">
-        <el-row :gutter="16">
-          <el-col :span="5">
+        <el-row :gutter="20">
+          <el-col :span="6">
             <el-input
               v-model="searchQuery"
               placeholder="商品名称"
               clearable
+              @clear="handleSearch"
               @keyup.enter="handleSearch"
             >
-              <template #prefix>
-                <el-icon><Search /></el-icon>
+              <template #append>
+                <el-button @click="handleSearch">
+                  <el-icon><Search /></el-icon>
+                </el-button>
               </template>
             </el-input>
           </el-col>
-          <el-col :span="3">
-            <el-select v-model="statusFilter" placeholder="商品状态" clearable>
+          <el-col :span="4">
+            <el-select v-model="statusFilter" placeholder="商品状态" clearable @change="handleSearch">
+              <el-option label="全部" value="" />
               <el-option label="在售" value="active" />
               <el-option label="下架" value="inactive" />
             </el-select>
           </el-col>
-          <el-col :span="16" class="button-group">
+          <el-col :span="14" class="button-group">
             <el-button type="primary" @click="handleSearch">查询</el-button>
             <el-button @click="resetFilters">重置</el-button>
-                              <el-button type="primary" @click="handleAddProduct">
-            <el-icon><Plus /></el-icon>
-            新增商品
-          </el-button>
+            <div style="flex: 1;"></div>
+            <el-button type="primary" @click="handleAddProduct">新增商品</el-button>
           </el-col>
         </el-row>
       </div>
 
       <!-- 商品列表 -->
       <div class="table-container">
-        <el-table :data="filteredProducts" v-loading="loading" stripe>
-          <el-table-column prop="id" label="ID" width="80" />
-          <el-table-column prop="name" label="商品名称" min-width="200" />
-          <el-table-column prop="description" label="描述" min-width="250">
+        <el-table :data="filteredProducts" v-loading="loading" stripe style="width: 100%">
+          <el-table-column prop="id" label="ID" width="60" align="center" />
+          <el-table-column prop="name" label="商品名称" width="160" show-overflow-tooltip />
+          <el-table-column prop="description" label="描述" min-width="180" show-overflow-tooltip>
             <template #default="{ row }">
               {{ row.description || '暂无描述' }}
             </template>
           </el-table-column>
-          <el-table-column prop="stock" label="库存" width="100" />
-          <el-table-column prop="status" label="状态" width="100">
+          <el-table-column prop="stock" label="库存" width="70" align="center" />
+          <el-table-column prop="status" label="状态" width="70" align="center">
             <template #default="{ row }">
-              <el-tag :type="row.status === 'active' ? 'success' : 'info'">
+              <el-tag :type="row.status === 'active' ? 'success' : 'info'" size="small">
                 {{ row.status === 'active' ? '在售' : '下架' }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="createTime" label="创建时间" width="160" />
-          <el-table-column label="操作" width="150" fixed="right">
+          <el-table-column prop="createTime" label="创建时间" width="160" align="center" />
+          <el-table-column label="操作" width="110" align="center" fixed="right">
             <template #default="{ row }">
-              <el-button size="small" @click="handleEditProduct(row)">编辑</el-button>
-              <el-button size="small" type="danger" @click="handleDeleteProduct(row)">删除</el-button>
+              <el-button size="small" type="primary" link @click="handleEditProduct(row)">编辑</el-button>
+              <el-button size="small" type="danger" link @click="handleDeleteProduct(row)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -86,7 +88,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Search } from '@element-plus/icons-vue'
+import { Search } from '@element-plus/icons-vue'
 
 // 加载状态
 const loading = ref(false)
@@ -232,12 +234,13 @@ onMounted(() => {
 
 .product-card {
   margin-bottom: 16px;
+  border: 1px solid #e6e6e6;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .product-card :deep(.el-card__body) {
-  padding: 16px;
+  padding: 0;
 }
 
 .card-header {
@@ -250,16 +253,67 @@ onMounted(() => {
 }
 
 .search-bar {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
+  padding: 16px;
+  background-color: #fafafa;
+  border-bottom: 1px solid #e6e8eb;
+}
+
+.search-bar :deep(.el-col) {
+  display: flex;
+  align-items: center;
+}
+
+.search-bar :deep(.el-input) {
+  flex: 1;
+}
+
+.search-bar :deep(.button-group) {
+  justify-content: flex-end;
+}
+
+.search-bar :deep(.button-group .el-button) {
+  margin-left: 8px;
 }
 
 .table-container {
-  margin-bottom: 16px;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.table-container :deep(.el-table) {
+  border-radius: 8px;
+  border: 1px solid #ebeef5;
+}
+
+.table-container :deep(.el-table__header-wrapper) {
+  background-color: #f5f7fa;
+}
+
+.table-container :deep(.el-table th) {
+  background-color: #f5f7fa !important;
+  color: #606266;
+  font-weight: 600;
+  padding: 12px 0;
+}
+
+.table-container :deep(.el-table td) {
+  padding: 12px 0;
+}
+
+.table-container :deep(.el-table .cell) {
+  padding: 0 12px;
+  word-break: break-word;
 }
 
 .pagination-container {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: 12px;
+  padding: 16px;
+  background-color: #fafafa;
+  border-top: 1px solid #e6e8eb;
 }
 </style>

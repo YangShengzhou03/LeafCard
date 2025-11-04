@@ -33,12 +33,9 @@
                 <el-option label="已停用" value="disabled" />
               </el-select>
             </el-col>
-            <el-col :span="6">
+            <el-col :span="6" style="display: flex; justify-content: flex-end; gap: 8px;">
               <el-button @click="resetFilters">重置</el-button>
-                        <el-button type="primary" @click="showAddDialog = true">
-            <el-icon><Plus /></el-icon>
-            添加规格
-          </el-button>
+              <el-button type="primary" @click="showAddDialog = true">添加规格</el-button>
             </el-col>
           </el-row>
         </div>
@@ -148,7 +145,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Search } from '@element-plus/icons-vue'
+import { Search } from '@element-plus/icons-vue'
 
 // 加载状态
 const loading = ref(false)

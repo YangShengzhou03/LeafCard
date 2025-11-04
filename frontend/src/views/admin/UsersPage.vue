@@ -36,7 +36,6 @@
             </el-col>
             <el-col :span="16" class="button-group">
               <el-button type="primary" @click="showAddUserDialog = true">
-                <el-icon><Plus /></el-icon>
                 添加用户
               </el-button>
             </el-col>
@@ -120,25 +119,6 @@
       :title="editingUser ? '编辑用户' : '添加用户'"
       width="500px"
     >
-      <!-- 用户头像显示区域 -->
-      <div v-if="editingUser" class="avatar-section">
-        <div class="avatar-display">
-          <el-avatar 
-            v-if="editingUser.avatar" 
-            :size="80" 
-            :src="editingUser.avatar" 
-            fit="cover"
-          />
-          <el-avatar 
-            v-else 
-            :size="80" 
-            :style="{ backgroundColor: '#409EFF' }"
-          >
-            {{ '默认头像' }}
-          </el-avatar>
-        </div>
-      </div>
-      
       <el-form :model="userForm" :rules="userRules" ref="userFormRef" label-width="80px">
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="userForm.email" />
@@ -167,7 +147,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Search } from '@element-plus/icons-vue'
+import { Search } from '@element-plus/icons-vue'
 import { AdminService } from '@/services/api.js'
 import Server from '@/utils/Server.js'
 
@@ -178,7 +158,7 @@ const users = ref([])
 const searchQuery = ref('')
 const statusFilter = ref('')
 const currentPage = ref(1)
-const pageSize = ref(20)
+const pageSize = ref(10)
 const totalUsers = ref(0)
 const showAddUserDialog = ref(false)
 const editingUser = ref(null)
@@ -188,8 +168,7 @@ const userFormRef = ref(null)
 const userForm = reactive({
   email: '',
   password: '',
-  status: 'active',
-  storageQuota: 1 // 默认1GB，单位GB
+  status: 'active'
 })
 
 // 表单验证规则
@@ -204,9 +183,6 @@ const userRules = {
   ],
   status: [
     { required: true, message: '请选择用户状态', trigger: 'change' }
-  ],
-  storageQuota: [
-    { required: true, message: '请设置存储配额', trigger: 'blur' }
   ]
 }
 
@@ -292,8 +268,6 @@ const editUser = (user) => {
   editingUser.value = user
   userForm.email = user.email
   userForm.status = user.status
-  // 将字节转换为GB显示
-  userForm.storageQuota = Math.round(user.storageQuota / (1024 * 1024 * 1024))
   userForm.password = '' // 编辑时不显示密码
   showAddUserDialog.value = true
 }
@@ -305,15 +279,11 @@ const saveUser = async () => {
   try {
     await userFormRef.value.validate()
     
-    // 将GB转换为字节
-    const storageQuotaInBytes = userForm.storageQuota * 1024 * 1024 * 1024
-    
     // 调用后端API保存用户数据
     const userData = {
       email: userForm.email,
       password: userForm.password,
-      status: userForm.status === 'active' ? 1 : 0,
-      storageQuota: storageQuotaInBytes
+      status: userForm.status === 'active' ? 1 : 0
     }
     
     if (editingUser.value) {
@@ -325,8 +295,7 @@ const saveUser = async () => {
         email: userForm.email,
         password: userForm.password,
         nickname: userForm.email.split('@')[0], // 默认昵称
-        status: userForm.status === 'active' ? 1 : 0,
-        storageQuota: storageQuotaInBytes
+        status: userForm.status === 'active' ? 1 : 0
       }
       // 使用管理员创建用户接口
       await Server.post('/admin/user', newUser)
@@ -362,8 +331,7 @@ const resetUserForm = () => {
   Object.assign(userForm, {
     email: '',
     password: '',
-    status: 'active',
-    storageQuota: 1 // 默认1GB，单位GB
+    status: 'active'
   })
 }
 
@@ -489,46 +457,6 @@ onMounted(() => {
 /* 操作按钮样式 */
 :deep(.el-table .el-button) {
   margin: 2px;
-}
-
-/* 使用率颜色样式 */
-.usage-high {
-  color: #f56c6c;
-  font-weight: bold;
-}
-
-.usage-medium {
-  color: #e6a23c;
-  font-weight: bold;
-}
-
-.usage-low {
-  color: #67c23a;
-  font-weight: bold;
-}
-
-/* 头像显示区域样式 */
-.avatar-section {
-  text-align: center;
-  margin-bottom: 20px;
-  padding: 20px;
-  border: 1px solid #e9ecef;
-}
-
-.avatar-label {
-  font-weight: 600;
-  color: #495057;
-  margin-bottom: 12px;
-  font-size: 14px;
-}
-
-.avatar-display {
-  margin-bottom: 8px;
-}
-
-.avatar-info {
-  font-size: 12px;
-  color: #6c757d;
 }
 
 /* 对话框样式调整 */
