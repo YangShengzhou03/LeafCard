@@ -111,15 +111,12 @@
                 :disabled="!generateForm.productId || !generateForm.specId"
                 class="action-btn"
               >
-                添加库存
+                <el-icon><Upload /></el-icon>
+                导入系统
               </el-button>
               <el-button type="primary" @click="exportCardKeys" class="export-btn">
                 <el-icon><Download /></el-icon>
                 导出卡密
-              </el-button>
-              <el-button type="warning" @click="importToSystem" class="import-btn">
-                <el-icon><Upload /></el-icon>
-                导入系统
               </el-button>
             </div>
           </div>
@@ -157,7 +154,7 @@ const addingToStock = ref(false)
 
 // 生成表单
 const generateForm = reactive({
-  count: 10,
+  count: 100,
   length: 32,
   productId: '',
   specId: '',
@@ -361,41 +358,12 @@ const copyCardKey = async (key) => {
   }
 }
 
-// 导入到系统
-const importToSystem = async () => {
-  if (!generateForm.productId) {
-    ElMessage.warning('请先选择商品规格')
-    return
-  }
-  
-  try {
-    await ElMessageBox.confirm(
-      `确定要将 ${generatedKeys.value.length} 个卡密导入到系统吗？`,
-      '确认导入',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }
-    )
-    
-    // 模拟导入操作
-    ElMessage.success('卡密导入成功')
-    
-    // 清空生成的卡密
-    generatedKeys.value = []
-    
-  } catch (error) {
-    if (error !== 'cancel') {
-      ElMessage.error('导入失败')
-    }
-  }
-}
+
 
 // 重置表单
 const resetForm = () => {
   Object.assign(generateForm, {
-    count: 10,
+    count: 100,
     length: 32,
     productId: '',
     specId: '',

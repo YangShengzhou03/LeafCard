@@ -10,7 +10,7 @@
       <!-- 筛选区域 -->
       <div class="filter-section">
         <el-row :gutter="20">
-          <el-col :span="5">
+          <el-col :span="6">
             <el-date-picker
               v-model="filter.dateRange"
               type="daterange"
@@ -22,9 +22,14 @@
               style="width: 100%"
             />
           </el-col>
-          <el-col :span="19">
+          <el-col :span="4">
             <div class="action-buttons">
+              <el-button type="primary" @click="handleFilter">查询</el-button>
               <el-button @click="resetFilter">重置</el-button>
+            </div>
+          </el-col>
+          <el-col :span="14">
+            <div class="action-buttons" style="justify-content: flex-end;">
               <el-button @click="exportLogs" :loading="exporting">
                 <el-icon><Download /></el-icon>
                 导出
