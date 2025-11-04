@@ -93,7 +93,7 @@
             <el-card class="chart-card">
               <template #header>
                 <div class="chart-header">
-                  <span>销量前五的商品-规格</span>
+                  <span>销量前五的商品</span>
                 </div>
               </template>
               <div class="products-container">

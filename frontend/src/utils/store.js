@@ -278,7 +278,7 @@ const store = {
   // 获取加载状态
   getLoading() {
     return state.loading
-  }
+  },
 
   // 注册
   async register(userData) {
