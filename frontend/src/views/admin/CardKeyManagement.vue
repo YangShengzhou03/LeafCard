@@ -71,17 +71,15 @@
             <template #default="scope">
               <el-button 
                 size="small" 
-                type="warning" 
-                @click="handleDisableCardKey(scope.row)"
-                :disabled="scope.row.status === 'used' || scope.row.status === 'disabled'"
+                :type="scope.row.status === 'disabled' ? 'success' : 'warning'"
+                @click="handleToggleCardKey(scope.row)"
               >
-                禁用
+                {{ scope.row.status === 'disabled' ? '启用' : '禁用' }}
               </el-button>
               <el-button 
                 size="small" 
                 type="danger" 
                 @click="handleDeleteCardKey(scope.row)"
-                :disabled="scope.row.status === 'used'"
               >
                 删除
               </el-button>
@@ -153,10 +151,10 @@ const filteredCardKeys = computed(() => {
 const getStatusTagType = (status) => {
   const typeMap = {
     unused: 'success',
-    used: 'primary',
+    used: 'info',
     disabled: 'danger'
   }
-  return typeMap[status] || 'info'
+  return typeMap[status] || 'warning'
 }
 
 // 状态文本映射
@@ -291,20 +289,23 @@ const handleClearUsed = () => {
 
 
 
-// 禁用卡密
-const handleDisableCardKey = (row) => {
+// 切换卡密状态（禁用/启用）
+const handleToggleCardKey = (row) => {
+  const isDisabling = row.status !== 'disabled'
+  const actionText = isDisabling ? '禁用' : '启用'
+  
   ElMessageBox.confirm(
-    `确定要禁用卡密"${row.cardKey}"吗？`,
-    '确认禁用',
+    `确定要${actionText}卡密"${row.cardKey}"吗？`,
+    `确认${actionText}`,
     {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
     }
   ).then(() => {
-    // 模拟禁用操作
-    row.status = 'disabled'
-    ElMessage.success('禁用成功')
+    // 模拟切换状态操作
+    row.status = isDisabling ? 'disabled' : 'unused'
+    ElMessage.success(`${actionText}成功`)
   }).catch(() => {
     // 取消操作
   })
