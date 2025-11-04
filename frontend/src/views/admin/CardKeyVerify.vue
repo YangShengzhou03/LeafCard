@@ -1,193 +1,220 @@
 <template>
-  <div class="admin-product-management">
-    <el-card class="product-card">
+  <div class="cardkey-verify">
+    <el-card class="verify-card">
       <template #header>
         <div class="card-header">
           <span>卡密验证</span>
         </div>
       </template>
 
-    </el-card>
+      <div class="verify-content">
+        <!-- 卡密输入区域 -->
+        <div class="input-section">
+          <el-input
+            v-model="cardKeyInput"
+            placeholder="请输入卡密代码"
+            clearable
+            size="large"
+            @keyup.enter="handleVerify"
+            @clear="clearResult"
+          >
+            <template #append>
+              <el-button type="primary" @click="handleVerify" :loading="verifying">
+                <el-icon><Search /></el-icon>
+                验证
+              </el-button>
+            </template>
+          </el-input>
+        </div>
 
+        <!-- 验证结果区域 -->
+        <div v-if="showResult" class="result-section">
+          <el-divider content-position="left">验证结果</el-divider>
+          
+          <div class="result-card" :class="resultClass">
+            <div class="result-header">
+              <el-icon :size="24" :color="resultIconColor">
+                <component :is="resultIcon" />
+              </el-icon>
+              <span class="result-title">{{ resultTitle }}</span>
+            </div>
+            
+            <div class="result-content">
+              <el-descriptions :column="2" border>
+                <el-descriptions-item label="卡密代码">{{ cardKeyInfo.cardKey }}</el-descriptions-item>
+                <el-descriptions-item label="状态">
+                  <el-tag :type="getStatusTagType(cardKeyInfo.status)">
+                    {{ getStatusText(cardKeyInfo.status) }}
+                  </el-tag>
+                </el-descriptions-item>
+                <el-descriptions-item label="商品规格">{{ cardKeyInfo.productSpec || '未设置' }}</el-descriptions-item>
+                <el-descriptions-item label="价格">¥{{ cardKeyInfo.price || '0.00' }}</el-descriptions-item>
+                <el-descriptions-item label="使用时间">{{ cardKeyInfo.activateTime || '未使用' }}</el-descriptions-item>
+                <el-descriptions-item label="创建时间">{{ cardKeyInfo.createTime || '-' }}</el-descriptions-item>
+              </el-descriptions>
+            </div>
+          </div>
+        </div>
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search } from '@element-plus/icons-vue'
+import { ref, computed } from 'vue'
+import { ElMessage } from 'element-plus'
+import { Search, CircleCheck, CircleClose, Warning } from '@element-plus/icons-vue'
 
-// 加载状态
-const loading = ref(false)
+// 卡密输入
+const cardKeyInput = ref('')
 
-// 卡密列表数据
-const products = ref([])
+// 验证状态
+const verifying = ref(false)
 
-// 搜索条件
-const searchQuery = ref('')
-const categoryFilter = ref('')
-const statusFilter = ref('')
+// 验证结果
+const showResult = ref(false)
+const cardKeyInfo = ref({})
 
-// 分页信息
-const currentPage = ref(1)
-const pageSize = ref(10)
-const total = ref(0)
-
-// 计算属性：筛选后的卡密列表
-const filteredProducts = computed(() => {
-  let filtered = products.value
-  
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(product => 
-      product.name.toLowerCase().includes(query)
-    )
+// 状态文本映射
+const getStatusText = (status) => {
+  const statusMap = {
+    active: '可用',
+    used: '已使用',
+    disabled: '已禁用',
+    expired: '已过期'
   }
-  
-  if (categoryFilter.value) {
-    filtered = filtered.filter(product => product.category === categoryFilter.value)
+  return statusMap[status] || '未知'
+}
+
+// 状态标签类型映射
+const getStatusTagType = (status) => {
+  const typeMap = {
+    active: 'success',
+    used: 'info',
+    disabled: 'warning',
+    expired: 'danger'
   }
-  
-  if (statusFilter.value) {
-    filtered = filtered.filter(product => product.status === statusFilter.value)
-  }
-  
-  return filtered
+  return typeMap[status] || 'info'
+}
+
+// 验证结果相关计算属性
+const resultClass = computed(() => {
+  const status = cardKeyInfo.value.status
+  if (status === 'active') return 'result-success'
+  if (status === 'used') return 'result-info'
+  if (status === 'disabled' || status === 'expired') return 'result-warning'
+  return 'result-error'
 })
 
-// 分类标签类型映射
-const getCategoryTagType = (category) => {
-  const typeMap = {
-    virtual: 'primary',
-    physical: 'success',
-    service: 'warning'
-  }
-  return typeMap[category] || 'info'
-}
+const resultTitle = computed(() => {
+  const status = cardKeyInfo.value.status
+  if (status === 'active') return '卡密验证成功 - 卡密可用'
+  if (status === 'used') return '卡密验证成功 - 卡密已使用'
+  if (status === 'disabled') return '卡密验证成功 - 卡密已禁用'
+  if (status === 'expired') return '卡密验证成功 - 卡密已过期'
+  return '卡密验证失败'
+})
 
-// 分类文本映射
-const getCategoryText = (category) => {
-  const textMap = {
-    virtual: '虚拟卡密',
-    physical: '实体卡密',
-    service: '服务类'
-  }
-  return textMap[category] || '未知'
-}
+const resultIcon = computed(() => {
+  const status = cardKeyInfo.value.status
+  if (status === 'active') return CircleCheck
+  if (status === 'used') return CircleCheck
+  if (status === 'disabled' || status === 'expired') return Warning
+  return CircleClose
+})
 
-// 加载卡密数据
-const loadProducts = async () => {
-  loading.value = true
+const resultIconColor = computed(() => {
+  const status = cardKeyInfo.value.status
+  if (status === 'active') return '#67C23A'
+  if (status === 'used') return '#409EFF'
+  if (status === 'disabled' || status === 'expired') return '#E6A23C'
+  return '#F56C6C'
+})
+
+// 验证卡密
+const handleVerify = async () => {
+  if (!cardKeyInput.value.trim()) {
+    ElMessage.warning('请输入卡密代码')
+    return
+  }
+
+  verifying.value = true
+  
   try {
-    // 模拟数据 - 实际项目中应该调用API
-    products.value = [
-      {
-        id: 1,
-        name: 'VIP会员月卡',
-        category: 'virtual',
-        price: 29.99,
-        stock: 1000,
+    // 模拟API调用 - 实际项目中应该调用真实的验证接口
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    // 模拟验证结果
+    const mockResults = {
+      'ABC123': {
+        cardKey: 'ABC123',
         status: 'active',
+        productSpec: 'VIP会员月卡',
+        price: '29.99',
+        activateTime: null,
         createTime: '2024-01-01 10:00:00'
       },
-      {
-        id: 2,
-        name: '实体礼品卡',
-        category: 'physical',
-        price: 199.99,
-        stock: 50,
-        status: 'active',
+      'DEF456': {
+        cardKey: 'DEF456',
+        status: 'used',
+        productSpec: '实体礼品卡',
+        price: '199.99',
+        activateTime: '2024-01-15 14:30:00',
         createTime: '2024-01-02 14:30:00'
       },
-      {
-        id: 3,
-        name: '在线课程服务',
-        category: 'service',
-        price: 399.99,
-        stock: 200,
-        status: 'inactive',
+      'GHI789': {
+        cardKey: 'GHI789',
+        status: 'disabled',
+        productSpec: '在线课程服务',
+        price: '399.99',
+        activateTime: null,
         createTime: '2024-01-03 09:15:00'
       }
-    ]
-    total.value = products.value.length
+    }
+    
+    const result = mockResults[cardKeyInput.value.trim()]
+    
+    if (result) {
+      cardKeyInfo.value = result
+      showResult.value = true
+      ElMessage.success('卡密验证成功')
+    } else {
+      // 卡密不存在的情况
+      cardKeyInfo.value = {
+        cardKey: cardKeyInput.value.trim(),
+        status: 'not_found'
+      }
+      showResult.value = true
+      ElMessage.error('卡密不存在')
+    }
   } catch (error) {
-    ElMessage.error('加载卡密数据失败')
+    ElMessage.error('验证失败，请重试')
   } finally {
-    loading.value = false
+    verifying.value = false
   }
 }
 
-// 搜索处理
-const handleSearch = () => {
-  currentPage.value = 1
-  // 实际项目中应该重新调用API
+// 清空结果
+const clearResult = () => {
+  showResult.value = false
+  cardKeyInfo.value = {}
 }
-
-// 重置筛选
-const resetFilters = () => {
-  searchQuery.value = ''
-  categoryFilter.value = ''
-  statusFilter.value = ''
-  handleSearch()
-}
-
-// 新增卡密功能已移除，因为模板中没有使用
-
-// 编辑卡密
-const handleEditProduct = (row) => {
-  ElMessage.info(`编辑卡密: ${row.name}`)
-}
-
-// 删除卡密
-const handleDeleteProduct = (row) => {
-  ElMessageBox.confirm(
-    `确定要删除卡密"${row.name}"吗？`,
-    '确认删除',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    }
-  ).then(() => {
-    ElMessage.success('删除成功')
-    loadProducts()
-  }).catch(() => {
-    // 取消操作
-  })
-}
-
-// 分页处理
-const handleSizeChange = (size) => {
-  pageSize.value = size
-  currentPage.value = 1
-  // 实际项目中应该重新调用API
-}
-
-const handleCurrentChange = (page) => {
-  currentPage.value = page
-  // 实际项目中应该重新调用API
-}
-
-onMounted(() => {
-  loadProducts()
-})
 </script>
 
 <style scoped>
-.admin-product-management {
+.cardkey-verify {
   padding: 0;
   background-color: #f0f2f5;
 }
 
-.product-card {
+.verify-card {
   margin-bottom: 16px;
-  border: 1px solid #e6e6e6;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.product-card :deep(.el-card__body) {
-  padding: 0;
+.verify-card :deep(.el-card__body) {
+  padding: 16px;
 }
 
 .card-header {
@@ -199,110 +226,118 @@ onMounted(() => {
   color: #303133;
 }
 
-.search-bar {
-  padding: 16px;
-  background-color: #fafafa;
-  border-bottom: 1px solid #e6e6e6;
+.verify-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.search-bar .el-row {
-  align-items: center;
+.input-section {
+  display: flex;
+  justify-content: center;
 }
 
-.search-bar .el-col {
+.input-section :deep(.el-input) {
+  width: 500px;
+}
+
+.input-section :deep(.el-input__wrapper) {
+  border-radius: 8px;
+}
+
+.result-section {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.result-card {
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid;
+  background-color: #ffffff;
+}
+
+.result-success {
+  border-color: #e1f3d8;
+  background-color: #f0f9eb;
+}
+
+.result-info {
+  border-color: #d9ecff;
+  background-color: #ecf5ff;
+}
+
+.result-warning {
+  border-color: #faecd8;
+  background-color: #fdf6ec;
+}
+
+.result-error {
+  border-color: #fde2e2;
+  background-color: #fef0f0;
+}
+
+.result-header {
   display: flex;
   align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
-.search-bar .el-button {
-  margin-left: 8px;
-}
-
-.table-container {
-  width: 100%;
-  overflow-x: auto;
-  min-height: 400px;
-  margin: 0;
-}
-
-.pagination-container {
-  padding: 16px;
-  background-color: #fafafa;
-  border-top: 1px solid #e6e6e6;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.product-name {
-  font-size: 13px;
+.result-title {
+  font-size: 16px;
+  font-weight: 600;
   color: #303133;
-  font-weight: 500;
 }
 
-.price-text {
-  font-size: 13px;
-  color: #e6a23c;
+.result-content {
+  margin-top: 16px;
+}
+
+.result-content :deep(.el-descriptions__header) {
+  margin-bottom: 0;
+}
+
+.result-content :deep(.el-descriptions__title) {
+  font-size: 14px;
   font-weight: 600;
 }
 
-.stock-text {
-  font-size: 13px;
+.result-content :deep(.el-descriptions__label) {
+  font-weight: 500;
   color: #606266;
 }
 
-.time-text {
-  font-size: 13px;
-  color: #909399;
+.result-content :deep(.el-descriptions__content) {
+  color: #303133;
 }
 
-.action-buttons {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  align-items: center;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.action-btn {
-  min-width: 60px;
-}
-
-:deep(.el-table) {
-  width: 100% !important;
-  border-radius: 4px;
-  border: 1px solid #ebeef5;
-}
-
-:deep(.el-table__header) {
-  width: 100% !important;
-}
-
-:deep(.el-table__body) {
-  width: 100% !important;
-}
-
-:deep(.el-table .cell) {
-  white-space: nowrap;
-  text-align: center;
-  font-size: 13px;
-}
-
-:deep(.el-table th) {
-  text-align: center !important;
-  background-color: #f8f9fa !important;
-  border-bottom: 1px solid #ebeef5;
-  padding: 12px 8px;
-}
-
-:deep(.el-table td) {
-  text-align: center !important;
-  border-bottom: 1px solid #ebeef5;
-}
-
-:deep(.el-table--striped .el-table__body tr.el-table__row--striped td) {
-  background-color: #fafafa;
-}
-
-:deep(.el-table .el-table__row:hover td) {
-  background-color: #f5f7fa;
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .cardkey-verify {
+    padding: 0;
+  }
+  
+  .input-section :deep(.el-input) {
+    width: 100%;
+  }
+  
+  .verify-card :deep(.el-card__body) {
+    padding: 16px;
+  }
+  
+  .result-content :deep(.el-descriptions) {
+    --el-descriptions-item-bordered-cell-padding: 8px 12px;
+  }
 }
 </style>

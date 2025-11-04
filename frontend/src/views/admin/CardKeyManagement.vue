@@ -179,7 +179,7 @@ const loadCardKeys = async () => {
     cardKeys.value = [
       {
         id: 1,
-        cardKey: 'LEAF-2024-001-ABCD-EFGH',
+        cardKey: 'LEAF-2024-001-ABCD-EFGHLEAF-2024-001-ABCD-EFGHLEAF-2024-001-ABCD-EFGHLEAF-2024-001-ABCD-EFGH',
         type: 'month',
         duration: 30,
         status: 'unused',

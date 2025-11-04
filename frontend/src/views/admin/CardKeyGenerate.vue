@@ -36,8 +36,8 @@
               </el-form-item>
             </el-col>
             <el-col :span="8">
-              <el-form-item label="商品规格">
-                <el-select v-model="generateForm.productId" placeholder="请选择商品规格" clearable class="form-input">
+              <el-form-item label="商品">
+                <el-select v-model="generateForm.productId" placeholder="请选择商品" clearable class="form-input">
                   <el-option 
                     v-for="product in productList" 
                     :key="product.id" 
@@ -51,18 +51,15 @@
           
           <el-row :gutter="20">
             <el-col :span="8">
-              <el-form-item label="前缀">
-                <el-input v-model="generateForm.prefix" placeholder="卡密前缀（可选）" class="form-input" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="后缀">
-                <el-input v-model="generateForm.suffix" placeholder="卡密后缀（可选）" class="form-input" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="分隔符">
-                <el-input v-model="generateForm.separator" placeholder="分隔符（默认无）" class="form-input" />
+              <el-form-item label="规格">
+                <el-select v-model="generateForm.specId" placeholder="请选择规格" clearable class="form-input">
+                  <el-option 
+                    v-for="spec in specList" 
+                    :key="spec.id" 
+                    :label="spec.name" 
+                    :value="spec.id"
+                  />
+                </el-select>
               </el-form-item>
             </el-col>
           </el-row>
@@ -80,6 +77,10 @@
               <el-button type="primary" @click="generateCardKeys" :loading="generating" class="action-btn">
                 <el-icon><Plus /></el-icon>
                 生成卡密
+              </el-button>
+              <el-button type="success" @click="addToStock" :loading="addingToStock" class="action-btn">
+                <el-icon><Plus /></el-icon>
+                添加库存
               </el-button>
               <el-button @click="resetForm" class="action-btn">重置</el-button>
             </div>
@@ -100,7 +101,8 @@
         <el-table :data="generatedKeys" border stripe class="result-table">
           <el-table-column type="index" label="序号" width="80" align="center" />
           <el-table-column prop="key" label="卡密代码" min-width="220" align="center" />
-          <el-table-column prop="productName" label="商品规格" width="160" align="center" />
+          <el-table-column prop="productName" label="商品" width="120" align="center" />
+          <el-table-column prop="specName" label="规格" width="120" align="center" />
           <el-table-column label="操作" width="140" align="center">
             <template #default="{ row }">
               <div class="action-buttons">
@@ -124,20 +126,21 @@ import { Plus, CopyDocument, Download, Upload } from '@element-plus/icons-vue'
 
 // 生成状态
 const generating = ref(false)
+const addingToStock = ref(false)
 
 // 生成表单
 const generateForm = reactive({
   count: 10,
-  length: 16,
+  length: 32,
   productId: '',
-  prefix: '',
-  suffix: '',
-  separator: '',
+  specId: '',
   charset: ['numbers', 'uppercase', 'lowercase']
 })
 
 // 商品列表
 const productList = ref([])
+// 规格列表
+const specList = ref([])
 
 // 生成的卡密列表
 const generatedKeys = ref([])
@@ -153,6 +156,62 @@ const loadProducts = async () => {
     ]
   } catch (error) {
     ElMessage.error('加载商品列表失败')
+  }
+}
+
+// 加载规格列表
+const loadSpecs = async () => {
+  try {
+    // 模拟规格数据
+    specList.value = [
+      { id: 1, name: '月卡' },
+      { id: 2, name: '季卡' },
+      { id: 3, name: '年卡' },
+      { id: 4, name: '标准版' },
+      { id: 5, name: '豪华版' }
+    ]
+  } catch (error) {
+    ElMessage.error('加载规格列表失败')
+  }
+}
+
+// 添加库存
+const addToStock = async () => {
+  if (generatedKeys.value.length === 0) {
+    ElMessage.warning('请先生成卡密')
+    return
+  }
+  
+  if (!generateForm.productId || !generateForm.specId) {
+    ElMessage.warning('请选择商品和规格')
+    return
+  }
+  
+  addingToStock.value = true
+  
+  try {
+    await ElMessageBox.confirm(
+      `确定要将 ${generatedKeys.value.length} 个卡密添加到库存吗？`,
+      '确认添加库存',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    
+    // 模拟添加库存操作
+    ElMessage.success(`成功添加 ${generatedKeys.value.length} 个卡密到库存`)
+    
+    // 清空生成的卡密
+    generatedKeys.value = []
+    
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('添加库存失败')
+    }
+  } finally {
+    addingToStock.value = false
   }
 }
 
@@ -181,14 +240,6 @@ const generateRandomKey = () => {
     result += charset.charAt(Math.floor(Math.random() * charsetLength))
   }
   
-  // 添加前缀和后缀
-  if (generateForm.prefix) {
-    result = generateForm.prefix + (generateForm.separator || '') + result
-  }
-  if (generateForm.suffix) {
-    result = result + (generateForm.separator || '') + generateForm.suffix
-  }
-  
   return result
 }
 
@@ -204,14 +255,26 @@ const generateCardKeys = async () => {
     return
   }
   
+  if (!generateForm.productId || !generateForm.specId) {
+    ElMessage.warning('请选择商品和规格')
+    return
+  }
+  
   generating.value = true
   
   try {
     generatedKeys.value = []
     
+    const product = productList.value.find(p => p.id === generateForm.productId)
+    const spec = specList.value.find(s => s.id === generateForm.specId)
+    
     for (let i = 0; i < generateForm.count; i++) {
       const key = generateRandomKey()
-      generatedKeys.value.push(key)
+      generatedKeys.value.push({
+        key: key,
+        productName: product ? product.name : '',
+        specName: spec ? spec.name : ''
+      })
     }
     
     ElMessage.success(`成功生成 ${generateForm.count} 个卡密`)
@@ -307,11 +370,9 @@ const importToSystem = async () => {
 const resetForm = () => {
   Object.assign(generateForm, {
     count: 10,
-    length: 16,
+    length: 32,
     productId: '',
-    prefix: '',
-    suffix: '',
-    separator: '',
+    specId: '',
     charset: ['numbers', 'uppercase', 'lowercase']
   })
   generatedKeys.value = []
@@ -319,6 +380,7 @@ const resetForm = () => {
 
 onMounted(() => {
   loadProducts()
+  loadSpecs()
 })
 </script>
 

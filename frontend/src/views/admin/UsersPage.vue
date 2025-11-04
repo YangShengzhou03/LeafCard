@@ -393,8 +393,34 @@ onMounted(() => {
 
 .table-container {
   width: 100%;
-  overflow-x: auto;
-  min-height: 400px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.table-container :deep(.el-table) {
+  border-radius: 8px;
+  border: 1px solid #ebeef5;
+}
+
+.table-container :deep(.el-table__header-wrapper) {
+  background-color: #f5f7fa;
+}
+
+.table-container :deep(.el-table th) {
+  background-color: #f5f7fa !important;
+  color: #606266;
+  font-weight: 600;
+  padding: 12px 0;
+}
+
+.table-container :deep(.el-table td) {
+  padding: 12px 0;
+}
+
+.table-container :deep(.el-table .cell) {
+  padding: 0 12px;
+  word-break: break-word;
 }
 
 .truncate-id {
