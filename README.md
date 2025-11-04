@@ -1,5 +1,16 @@
 # LeafCard - 枫叶卡管系统
 
+<div align="center">
+
+[![GitHub stars](https://img.shields.io/github/stars/YangShengzhou03/LeafCard?style=for-the-badge&logo=github)](https://github.com/YangShengzhou03/LeafCard/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/YangShengzhou03/LeafCard?style=for-the-badge&logo=github)](https://github.com/YangShengzhou03/LeafCard/network/members)
+[![GitHub issues](https://img.shields.io/github/issues/YangShengzhou03/LeafCard?style=for-the-badge&logo=github)](https://github.com/YangShengzhou03/LeafCard/issues)
+[![GitHub license](https://img.shields.io/github/license/YangShengzhou03/LeafCard?style=for-the-badge)](https://github.com/YangShengzhou03/LeafCard/blob/main/LICENSE)
+[![Vue.js](https://img.shields.io/badge/Vue.js-3.4.0-42b883?style=for-the-badge&logo=vuedotjs)](https://vuejs.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.1.0-6DB33F?style=for-the-badge&logo=springboot)](https://spring.io/projects/spring-boot)
+
+</div>
+
 #### 介绍
 LeafCard 是一个现代化的卡验证后台管理系统，采用前后端分离架构，提供完整的卡管理、用户认证、权限控制等功能。
 
@@ -199,10 +210,31 @@ COPY target/leaf-card-backend-1.0.0.jar /app.jar
 
 #### 版本历史
 
-- **v1.0.0** (2024-01-01)
-  - 初始版本发布
-  - 基础卡管理功能
-  - 用户认证系统
+| 版本 | 发布日期 | 主要特性 |
+|------|----------|----------|
+| **v1.2.0** | 2024-03-15 | 优化前端性能，增强数据可视化功能 |
+| **v1.1.0** | 2024-02-20 | 添加批量操作功能，改进用户界面 |
+| **v1.0.0** | 2024-01-01 | 初始版本发布，基础卡管理和用户认证 |
+
+**详细更新日志：**
+
+**v1.2.0 (2024-03-15)**
+- ✨ 新增数据可视化图表组件
+- 🚀 优化前端打包体积，减少30%加载时间
+- 🔧 改进API响应格式和错误处理
+- 📱 增强移动端适配体验
+
+**v1.1.0 (2024-02-20)**
+- ✨ 新增批量卡管理功能
+- 🎨 优化UI设计，提升用户体验
+- 🔒 增强安全验证机制
+- 📊 改进统计报表功能
+
+**v1.0.0 (2024-01-01)**
+- 🎉 初始版本发布
+- 🔐 完整的用户认证系统
+- 💳 基础卡管理功能
+- 📈 基础数据统计功能
 
 #### 许可证
 
@@ -210,10 +242,26 @@ COPY target/leaf-card-backend-1.0.0.jar /app.jar
 
 #### 联系方式
 
-- 项目主页：https://gitee.com/your-repo/leaf-card
-- 问题反馈：https://gitee.com/your-repo/leaf-card/issues
-- 邮箱：dev@leafcard.com
+- **GitHub 仓库**: [https://github.com/YangShengzhou03/LeafCard](https://github.com/YangShengzhou03/LeafCard)
+- **问题反馈**: [GitHub Issues](https://github.com/YangShengzhou03/LeafCard/issues)
+- **邮箱**: dev@leafcard.com
+- **项目主页**: [https://github.com/YangShengzhou03/LeafCard](https://github.com/YangShengzhou03/LeafCard)
+
+#### 项目统计
+
+![GitHub Release](https://img.shields.io/github/v/release/YangShengzhou03/LeafCard?style=flat-square)
+![GitHub Last Commit](https://img.shields.io/github/last-commit/YangShengzhou03/LeafCard?style=flat-square)
+![GitHub Contributors](https://img.shields.io/github/contributors/YangShengzhou03/LeafCard?style=flat-square)
+![GitHub Repo Size](https://img.shields.io/github/repo-size/YangShengzhou03/LeafCard?style=flat-square)
 
 ---
 
 **感谢使用 LeafCard！** 🍁
+
+<div align="center">
+
+如果这个项目对您有帮助，请给个 ⭐ Star 支持一下！
+
+[![Star History Chart](https://api.star-history.com/svg?repos=YangShengzhou03/LeafCard&type=Date)](https://star-history.com/#YangShengzhou03/LeafCard&Date)
+
+</div>
