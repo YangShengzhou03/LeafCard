@@ -61,13 +61,19 @@
                 <el-icon>
                   <List />
                 </el-icon>
-                <template #title>商品管理</template>
+                <template #title>商品列表</template>
               </el-menu-item>
               <el-menu-item index="/admin/specifications">
                 <el-icon>
                   <Operation />
                 </el-icon>
                 <template #title>规格管理</template>
+              </el-menu-item>
+              <el-menu-item index="/admin/product-specs">
+                <el-icon>
+                  <Goods />
+                </el-icon>
+                <template #title>商品规格管理</template>
               </el-menu-item>
             </el-sub-menu>
 
@@ -84,12 +90,6 @@
                   <List />
                 </el-icon>
                 <template #title>卡密列表</template>
-              </el-menu-item>
-              <el-menu-item index="/admin/product-specs">
-                <el-icon>
-                  <Goods />
-                </el-icon>
-                <template #title>商品规格管理</template>
               </el-menu-item>
             </el-sub-menu>
 
@@ -296,7 +296,7 @@ onMounted(async () => {
 
 .admin-main {
   flex: 1;
-  padding: 9px;
+  padding: 12px;
   overflow-y: auto;
   background-color: #f0f2f5;
 }
@@ -314,19 +314,37 @@ onMounted(async () => {
 
 /* 卡片容器统一样式 */
 .admin-main :deep(.el-card) {
-  border-radius: 4px;
+  border-radius: 6px;
   border: 1px solid #e6e8eb;
   overflow: hidden;
+  margin-bottom: 16px;
 }
 
 .admin-main :deep(.el-card__header) {
-  padding: 18px 24px;
+  padding: 16px 20px;
   border-bottom: 1px solid #e6e8eb;
   background-color: #fafbfc;
 }
 
 .admin-main :deep(.el-card__body) {
-  padding: 24px;
+  padding: 20px;
+}
+
+/* 表单间距优化 */
+.admin-main :deep(.el-form) {
+  margin-bottom: 16px;
+}
+
+.admin-main :deep(.el-form-item) {
+  margin-bottom: 16px;
+}
+
+.admin-main :deep(.el-table) {
+  margin-top: 16px;
+}
+
+.admin-main :deep(.pagination) {
+  margin-top: 20px;
 }
 
 .admin-main :deep(.card-header) {
@@ -385,12 +403,20 @@ onMounted(async () => {
     padding: 16px;
   }
   
+  .admin-main :deep(.el-card) {
+    margin-bottom: 12px;
+  }
+  
   .admin-main :deep(.el-card__header) {
     padding: 14px 16px;
   }
   
   .admin-main :deep(.el-card__body) {
     padding: 16px;
+  }
+  
+  .admin-main :deep(.el-form-item) {
+    margin-bottom: 12px;
   }
 }
 
@@ -407,12 +433,20 @@ onMounted(async () => {
     padding: 12px;
   }
   
+  .admin-main :deep(.el-card) {
+    margin-bottom: 8px;
+  }
+  
   .admin-main :deep(.el-card__header) {
     padding: 12px;
   }
   
   .admin-main :deep(.el-card__body) {
     padding: 12px;
+  }
+  
+  .admin-main :deep(.el-form-item) {
+    margin-bottom: 8px;
   }
 }
 </style>

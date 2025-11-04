@@ -68,6 +68,24 @@ const routes = [
         }
       },
       {
+        path: 'products',
+        name: 'ProductManagement',
+        component: () => import('@/views/admin/ProductManagement.vue'),
+        meta: {
+          title: '枫叶卡管 - 商品管理',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'specifications',
+        name: 'SpecificationManagement',
+        component: () => import('@/views/admin/SpecificationManagement.vue'),
+        meta: {
+          title: '枫叶卡管 - 规格管理',
+          requiresAuth: true
+        }
+      },
+      {
         path: 'card-keys',
         name: 'CardKeyManagement',
         component: () => import('@/views/admin/CardKeyManagement.vue'),
@@ -152,7 +170,7 @@ const routes = [
   {
     path: '/verify',
     name: 'CardKeyVerify',
-    component: () => import('@/views/CardKeyVerify.vue'),
+    component: () => import('@/views/admin/CardKeyVerify.vue'),
     meta: {
       title: '枫叶卡管 - 卡密验证',
       requiresAuth: false
