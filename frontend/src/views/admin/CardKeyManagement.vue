@@ -1,19 +1,5 @@
 <template>
   <div class="card-key-management">
-    <div class="page-header">
-      <h2>卡密管理</h2>
-      <div class="header-actions">
-        <el-button type="success" @click="handleVerify">
-          <el-icon><Check /></el-icon>
-          验证卡密
-        </el-button>
-        <el-button type="primary" @click="handleBatchExport" :disabled="!selectedKeys.length">
-          <el-icon><Download /></el-icon>
-          批量导出
-        </el-button>
-      </div>
-    </div>
-    
     <!-- 搜索和筛选区域 -->
     <el-card class="filter-card">
       <el-form :inline="true" :model="searchForm" class="search-form">
@@ -30,12 +16,22 @@
             />
           </el-select>
         </el-form-item>
+
+              <div class="header-actions">
+        <el-button type="success" @click="handleVerify">
+          <el-icon><Check /></el-icon>
+          验证卡密
+        </el-button>
+        <el-button type="primary" @click="handleBatchExport" :disabled="!selectedKeys.length">
+          <el-icon><Download /></el-icon>
+          批量导出
+        </el-button>
+      </div>
         <el-form-item label="卡密状态">
           <el-select v-model="searchForm.status" placeholder="请选择状态" clearable>
-            <el-option label="未售出" value="unsold" />
-            <el-option label="已售出" value="sold" />
+            <el-option label="未使用" value="unsold" />
             <el-option label="已使用" value="used" />
-            <el-option label="已过期" value="expired" />
+            <el-option label="已禁用" value="expired" />
           </el-select>
         </el-form-item>
         <el-form-item label="生成时间">
@@ -413,14 +409,12 @@ const submitVerify = () => {
           message += `状态：${getStatusText(key.status)}\n`
           message += `有效期：${key.validityPeriod}天`
           
-          if (key.status === 'unsold') {
+          if (key.status === 'unsold' || key.status === 'sold') {
             ElMessage.success(message)
-          } else if (key.status === 'sold') {
-            ElMessage.info(message)
           } else if (key.status === 'used') {
             ElMessage.warning(`卡密已被使用！\n使用时间：${key.usedTime}`)
           } else if (key.status === 'expired') {
-            ElMessage.error('卡密已过期！')
+            ElMessage.error('卡密已被禁用！')
           }
         } else {
           ElMessage.error('卡密不存在！')
@@ -491,9 +485,9 @@ const handleDelete = (row) => {
 // 获取状态类型
 const getStatusType = (status) => {
   const typeMap = {
-    'unsold': 'info',
-    'sold': 'warning',
-    'used': 'success',
+    'unsold': 'success',
+    'sold': 'success',
+    'used': 'info',
     'expired': 'danger'
   }
   return typeMap[status] || 'info'
@@ -502,10 +496,10 @@ const getStatusType = (status) => {
 // 获取状态文本
 const getStatusText = (status) => {
   const textMap = {
-    'unsold': '未售出',
-    'sold': '已售出',
+    'unsold': '未使用',
+    'sold': '未使用',
     'used': '已使用',
-    'expired': '已过期'
+    'expired': '已禁用'
   }
   return textMap[status] || status
 }
@@ -519,28 +513,39 @@ onMounted(() => {
 
 <style scoped>
 .card-key-management {
-  padding: 20px;
+  padding: 16px;
+  min-height: calc(100vh - 64px);
+  background-color: #f0f2f5;
 }
 
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  padding: 0;
 }
 
 .page-header h2 {
   margin: 0;
   color: #303133;
+  font-size: 20px;
+  font-weight: 600;
 }
 
 .header-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 .filter-card {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.filter-card :deep(.el-card__body) {
+  padding: 16px;
 }
 
 .search-form {
@@ -548,12 +553,41 @@ onMounted(() => {
 }
 
 .table-card {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.table-card :deep(.el-card__body) {
+  padding: 0;
+}
+
+.table-card :deep(.el-table) {
+  border-radius: 8px;
+}
+
+.table-card :deep(.el-table__header) {
+  background-color: #fafafa;
+}
+
+.table-card :deep(.el-table th) {
+  background-color: #fafafa;
+  color: #606266;
+  font-weight: 500;
+  padding: 12px 8px;
+}
+
+.table-card :deep(.el-table td) {
+  padding: 8px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .pagination-container {
   display: flex;
   justify-content: flex-end;
-  margin-top: 20px;
+  margin-top: 16px;
+  padding: 16px;
+  background-color: #fafafa;
+  border-top: 1px solid #e6e8eb;
 }
 </style>

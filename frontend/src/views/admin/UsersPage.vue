@@ -52,13 +52,13 @@
         
         <!-- 用户表格 -->
         <div class="table-container">
-          <el-table :data="filteredUsers" style="width: 100%" v-loading="loading" :scroll="{ x: 1200 }">
-            <el-table-column prop="id" label="ID" width="180" :show-overflow-tooltip="true">
+          <el-table :data="filteredUsers" style="width: 100%" v-loading="loading" :scroll="{ x: 1000 }">
+            <el-table-column prop="id" label="ID" width="120" :show-overflow-tooltip="true">
               <template #default="scope">
                 <span class="truncate-id">{{ scope.row.id }}</span>
               </template>
             </el-table-column>
-            <el-table-column prop="email" label="邮箱" width="180" :show-overflow-tooltip="true" />
+            <el-table-column prop="email" label="邮箱" width="200" :show-overflow-tooltip="true" />
             <el-table-column prop="gender" label="性别" width="80">
               <template #default="scope">
                 {{ scope.row.gender === 'MALE' ? '男' : scope.row.gender === 'FEMALE' ? '女' : '未设置' }}
@@ -96,8 +96,8 @@
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="lastLoginTime" label="最后上线时间" width="200" :show-overflow-tooltip="true" />
-            <el-table-column label="操作" width="280" fixed="right">
+            <el-table-column prop="lastLoginTime" label="最后上线时间" width="160" :show-overflow-tooltip="true" />
+            <el-table-column label="操作" width="200" fixed="right">
               <template #default="scope">
                 <el-button size="small" @click="editUser(scope.row)">编辑</el-button>
                 <el-button 
@@ -108,7 +108,6 @@
                   {{ scope.row.status === 'active' ? '禁用' : '启用' }}
                 </el-button>
                 <el-button size="small" type="info" @click="resetPassword(scope.row)">重置密码</el-button>
-                <el-button size="small" type="danger" @click="deleteUser(scope.row)">删除</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -491,12 +490,20 @@ onMounted(() => {
 
 <style scoped>
 .admin-users {
-  padding: 0px;
+  padding: 16px;
+  min-height: calc(100vh - 64px);
+  background-color: #f0f2f5;
 }
 
 .users-card {
   margin-bottom: 16px;
   border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.users-card :deep(.el-card__body) {
+  padding: 0;
 }
 
 .card-header {
@@ -510,7 +517,7 @@ onMounted(() => {
 
 .search-bar {
   margin-bottom: 16px;
-  padding: 0 16px;
+  padding: 16px;
 }
 
 .table-container {
@@ -527,11 +534,12 @@ onMounted(() => {
 }
 
 .pagination-container {
-  margin-top: 16px;
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
+  margin-top: 16px;
   padding: 16px;
-  border-top: 1px solid #f0f0f0;
+  background-color: #fafafa;
+  border-top: 1px solid #e6e8eb;
 }
 
 /* 表格样式优化 */

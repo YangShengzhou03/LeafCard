@@ -374,11 +374,19 @@ onMounted(() => {
 
 <style scoped>
 .admin-logs {
-  padding: 20px;
+  padding: 16px;
+  min-height: calc(100vh - 64px);
+  background-color: #f0f2f5;
 }
 
 .logs-card {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.logs-card :deep(.el-card__body) {
+  padding: 0;
 }
 
 .card-header {
@@ -393,13 +401,16 @@ onMounted(() => {
 }
 
 .filter-section {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  padding: 16px;
 }
 
 .stats-section {
-  margin-bottom: 20px;
-  padding: 15px;
-  border: 1px solid #ddd;
+  margin-bottom: 16px;
+  padding: 16px;
+  border: 1px solid #e6e8eb;
+  background-color: #fafafa;
+  border-radius: 4px;
 }
 
 .stat-item {
@@ -434,8 +445,11 @@ onMounted(() => {
 }
 
 .pagination-container {
-  margin-top: 20px;
+  margin-top: 16px;
   text-align: right;
+  padding: 16px;
+  background-color: #fafafa;
+  border-top: 1px solid #e6e8eb;
 }
 
 .log-detail-content {

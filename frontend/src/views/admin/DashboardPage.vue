@@ -141,11 +141,19 @@ onMounted(() => {
 
 <style scoped>
 .admin-dashboard {
-  padding: 0;
+  padding: 16px;
+  min-height: calc(100vh - 64px);
+  background-color: #f0f2f5;
 }
 
 .dashboard-card {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-card :deep(.el-card__body) {
+  padding: 16px;
 }
 
 .card-header {
@@ -153,14 +161,24 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   font-weight: 600;
+  font-size: 16px;
+  color: #303133;
 }
 
 /* 统计卡片样式 - 简约风格 */
 .stat-card {
   height: 100%;
-  border: 1px solid #ddd;
+  border: 1px solid #e6e8eb;
+  border-radius: 8px;
   overflow: hidden;
   position: relative;
+  background-color: #fff;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
 
 .stat-card::before {
@@ -176,14 +194,14 @@ onMounted(() => {
 .stat-item {
   display: flex;
   align-items: center;
-  padding: 24px;
+  padding: 20px;
 }
 
 .stat-icon {
   margin-right: 16px;
   width: 56px;
   height: 56px;
-  border-radius: 4px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -216,16 +234,17 @@ onMounted(() => {
 
 /* 系统信息卡片样式 */
 .system-info {
-  padding: 20px 0;
+  padding: 16px 0;
 }
 
 .info-item {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
   padding: 12px 16px;
-  border-radius: 4px;
+  border-radius: 6px;
   background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
 }
 
 .info-item:last-child {
@@ -258,6 +277,7 @@ onMounted(() => {
   padding: 4px 12px;
   background-color: #fff;
   border-radius: 4px;
+  border: 1px solid #e9ecef;
 }
 
 /* 响应式设计 */

@@ -29,11 +29,19 @@ onMounted(() => {
 
 <style scoped>
 .admin-system {
-  padding: 20px;
+  padding: 0px;
+  min-height: calc(100vh - 64px);
+  background-color: #f0f2f5;
 }
 
 .system-card {
   min-height: 400px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.system-card :deep(.el-card__body) {
+  padding: 16px;
 }
 
 .card-header {
