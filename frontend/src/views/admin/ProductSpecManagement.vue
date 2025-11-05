@@ -91,6 +91,13 @@
 
               </template>
             </el-table-column>
+            
+            <!-- 空状态 -->
+            <template #empty>
+              <div class="empty-container" style="padding: 40px 0;">
+                <el-empty description="暂无规格数据" image-size="120" />
+              </div>
+            </template>
           </el-table>
         </div>
         
