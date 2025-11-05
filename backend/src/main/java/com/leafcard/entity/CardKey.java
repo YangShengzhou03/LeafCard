@@ -2,6 +2,7 @@ package com.leafcard.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
+
 import java.time.LocalDateTime;
 
 /**
@@ -40,8 +41,4 @@ public class CardKey {
     
     @TableField(value = "updated_at", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
-    
-    @TableLogic
-    @TableField("deleted")
-    private Integer deleted;
 }

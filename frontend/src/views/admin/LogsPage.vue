@@ -135,7 +135,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Download, Delete } from '@element-plus/icons-vue'
-import { AdminService } from '@/services/api.js'
+import api from '../../services/api'
 
 // 响应式数据
 const loading = ref(false)
@@ -237,7 +237,7 @@ const loadLogs = async () => {
   loading.value = true
   try {
     const params = {
-      page: currentPage.value - 1,
+      page: currentPage.value,
       size: pageSize.value
     }
     
@@ -247,13 +247,29 @@ const loadLogs = async () => {
       params.endDate = filter.dateRange[1]
     }
     
-    const response = await AdminService.getLogList(params)
-    logs.value = response.content || []
-    totalLogs.value = response.totalElements || 0
+    // 调用API获取日志列表
+    const response = await api.admin.getLogList(params)
+    
+    // 处理API响应数据格式
+    if (response && response.data) {
+      const data = response.data
+      // 支持两种可能的响应格式：records/content 和 total/totalElements
+      if (data.records) {
+        logs.value = data.records
+        totalLogs.value = data.total || 0
+      } else if (data.content) {
+        logs.value = data.content
+        totalLogs.value = data.totalElements || 0
+      } else {
+        logs.value = []
+        totalLogs.value = 0
+      }
+    }
+    
     updateStats()
   } catch (error) {
-    // 错误已由AdminService处理，这里不需要额外处理
     console.error('加载日志数据失败:', error)
+    ElMessage.error('加载日志数据失败')
   } finally {
     loading.value = false
   }
@@ -295,10 +311,8 @@ const exportLogs = async () => {
       params.endDate = filter.dateRange[1]
     }
     
-    const response = await AdminService.get('/admin/log/export', {
-      responseType: 'blob',
-      params: params
-    })
+    // 调用API导出日志
+    const response = await api.admin.exportLogs(params)
 
     // 创建下载链接
     const blob = new Blob([response.data], { type: 'application/json' })
@@ -311,6 +325,7 @@ const exportLogs = async () => {
 
     ElMessage.success('日志导出成功')
   } catch (error) {
+    console.error('导出日志失败:', error)
     ElMessage.error('导出日志失败')
   } finally {
     exporting.value = false
@@ -332,13 +347,15 @@ const clearLogs = async () => {
 
     clearing.value = true
 
-    await AdminService.delete('/admin/log')
+    // 调用API清空日志
+    await api.admin.clearLogs()
 
     logs.value = []
     totalLogs.value = 0
     ElMessage.success('日志清空成功')
   } catch (error) {
     if (error !== 'cancel') {
+      console.error('清空日志失败:', error)
       ElMessage.error('清空日志失败')
     }
   } finally {

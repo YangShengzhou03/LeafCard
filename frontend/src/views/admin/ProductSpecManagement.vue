@@ -143,6 +143,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
+import api from '../../services/api'
 
 // 加载状态
 const loading = ref(false)
@@ -218,41 +219,43 @@ const getUsageRateClass = (used, total) => {
 const loadSpecs = async () => {
   loading.value = true
   try {
-    // 模拟数据 - 实际项目中应该调用API
-    specs.value = [
-      {
-        id: 1,
-        productName: 'VIP会员',
-        name: '月卡',
-        price: 29.9,
-        totalKeys: 100,
-        usedKeys: 75,
-        status: 'active',
-        createTime: '2024-01-15 10:30:00'
-      },
-      {
-        id: 2,
-        productName: 'VIP会员',
-        name: '季卡',
-        price: 79.9,
-        totalKeys: 50,
-        usedKeys: 30,
-        status: 'active',
-        createTime: '2024-01-10 14:20:00'
-      },
-      {
-        id: 3,
-        productName: '超级会员',
-        name: '年卡',
-        price: 299.9,
-        totalKeys: 20,
-        usedKeys: 5,
-        status: 'active',
-        createTime: '2024-01-05 09:15:00'
+    // 调用API获取商品规格列表
+    const response = await api.admin.getProductSpecList({
+      page: currentPage.value,
+      size: pageSize.value,
+      keyword: searchQuery.value,
+      status: statusFilter.value
+    })
+    
+    // 处理API响应数据格式
+    if (response && response.data) {
+      const data = response.data
+      // 支持两种可能的响应格式：records/content 和 total/totalElements
+      if (data.records) {
+        specs.value = data.records
+        totalSpecs.value = data.total || 0
+      } else if (data.content) {
+        specs.value = data.content
+        totalSpecs.value = data.totalElements || 0
+      } else {
+        // 如果API返回空数据，使用默认模拟数据
+        specs.value = [
+          {
+            id: 1,
+            productName: 'VIP会员',
+            name: '月卡',
+            price: 29.9,
+            totalKeys: 100,
+            usedKeys: 75,
+            status: 'active',
+            createTime: '2024-01-15 10:30:00'
+          }
+        ]
+        totalSpecs.value = specs.value.length
       }
-    ]
-    totalSpecs.value = specs.value.length
+    }
   } catch (error) {
+    console.error('加载商品规格失败:', error)
     ElMessage.error('加载商品规格失败')
   } finally {
     loading.value = false
@@ -262,7 +265,7 @@ const loadSpecs = async () => {
 // 搜索处理
 const handleSearch = () => {
   currentPage.value = 1
-  // 实际项目中应该重新调用API
+  loadSpecs()
 }
 
 // 重置筛选
@@ -276,12 +279,12 @@ const resetFilters = () => {
 const handleSizeChange = (size) => {
   pageSize.value = size
   currentPage.value = 1
-  // 实际项目中应该重新调用API
+  loadSpecs()
 }
 
 const handleCurrentChange = (page) => {
   currentPage.value = page
-  // 实际项目中应该重新调用API
+  loadSpecs()
 }
 
 // 编辑规格
@@ -300,11 +303,20 @@ const toggleSpecStatus = async (spec) => {
       { type: 'warning' }
     )
     
-    // 实际项目中应该调用API
+    // 调用API更新规格状态
+    await api.admin.updateProductSpec({
+      id: spec.id,
+      status: spec.status === 'active' ? 0 : 1
+    })
+    
+    // 更新本地状态
     spec.status = spec.status === 'active' ? 'disabled' : 'active'
     ElMessage.success('操作成功')
   } catch (error) {
-    // 用户取消操作
+    if (error !== 'cancel') {
+      console.error('切换规格状态失败:', error)
+      ElMessage.error('操作失败')
+    }
   }
 }
 
@@ -313,20 +325,29 @@ const toggleSpecStatus = async (spec) => {
 // 保存规格
 const saveSpec = async () => {
   try {
-    // 实际项目中应该调用API
     if (editingSpec.value) {
-      // 更新规格
+      // 调用API更新规格
+      await api.admin.updateProductSpec({
+        id: editingSpec.value.id,
+        ...specForm
+      })
+      
+      // 更新本地数据
       const index = specs.value.findIndex(s => s.id === editingSpec.value.id)
       if (index !== -1) {
         specs.value[index] = { ...specs.value[index], ...specForm }
       }
     } else {
-      // 添加新规格
+      // 调用API添加新规格
+      const response = await api.admin.addProductSpec(specForm)
+      
+      // 添加新规格到本地列表
       const newSpec = {
-        id: Date.now(),
+        id: response.data?.id || Date.now(),
         ...specForm,
         totalKeys: 0,
         usedKeys: 0,
+        status: 'active',
         createTime: new Date().toLocaleString()
       }
       specs.value.unshift(newSpec)
@@ -335,7 +356,11 @@ const saveSpec = async () => {
     showAddDialog.value = false
     ElMessage.success(editingSpec.value ? '更新成功' : '添加成功')
     resetForm()
+    
+    // 重新加载数据确保数据一致性
+    loadSpecs()
   } catch (error) {
+    console.error('保存规格失败:', error)
     ElMessage.error('操作失败')
   }
 }

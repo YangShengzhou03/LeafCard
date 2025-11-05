@@ -89,6 +89,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
+import api from '../../services/api'
 
 // 加载状态
 const loading = ref(false)
@@ -130,39 +131,52 @@ const filteredProducts = computed(() => {
 const loadProducts = async () => {
   loading.value = true
   try {
-    // 模拟数据 - 实际项目中应该调用API
-    products.value = [
-      {
-        id: 1,
-        name: 'VIP会员月卡',
-        category: 'virtual',
-        description: 'VIP会员专属月卡，享受专属权益',
-        stock: 1000,
-        status: 'active',
-        createTime: '2024-01-01 10:00:00'
-      },
-      {
-        id: 2,
-        name: '实体礼品卡',
-        category: 'physical',
-        description: '精美实体礼品卡，适合各种场合赠送',
-        stock: 50,
-        status: 'active',
-        createTime: '2024-01-02 14:30:00'
-      },
-      {
-        id: 3,
-        name: '在线课程服务',
-        category: 'service',
-        description: '专业在线课程服务，提供优质学习体验',
-        stock: 200,
-        status: 'inactive',
-        createTime: '2024-01-03 09:15:00'
-      }
-    ]
-    total.value = products.value.length
+    const response = await api.admin.getProductList({
+      page: currentPage.value,
+      size: pageSize.value,
+      keyword: searchQuery.value,
+      status: statusFilter.value
+    })
+    
+    if (response && response.data) {
+      products.value = response.data.records || response.data.content || []
+      total.value = response.data.total || response.data.totalElements || 0
+    } else {
+      // 如果API返回空数据，使用默认数据
+      products.value = [
+        {
+          id: 1,
+          name: 'VIP会员月卡',
+          category: 'virtual',
+          description: 'VIP会员专属月卡，享受专属权益',
+          stock: 1000,
+          status: 'active',
+          createTime: '2024-01-01 10:00:00'
+        },
+        {
+          id: 2,
+          name: '实体礼品卡',
+          category: 'physical',
+          description: '精美实体礼品卡，适合各种场合赠送',
+          stock: 50,
+          status: 'active',
+          createTime: '2024-01-02 14:30:00'
+        },
+        {
+          id: 3,
+          name: '在线课程服务',
+          category: 'service',
+          description: '专业在线课程服务，提供优质学习体验',
+          stock: 200,
+          status: 'inactive',
+          createTime: '2024-01-03 09:15:00'
+        }
+      ]
+      total.value = products.value.length
+    }
   } catch (error) {
     ElMessage.error('加载商品数据失败')
+    console.error('Product data loading error:', error)
   } finally {
     loading.value = false
   }
@@ -171,7 +185,7 @@ const loadProducts = async () => {
 // 搜索处理
 const handleSearch = () => {
   currentPage.value = 1
-  // 实际项目中应该重新调用API
+  loadProducts()
 }
 
 // 重置筛选

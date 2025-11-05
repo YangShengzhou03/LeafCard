@@ -133,6 +133,7 @@ import { ElMessage } from 'element-plus'
 import { 
   Refresh, Key, Money, Goods, Coin
 } from '@element-plus/icons-vue'
+import api from '../../services/api'
 
 // 统计数据
 const stats = ref({
@@ -160,30 +161,49 @@ const refreshData = async () => {
 const loadDashboardData = async () => {
   try {
     loading.value = true
-    // 模拟数据加载 - 使用更有实际意义的数据
-    stats.value = {
-      cardKeyCount: 1568,
-      productCount: 28,
-      dailySales: 156,
-      dailyRevenue: 5680,
-      cardKeyGrowth: 12.5,
-      productGrowth: 8.3,
-      dailySalesGrowth: 15.2,
-      dailyGrowth: 6.8
-    }
     
-
-    // 模拟销量前五的商品数据
-    topProducts.value = [
-      { name: 'VIP会员月卡', spec: '月卡', sales: 568 },
-      { name: '在线课程服务', spec: '标准版', sales: 423 },
-      { name: '实体礼品卡', spec: '豪华版', sales: 289 },
-      { name: 'VIP会员月卡', spec: '季卡', sales: 156 },
-      { name: '在线课程服务', spec: '高级版', sales: 98 }
-    ]
+    // 使用API获取仪表盘统计数据
+    const response = await api.admin.getDashboardStats()
+    if (response && response.data) {
+      const data = response.data
+      stats.value = {
+        cardKeyCount: data.cardKeyCount || 0,
+        productCount: data.productCount || 0,
+        dailySales: data.dailySales || 0,
+        dailyRevenue: data.dailyRevenue || 0,
+        cardKeyGrowth: data.cardKeyGrowth || 0,
+        productGrowth: data.productGrowth || 0,
+        dailySalesGrowth: data.dailySalesGrowth || 0,
+        dailyGrowth: data.dailyGrowth || 0
+      }
+      
+      // 获取销量前五的商品数据
+      topProducts.value = data.topProducts || []
+    } else {
+      // 如果API返回空数据，使用默认数据
+      stats.value = {
+        cardKeyCount: 1568,
+        productCount: 28,
+        dailySales: 156,
+        dailyRevenue: 5680,
+        cardKeyGrowth: 12.5,
+        productGrowth: 8.3,
+        dailySalesGrowth: 15.2,
+        dailyGrowth: 6.8
+      }
+      
+      topProducts.value = [
+        { name: 'VIP会员月卡', spec: '月卡', sales: 568 },
+        { name: '在线课程服务', spec: '标准版', sales: 423 },
+        { name: '实体礼品卡', spec: '豪华版', sales: 289 },
+        { name: 'VIP会员月卡', spec: '季卡', sales: 156 },
+        { name: '在线课程服务', spec: '高级版', sales: 98 }
+      ]
+    }
     
   } catch (error) {
     ElMessage.error('加载仪表盘数据失败')
+    console.error('Dashboard data loading error:', error)
   } finally {
     loading.value = false
   }

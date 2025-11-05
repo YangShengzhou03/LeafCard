@@ -3,14 +3,13 @@ package com.leafcard.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.leafcard.common.Result;
 import com.leafcard.entity.Product;
 import com.leafcard.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 产品控制器
@@ -26,7 +25,7 @@ public class ProductController {
      * 获取产品列表（分页）
      */
     @GetMapping
-    public Map<String, Object> getProducts(
+    public Result<IPage<Product>> getProducts(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String category,
@@ -44,119 +43,81 @@ public class ProductController {
         }
         
         IPage<Product> productPage = productService.page(pageParam, queryWrapper);
-        
-        Map<String, Object> result = new HashMap<>();
-        result.put("success", true);
-        result.put("data", productPage.getRecords());
-        result.put("total", productPage.getTotal());
-        result.put("current", productPage.getCurrent());
-        result.put("size", productPage.getSize());
-        
-        return result;
+        return Result.success(productPage);
     }
 
     /**
      * 根据ID获取产品
      */
     @GetMapping("/{id}")
-    public Map<String, Object> getProduct(@PathVariable String id) {
-        Map<String, Object> result = new HashMap<>();
+    public Result<Product> getProduct(@PathVariable String id) {
         Product product = productService.getById(id);
         
         if (product != null) {
-            result.put("success", true);
-            result.put("product", product);
+            return Result.success(product);
         } else {
-            result.put("success", false);
-            result.put("message", "产品不存在");
+            return Result.notFound();
         }
-        
-        return result;
     }
 
     /**
      * 创建产品
      */
     @PostMapping
-    public Map<String, Object> createProduct(@RequestBody Product product) {
-        Map<String, Object> result = new HashMap<>();
+    public Result<Boolean> createProduct(@RequestBody Product product) {
         boolean saved = productService.save(product);
         
         if (saved) {
-            result.put("success", true);
-            result.put("message", "产品创建成功");
+            return Result.success("产品创建成功", true);
         } else {
-            result.put("success", false);
-            result.put("message", "产品创建失败");
+            return Result.error("产品创建失败");
         }
-        
-        return result;
     }
 
     /**
      * 更新产品
      */
     @PutMapping("/{id}")
-    public Map<String, Object> updateProduct(@PathVariable String id, @RequestBody Product product) {
-        Map<String, Object> result = new HashMap<>();
+    public Result<Boolean> updateProduct(@PathVariable String id, @RequestBody Product product) {
         product.setId(id);
         boolean updated = productService.updateById(product);
         
         if (updated) {
-            result.put("success", true);
-            result.put("message", "产品更新成功");
+            return Result.success("产品更新成功", true);
         } else {
-            result.put("success", false);
-            result.put("message", "产品更新失败");
+            return Result.error("产品更新失败");
         }
-        
-        return result;
     }
 
     /**
      * 删除产品
      */
     @DeleteMapping("/{id}")
-    public Map<String, Object> deleteProduct(@PathVariable String id) {
-        Map<String, Object> result = new HashMap<>();
+    public Result<Boolean> deleteProduct(@PathVariable String id) {
         boolean deleted = productService.removeById(id);
         
         if (deleted) {
-            result.put("success", true);
-            result.put("message", "产品删除成功");
+            return Result.success("产品删除成功", true);
         } else {
-            result.put("success", false);
-            result.put("message", "产品删除失败");
+            return Result.error("产品删除失败");
         }
-        
-        return result;
     }
 
     /**
      * 获取产品统计信息
      */
     @GetMapping("/statistics")
-    public Map<String, Object> getStatistics() {
-        Map<String, Object> result = new HashMap<>();
+    public Result<Object> getStatistics() {
         Object statistics = productService.getProductStatistics();
-        
-        result.put("success", true);
-        result.put("statistics", statistics);
-        
-        return result;
+        return Result.success(statistics);
     }
 
     /**
      * 根据分类获取产品
      */
     @GetMapping("/category/{category}")
-    public Map<String, Object> getProductsByCategory(@PathVariable String category) {
-        Map<String, Object> result = new HashMap<>();
+    public Result<List<Product>> getProductsByCategory(@PathVariable String category) {
         List<Product> products = productService.findByCategory(category);
-        
-        result.put("success", true);
-        result.put("data", products);
-        
-        return result;
+        return Result.success(products);
     }
 }

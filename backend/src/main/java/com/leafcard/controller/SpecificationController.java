@@ -1,7 +1,9 @@
 package com.leafcard.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.leafcard.common.Result;
 import com.leafcard.entity.Specification;
 import com.leafcard.service.SpecificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,67 +25,78 @@ public class SpecificationController {
      * 分页查询规格列表
      */
     @GetMapping
-    public Page<Specification> getSpecifications(
+    public Result<IPage<Specification>> getSpecifications(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
         Page<Specification> pageInfo = new Page<>(page, size);
-        return specificationService.page(pageInfo);
+        IPage<Specification> result = specificationService.page(pageInfo);
+        return Result.success(result);
     }
 
     /**
      * 根据ID查询规格
      */
     @GetMapping("/{id}")
-    public Specification getSpecification(@PathVariable Long id) {
-        return specificationService.getById(id);
+    public Result<Specification> getSpecification(@PathVariable String id) {
+        Specification specification = specificationService.getById(id);
+        if (specification == null) {
+            return Result.notFound();
+        }
+        return Result.success(specification);
     }
 
     /**
      * 根据产品ID查询规格列表
      */
     @GetMapping("/product/{productId}")
-    public List<Specification> getSpecificationsByProduct(@PathVariable Long productId) {
-        return specificationService.findByProductId(productId);
+    public Result<List<Specification>> getSpecificationsByProduct(@PathVariable String productId) {
+        List<Specification> specifications = specificationService.findByProductId(productId);
+        return Result.success(specifications);
     }
 
     /**
      * 根据状态查询规格列表
      */
     @GetMapping("/status/{status}")
-    public List<Specification> getSpecificationsByStatus(@PathVariable Integer status) {
-        return specificationService.findByStatus(status);
+    public Result<List<Specification>> getSpecificationsByStatus(@PathVariable Integer status) {
+        List<Specification> specifications = specificationService.findByStatus(status);
+        return Result.success(specifications);
     }
 
     /**
      * 创建规格
      */
     @PostMapping
-    public boolean createSpecification(@RequestBody Specification specification) {
-        return specificationService.save(specification);
+    public Result<Boolean> createSpecification(@RequestBody Specification specification) {
+        boolean result = specificationService.save(specification);
+        return result ? Result.success("规格创建成功", true) : Result.error("规格创建失败");
     }
 
     /**
      * 更新规格
      */
     @PutMapping("/{id}")
-    public boolean updateSpecification(@PathVariable Long id, @RequestBody Specification specification) {
+    public Result<Boolean> updateSpecification(@PathVariable String id, @RequestBody Specification specification) {
         specification.setId(id);
-        return specificationService.updateById(specification);
+        boolean result = specificationService.updateById(specification);
+        return result ? Result.success("规格更新成功", true) : Result.error("规格更新失败");
     }
 
     /**
      * 删除规格
      */
     @DeleteMapping("/{id}")
-    public boolean deleteSpecification(@PathVariable Long id) {
-        return specificationService.removeById(id);
+    public Result<Boolean> deleteSpecification(@PathVariable String id) {
+        boolean result = specificationService.removeById(id);
+        return result ? Result.success("规格删除成功", true) : Result.error("规格删除失败");
     }
 
     /**
      * 获取规格统计信息
      */
     @GetMapping("/statistics")
-    public Object getStatistics() {
-        return specificationService.getSpecificationStatistics();
+    public Result<Object> getStatistics() {
+        Object statistics = specificationService.getSpecificationStatistics();
+        return Result.success(statistics);
     }
 }

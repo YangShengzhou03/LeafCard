@@ -3,13 +3,12 @@ package com.leafcard.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.leafcard.common.Result;
 import com.leafcard.entity.CardKey;
 import com.leafcard.service.CardKeyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,7 +25,7 @@ public class CardKeyController {
      * 获取卡密列表（分页）
      */
     @GetMapping
-    public Map<String, Object> getCardKeys(
+    public Result<IPage<CardKey>> getCardKeys(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String status) {
@@ -39,110 +38,77 @@ public class CardKeyController {
         }
         
         IPage<CardKey> cardKeyPage = cardKeyService.page(pageParam, queryWrapper);
-        
-        Map<String, Object> result = new HashMap<>();
-        result.put("success", true);
-        result.put("data", cardKeyPage.getRecords());
-        result.put("total", cardKeyPage.getTotal());
-        result.put("current", cardKeyPage.getCurrent());
-        result.put("size", cardKeyPage.getSize());
-        
-        return result;
+        return Result.success(cardKeyPage);
     }
 
     /**
      * 根据卡密查询
      */
     @GetMapping("/search")
-    public Map<String, Object> searchCardKey(@RequestParam String cardKey) {
-        Map<String, Object> result = new HashMap<>();
+    public Result<CardKey> searchCardKey(@RequestParam String cardKey) {
         CardKey card = cardKeyService.findByCardKey(cardKey);
         
         if (card != null) {
-            result.put("success", true);
-            result.put("card", card);
+            return Result.success(card);
         } else {
-            result.put("success", false);
-            result.put("message", "卡密不存在");
+            return Result.notFound();
         }
-        
-        return result;
     }
 
     /**
      * 激活卡密
      */
     @PostMapping("/{cardKey}/activate")
-    public Map<String, Object> activateCard(
+    public Result<Boolean> activateCard(
             @PathVariable String cardKey,
             @RequestBody Map<String, String> request) {
         
         String userId = request.get("userId");
         String userEmail = request.get("userEmail");
         
-        Map<String, Object> result = new HashMap<>();
         boolean success = cardKeyService.activateCard(cardKey, userId, userEmail);
         
         if (success) {
-            result.put("success", true);
-            result.put("message", "卡密激活成功");
+            return Result.success("卡密激活成功", true);
         } else {
-            result.put("success", false);
-            result.put("message", "卡密激活失败，请检查卡密状态");
+            return Result.error("卡密激活失败，请检查卡密状态");
         }
-        
-        return result;
     }
 
     /**
      * 禁用卡密
      */
     @PostMapping("/{cardKey}/disable")
-    public Map<String, Object> disableCard(@PathVariable String cardKey) {
-        Map<String, Object> result = new HashMap<>();
+    public Result<Boolean> disableCard(@PathVariable String cardKey) {
         boolean success = cardKeyService.disableCard(cardKey);
         
         if (success) {
-            result.put("success", true);
-            result.put("message", "卡密禁用成功");
+            return Result.success("卡密禁用成功", true);
         } else {
-            result.put("success", false);
-            result.put("message", "卡密禁用失败");
+            return Result.error("卡密禁用失败");
         }
-        
-        return result;
     }
 
     /**
      * 获取卡密统计信息
      */
     @GetMapping("/statistics")
-    public Map<String, Object> getStatistics() {
-        Map<String, Object> result = new HashMap<>();
+    public Result<Object> getStatistics() {
         Object statistics = cardKeyService.getCardStatistics();
-        
-        result.put("success", true);
-        result.put("statistics", statistics);
-        
-        return result;
+        return Result.success(statistics);
     }
 
     /**
      * 创建卡密
      */
     @PostMapping
-    public Map<String, Object> createCardKey(@RequestBody CardKey cardKey) {
-        Map<String, Object> result = new HashMap<>();
+    public Result<Boolean> createCardKey(@RequestBody CardKey cardKey) {
         boolean saved = cardKeyService.save(cardKey);
         
         if (saved) {
-            result.put("success", true);
-            result.put("message", "卡密创建成功");
+            return Result.success("卡密创建成功", true);
         } else {
-            result.put("success", false);
-            result.put("message", "卡密创建失败");
+            return Result.error("卡密创建失败");
         }
-        
-        return result;
     }
 }

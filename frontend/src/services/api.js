@@ -1,4 +1,5 @@
 import Server from '../utils/Server'
+import { userApi, productApi, specificationApi, cardKeyApi, operationLogApi } from '../api'
 
 const AdminService = {
   getDashboardStats() {
@@ -6,11 +7,11 @@ const AdminService = {
   },
 
   getUserList(params) {
-    return Server.get('/admin/users', params)
+    return userApi.getUsers(params.page || 1, params.size || 10)
   },
 
   getLogList(params) {
-    return Server.get('/admin/logs', params)
+    return operationLogApi.getOperationLogs(params.page || 1, params.size || 10)
   },
 
   getSystemConfig() {
@@ -22,19 +23,19 @@ const AdminService = {
   },
 
   getCardKeyList(params) {
-    return Server.get('/admin/card-keys', params)
+    return cardKeyApi.getCardKeys(params.page || 1, params.size || 10, params.status)
   },
 
   generateCardKey(data) {
-    return Server.post('/admin/card-keys/generate', data)
+    return cardKeyApi.createCardKey(data)
   },
 
   editCardKey(id, data) {
-    return Server.put(`/admin/card-keys/${id}`, data)
+    return cardKeyApi.updateCardKey(id, data)
   },
 
   deleteCardKey(id) {
-    return Server.delete(`/admin/card-keys/${id}`)
+    return cardKeyApi.deleteCardKey(id)
   },
 
   exportCardKeys(params) {
@@ -42,41 +43,41 @@ const AdminService = {
   },
 
   getProductList(params) {
-    return Server.get('/admin/products', params)
+    return productApi.getProducts(params.page || 1, params.size || 10, params.category, params.status)
   },
 
   createProduct(data) {
-    return Server.post('/admin/products', data)
+    return productApi.createProduct(data)
   },
 
   editProduct(id, data) {
-    return Server.put(`/admin/products/${id}`, data)
+    return productApi.updateProduct(id, data)
   },
 
   deleteProduct(id) {
-    return Server.delete(`/admin/products/${id}`)
+    return productApi.deleteProduct(id)
   },
 
   getSpecList(params) {
-    return Server.get('/admin/specs', params)
+    return specificationApi.getSpecifications(params.page || 1, params.size || 10)
   },
 
   createSpec(data) {
-    return Server.post('/admin/specs', data)
+    return specificationApi.createSpecification(data)
   },
 
   editSpec(id, data) {
-    return Server.put(`/admin/specs/${id}`, data)
+    return specificationApi.updateSpecification(id, data)
   },
 
   deleteSpec(id) {
-    return Server.delete(`/admin/specs/${id}`)
+    return specificationApi.deleteSpecification(id)
   }
 }
 
 const UserService = {
   login(data) {
-    return Server.post('/auth/login', data)
+    return userApi.login(data)
   },
 
   register(data) {

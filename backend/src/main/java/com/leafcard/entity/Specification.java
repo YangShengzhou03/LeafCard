@@ -2,7 +2,7 @@ package com.leafcard.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
-import java.math.BigDecimal;
+
 import java.time.LocalDateTime;
 
 /**
@@ -28,7 +28,7 @@ public class Specification {
     private Integer durationDays;
     
     @TableField("price")
-    private BigDecimal price;
+    private Double price;
     
     @TableField("currency")
     private String currency;
@@ -44,8 +44,4 @@ public class Specification {
     
     @TableField(value = "updated_at", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
-    
-    @TableLogic
-    @TableField("deleted")
-    private Integer deleted;
 }

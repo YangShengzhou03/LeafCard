@@ -148,8 +148,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
-import { AdminService } from '@/services/api.js'
-import Server from '@/utils/Server.js'
+import api from '../../services/api'
 
 // 数据状态
 const loading = ref(false)
@@ -208,17 +207,22 @@ const filteredUsers = computed(() => {
 const loadUsers = async () => {
   loading.value = true
   try {
-    const response = await AdminService.getUserList({
-      page: currentPage.value - 1,
+    const response = await api.admin.getUserList({
+      page: currentPage.value,
       size: pageSize.value,
       keyword: searchQuery.value,
       status: statusFilter.value
     })
-    users.value = response.content
-    totalUsers.value = response.totalElements
+    if (response && response.data) {
+      users.value = response.data.records || response.data.content || []
+      totalUsers.value = response.data.total || response.data.totalElements || 0
+    } else {
+      users.value = []
+      totalUsers.value = 0
+    }
   } catch (error) {
-    // 错误已由AdminService处理，这里不需要额外处理
     console.error('加载用户数据失败:', error)
+    ElMessage.error('加载用户数据失败')
   } finally {
     loading.value = false
   }
@@ -243,7 +247,11 @@ const resetPassword = async (user) => {
       }
     )
     
-    await AdminService.resetUserPassword(user.id, '123456')
+    // 使用用户API重置密码
+    await api.user.changePassword({ 
+      userId: user.id, 
+      newPassword: '123456' 
+    })
     ElMessage.success(`密码重置成功，新密码为：123456`)
   } catch (error) {
     if (error !== 'cancel') {
@@ -288,17 +296,10 @@ const saveUser = async () => {
     
     if (editingUser.value) {
       // 更新用户
-      await Server.put(`/admin/user/${editingUser.value.id}`, userData)
+      await api.user.updateUserInfo(userData)
     } else {
-      // 添加用户 - 使用管理员创建用户接口
-      const newUser = {
-        email: userForm.email,
-        password: userForm.password,
-        nickname: userForm.email.split('@')[0], // 默认昵称
-        status: userForm.status === 'active' ? 1 : 0
-      }
-      // 使用管理员创建用户接口
-      await Server.post('/admin/user', newUser)
+      // 添加用户 - 使用用户注册接口
+      await api.user.register(userData)
     }
     
     ElMessage.success(editingUser.value ? '用户更新成功' : '用户添加成功')
@@ -318,7 +319,12 @@ const toggleUserStatus = async (user) => {
   try {
     const newStatus = user.status === 'active' ? 'disabled' : 'active'
     const enabled = newStatus === 'active'
-    await Server.put(`/admin/user/${user.id}/status?enabled=${enabled}`)
+    
+    // 更新用户状态
+    await api.user.updateUserInfo({
+      status: enabled ? 1 : 0
+    })
+    
     ElMessage.success(`用户已${newStatus === 'active' ? '启用' : '禁用'}`)
     loadUsers()
   } catch (error) {

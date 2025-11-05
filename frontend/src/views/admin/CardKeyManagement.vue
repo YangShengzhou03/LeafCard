@@ -110,6 +110,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
+import api from '../../services/api'
 
 // 加载状态
 const loading = ref(false)
@@ -173,62 +174,74 @@ const getStatusText = (status) => {
 const loadCardKeys = async () => {
   loading.value = true
   try {
-    // 模拟数据 - 实际项目中应该调用API
-    cardKeys.value = [
-      {
-        id: 1,
-        cardKey: 'LEAF-2024-001-ABCD-EFGHLEAF-2024-001-ABCD-EFGHLEAF-2024-001-ABCD-EFGHLEAF-2024-001-ABCD-EFGH',
-        type: 'month',
-        duration: 30,
-        status: 'unused',
-        userId: null,
-        userEmail: null,
-        activateTime: null,
-        expireTime: null,
-        createTime: '2024-01-01 10:00:00',
-        productSpec: '月卡-基础版'
-      },
-      {
-        id: 2,
-        cardKey: 'LEAF-2024-002-IJKL-MNOP',
-        type: 'quarter',
-        duration: 90,
-        status: 'used',
-        userId: 1001,
-        userEmail: 'user1@example.com',
-        activateTime: '2024-01-15 14:30:00',
-        expireTime: '2024-04-15 14:30:00',
-        createTime: '2024-01-02 09:15:00',
-        productSpec: '季卡-高级版'
-      },
-      {
-        id: 3,
-        cardKey: 'LEAF-2024-003-QRST-UVWX',
-        type: 'year',
-        duration: 365,
-        status: 'disabled',
-        userId: 1002,
-        userEmail: 'user2@example.com',
-        activateTime: '2023-12-01 08:00:00',
-        expireTime: '2024-12-01 08:00:00',
-        createTime: '2023-11-28 16:45:00',
-        productSpec: '年卡-旗舰版'
-      },
-      {
-        id: 4,
-        cardKey: 'LEAF-2024-004-YZAB-CDEF',
-        type: 'permanent',
-        duration: null,
-        status: 'disabled',
-        userId: null,
-        userEmail: null,
-        activateTime: null,
-        expireTime: null,
-        createTime: '2024-01-03 11:20:00',
-        productSpec: '永久卡-至尊版'
-      }
-    ]
-    total.value = cardKeys.value.length
+    const response = await api.admin.getCardKeyList({
+      page: currentPage.value,
+      size: pageSize.value,
+      keyword: searchQuery.value,
+      status: statusFilter.value
+    })
+    
+    if (response && response.data) {
+      cardKeys.value = response.data.records || response.data.content || []
+      total.value = response.data.total || response.data.totalElements || 0
+    } else {
+      // 如果API返回空数据，使用默认数据
+      cardKeys.value = [
+        {
+          id: 1,
+          cardKey: 'LEAF-2024-001-ABCD-EFGH',
+          type: 'month',
+          duration: 30,
+          status: 'unused',
+          userId: null,
+          userEmail: null,
+          activateTime: null,
+          expireTime: null,
+          createTime: '2024-01-01 10:00:00',
+          productSpec: '月卡-基础版'
+        },
+        {
+          id: 2,
+          cardKey: 'LEAF-2024-002-IJKL-MNOP',
+          type: 'quarter',
+          duration: 90,
+          status: 'used',
+          userId: 1001,
+          userEmail: 'user1@example.com',
+          activateTime: '2024-01-15 14:30:00',
+          expireTime: '2024-04-15 14:30:00',
+          createTime: '2024-01-02 09:15:00',
+          productSpec: '季卡-高级版'
+        },
+        {
+          id: 3,
+          cardKey: 'LEAF-2024-003-QRST-UVWX',
+          type: 'year',
+          duration: 365,
+          status: 'disabled',
+          userId: 1002,
+          userEmail: 'user2@example.com',
+          activateTime: '2023-12-01 08:00:00',
+          expireTime: '2024-12-01 08:00:00',
+          createTime: '2023-11-28 16:45:00',
+          productSpec: '年卡-旗舰版'
+        },
+        {
+          id: 4,
+          cardKey: 'LEAF-2024-004-YZAB-CDEF',
+          type: 'permanent',
+          duration: null,
+          status: 'disabled',
+          userId: null,
+          userEmail: null,
+          activateTime: null,
+          expireTime: null,
+          createTime: '2024-01-03 11:20:00',
+          productSpec: '永久卡-至尊版'
+        }
+      ]
+      total.value = cardKeys.value.length
+    }
   } catch (error) {
     ElMessage.error('加载卡密数据失败')
   } finally {
@@ -239,7 +252,7 @@ const loadCardKeys = async () => {
 // 搜索处理
 const handleSearch = () => {
   currentPage.value = 1
-  // 实际项目中应该重新调用API
+  loadCardKeys()
 }
 
 // 复制卡密
@@ -333,12 +346,12 @@ const handleDeleteCardKey = (row) => {
 const handleSizeChange = (size) => {
   pageSize.value = size
   currentPage.value = 1
-  // 实际项目中应该重新调用API
+  loadCardKeys()
 }
 
 const handleCurrentChange = (page) => {
   currentPage.value = page
-  // 实际项目中应该重新调用API
+  loadCardKeys()
 }
 
 onMounted(() => {

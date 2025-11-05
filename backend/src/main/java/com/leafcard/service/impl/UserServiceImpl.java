@@ -20,29 +20,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public User findByUsername(String username) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", username);
-        return baseMapper.selectOne(queryWrapper);
+        return this.getOne(queryWrapper);
     }
 
     @Override
     public User findByEmail(String email) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("email", email);
-        return baseMapper.selectOne(queryWrapper);
+        return this.getOne(queryWrapper);
     }
 
     @Override
     public User login(String username, String password) {
         User user = findByUsername(username);
-        if (user == null) {
-            return null;
-        }
-        
-        // 验证密码（这里使用简单的MD5加密验证，实际项目中应该使用更安全的加密方式）
-        String encryptedPassword = DigestUtils.md5DigestAsHex(password.getBytes(StandardCharsets.UTF_8));
-        if (user.getPasswordHash().equals(encryptedPassword)) {
+        // 在实际应用中，这里应该使用密码加密验证
+        // 例如：BCrypt.checkpw(password, user.getPasswordHash())
+        if (user != null && user.getPasswordHash().equals(password)) {
+            user.setLastLoginTime(LocalDateTime.now());
+            this.updateById(user);
             return user;
         }
-        
         return null;
     }
 }

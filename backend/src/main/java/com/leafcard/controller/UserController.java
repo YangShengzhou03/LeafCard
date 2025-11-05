@@ -1,12 +1,10 @@
 package com.leafcard.controller;
 
+import com.leafcard.common.Result;
 import com.leafcard.entity.User;
 import com.leafcard.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 用户控制器
@@ -22,74 +20,52 @@ public class UserController {
      * 用户登录
      */
     @PostMapping("/login")
-    public Map<String, Object> login(@RequestBody Map<String, String> loginRequest) {
+    public Result<User> login(@RequestBody Map<String, String> loginRequest) {
         String username = loginRequest.get("username");
         String password = loginRequest.get("password");
         
-        Map<String, Object> result = new HashMap<>();
-        
         User user = userService.login(username, password);
         if (user != null) {
-            result.put("success", true);
-            result.put("message", "登录成功");
-            result.put("user", user);
+            return Result.success("登录成功", user);
         } else {
-            result.put("success", false);
-            result.put("message", "用户名或密码错误");
+            return Result.error("用户名或密码错误");
         }
-        
-        return result;
     }
 
     /**
      * 获取用户信息
      */
     @GetMapping("/{id}")
-    public Map<String, Object> getUser(@PathVariable String id) {
-        Map<String, Object> result = new HashMap<>();
+    public Result<User> getUser(@PathVariable String id) {
         User user = userService.getById(id);
         
         if (user != null) {
-            result.put("success", true);
-            result.put("user", user);
+            return Result.success(user);
         } else {
-            result.put("success", false);
-            result.put("message", "用户不存在");
+            return Result.notFound();
         }
-        
-        return result;
     }
 
     /**
      * 创建用户
      */
     @PostMapping
-    public Map<String, Object> createUser(@RequestBody User user) {
-        Map<String, Object> result = new HashMap<>();
-        
+    public Result<Boolean> createUser(@RequestBody User user) {
         // 检查用户名是否已存在
         if (userService.findByUsername(user.getUsername()) != null) {
-            result.put("success", false);
-            result.put("message", "用户名已存在");
-            return result;
+            return Result.error("用户名已存在");
         }
         
         // 检查邮箱是否已存在
         if (userService.findByEmail(user.getEmail()) != null) {
-            result.put("success", false);
-            result.put("message", "邮箱已存在");
-            return result;
+            return Result.error("邮箱已存在");
         }
         
         boolean saved = userService.save(user);
         if (saved) {
-            result.put("success", true);
-            result.put("message", "用户创建成功");
+            return Result.success("用户创建成功", true);
         } else {
-            result.put("success", false);
-            result.put("message", "用户创建失败");
+            return Result.error("用户创建失败");
         }
-        
-        return result;
     }
 }

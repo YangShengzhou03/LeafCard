@@ -248,7 +248,7 @@ import { ref, reactive, onMounted, markRaw } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import store from '@/utils/store.js'
-import { UserService } from '@/services/api.js'
+import api from '../services/api'
 import * as utils from '@/utils/utils.js'
 
 const router = useRouter()
@@ -351,17 +351,17 @@ const sendForgotVerificationCode = async () => {
   
   try {
     forgotCodeSending.value = true
-    const response = await UserService.sendResetCode({ email: forgotForm.email })
+    const response = await api.user.sendResetCode({ email: forgotForm.email })
     
-    if (response.code === 200) {
+    if (response && response.code === 200) {
       ElMessage.success('验证码已发送，请查收邮箱')
       startForgotCountdown()
     } else {
-      ElMessage.error(response.message || '验证码发送失败')
+      ElMessage.error(response?.message || '验证码发送失败')
     }
   } catch (error) {
-    // 错误已由UserService处理，这里不需要额外处理
     console.error('发送重置验证码失败:', error)
+    ElMessage.error('验证码发送失败，请检查网络连接')
   } finally {
     forgotCodeSending.value = false
   }
@@ -459,9 +459,20 @@ const handleLogin = async () => {
     loginLoading.value = true
     
     // 调用管理员登录API
-    const result = await store.adminLogin(loginForm)
+    const response = await api.admin.login(loginForm)
     
-    if (result.success) {
+    if (response && response.code === 200 && response.data) {
+      const { token, user } = response.data
+      
+      if (token) {
+        utils.saveToken(token)
+      }
+      
+      // 设置用户信息
+      if (user) {
+        store.setUser(user)
+      }
+      
       // 如果用户选择了记住密码，保存凭据
       if (loginForm.rememberPassword) {
         utils.saveCredentials(loginForm.username, loginForm.password)
@@ -485,7 +496,7 @@ const handleLogin = async () => {
         window.location.href = '/admin'
       }
     } else {
-      ElMessage.error(result.message || '登录失败，请检查用户名和密码')
+      ElMessage.error(response?.message || '登录失败，请检查用户名和密码')
     }
   } catch (error) {
     console.error('登录错误:', error)
@@ -511,16 +522,16 @@ const handleRegister = async () => {
     registerLoading.value = true
     
     // 调用管理员注册API
-    const result = await store.adminRegister({
+    const response = await api.admin.register({
       email: registerForm.email,
       password: registerForm.password
     })
     
-    if (result.success) {
+    if (response && response.code === 200) {
       ElMessage.success('注册成功，请登录')
       currentView.value = 'login'
     } else {
-      ElMessage.error(result.message || '注册失败')
+      ElMessage.error(response?.message || '注册失败')
     }
   } catch (error) {
     console.error('注册错误:', error)
@@ -541,21 +552,21 @@ const handleForgotPassword = async () => {
     forgotLoading.value = true
     
     // 调用重置密码API
-    const result = await UserService.resetPassword({
+    const response = await api.user.resetPassword({
       email: forgotForm.email,
       verificationCode: forgotForm.verificationCode,
       newPassword: forgotForm.newPassword
     })
     
-    if (result.code === 200) {
+    if (response && response.code === 200) {
       ElMessage.success('密码重置成功，请使用新密码登录')
       currentView.value = 'login'
     } else {
-      ElMessage.error(result.message || '密码重置失败')
+      ElMessage.error(response?.message || '密码重置失败')
     }
   } catch (error) {
-    // 错误已由UserService处理，这里不需要额外处理
     console.error('重置密码失败:', error)
+    ElMessage.error('密码重置失败，请检查网络连接')
   } finally {
     forgotLoading.value = false
   }
