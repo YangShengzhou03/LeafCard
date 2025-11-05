@@ -98,39 +98,37 @@
                 </div>
               </template>
               <div class="chart-container">
-                <div class="trend-chart">
-                  <div class="trend-item" v-for="(item, index) in salesTrend" :key="index">
-                    <div class="trend-bar-container">
-                      <div 
-                        class="trend-bar" 
-                        :style="{ height: (item.sales / maxSales) * 100 + '%' }"
-                        :class="{ 'today': index === salesTrend.length - 1 }"
-                      ></div>
-                    </div>
-                    <div class="trend-label">{{ item.date }}</div>
-                    <div class="trend-value">{{ item.sales }}</div>
-                  </div>
-                </div>
+                <!-- 图表内容已清空 -->
               </div>
             </el-card>
           </el-col>
           
-          <!-- 商品销售占比 -->
+          <!-- 销量前五商品数量 -->
           <el-col :span="12">
             <el-card class="chart-card">
               <template #header>
                 <div class="chart-header">
-                  <span>商品销售占比</span>
+                  <span>销量前五商品数量</span>
                 </div>
               </template>
               <div class="chart-container">
-                <div class="product-pie-chart">
-                  <div class="pie-item" v-for="(item, index) in productSalesRatio" :key="index">
-                    <div class="pie-slice" :style="{ backgroundColor: item.color, width: item.percentage + '%' }"></div>
-                    <div class="pie-info">
-                      <span class="pie-label">{{ item.name }}</span>
-                      <span class="pie-value">{{ item.percentage }}%</span>
+                <div class="product-bar-chart">
+                  <div 
+                    v-for="(item, index) in topProducts" 
+                    :key="index"
+                    class="bar-item"
+                  >
+                    <div class="bar-info-left">
+                      <span class="product-name">{{ item.name }}</span>
+                      <span class="product-spec">{{ item.spec }}</span>
                     </div>
+                    <div class="bar-container">
+                      <div 
+                        class="bar-fill" 
+                        :style="{ width: (item.sales / maxProductSales) * 100 + '%', background: getProductColor(index) }"
+                      ></div>
+                    </div>
+                    <span class="sales-count">{{ item.sales }}</span>
                   </div>
                 </div>
               </div>
@@ -167,30 +165,19 @@ const loading = ref(false)
 // 销量前五的商品数据
 const topProducts = ref([])
 
-// 销售趋势数据
-const salesTrend = ref([
-  { date: '12-01', sales: 120 },
-  { date: '12-02', sales: 145 },
-  { date: '12-03', sales: 98 },
-  { date: '12-04', sales: 167 },
-  { date: '12-05', sales: 132 },
-  { date: '12-06', sales: 189 },
-  { date: '12-07', sales: 156 }
-])
-
-// 商品销售占比数据
-const productSalesRatio = ref([
-  { name: 'VIP会员月卡', percentage: 35, color: '#409eff' },
-  { name: '在线课程服务', percentage: 25, color: '#67c23a' },
-  { name: '实体礼品卡', percentage: 20, color: '#e6a23c' },
-  { name: 'VIP会员季卡', percentage: 12, color: '#f56c6c' },
-  { name: '其他商品', percentage: 8, color: '#909399' }
-])
-
-// 计算最大销售值用于趋势图
-const maxSales = computed(() => {
-  return Math.max(...salesTrend.value.map(item => item.sales))
+// 计算最大商品销售量用于横向数据条
+const maxProductSales = computed(() => {
+  if (topProducts.value.length === 0) return 1
+  return Math.max(...topProducts.value.map(item => item.sales))
 })
+
+// 获取商品颜色
+const getProductColor = (index) => {
+  const colors = ['#409eff', '#67c23a', '#e6a23c', '#f56c6c', '#909399']
+  return colors[index] || '#909399'
+}
+
+
 
 // 刷新数据
 const refreshData = async () => {
@@ -267,7 +254,7 @@ onMounted(() => {
 }
 
 .dashboard-card :deep(.el-card__body) {
-  padding: 16px;
+  padding: 12px;
 }
 
 .card-header {
@@ -283,15 +270,13 @@ onMounted(() => {
 .stat-card {
   height: 100%;
   border: 1px solid #ebeef5;
-  border-radius: 4px;
+  border-radius: 2px;
   background-color: #fff;
-  padding: 16px;
-  transition: all 0.3s ease;
+  padding: 12px;
 }
 
 .stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #c6e2ff;
 }
 
 .stat-card.primary {
@@ -316,14 +301,14 @@ onMounted(() => {
 }
 
 .stat-icon {
-  margin-right: 16px;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
+  margin-right: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #409eff, #79bbff);
+  background: #409eff;
 }
 
 .stat-icon .el-icon {
@@ -336,25 +321,25 @@ onMounted(() => {
 }
 
 .stat-title {
-  font-size: 14px;
+  font-size: 13px;
   color: #909399;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   font-weight: 500;
 }
 
 .stat-value {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
   color: #303133;
   line-height: 1.2;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .stat-trend {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .trend-text {
@@ -371,124 +356,183 @@ onMounted(() => {
 
 /* 图表卡片样式 */
 .chart-card {
-  margin-top: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
+  margin-top: 16px;
+  border-radius: 4px;
+  border: 1px solid #ebeef5;
+  height: 360px;
+  display: flex;
+  flex-direction: column;
 }
 
 .chart-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  border-color: #c6e2ff;
 }
 
 .chart-header {
   font-weight: 600;
   font-size: 16px;
   color: #303133;
+  flex-shrink: 0;
 }
 
 .chart-container {
-  padding: 16px 0;
-  min-height: 200px;
-}
-
-/* 销售趋势图样式 */
-.trend-chart {
+  padding: 12px 0;
+  flex: 1;
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  height: 160px;
-  padding: 0 8px;
+  align-items: center;
+  justify-content: center;
 }
 
-.trend-item {
+/* 柱形图样式 */
+ .bar-chart {
+   position: relative;
+   height: 160px;
+   width: 100%;
+ }
+ 
+ .chart-grid {
+   position: absolute;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 40px;
+   display: flex;
+   flex-direction: column;
+   justify-content: space-between;
+ }
+ 
+ .grid-line {
+   height: 1px;
+   background: #f0f0f0;
+   width: 100%;
+ }
+ 
+ .bars-container {
+   position: absolute;
+   top: 0;
+   left: 16px;
+   right: 16px;
+   bottom: 40px;
+   display: flex;
+   align-items: flex-end;
+   justify-content: space-between;
+ }
+ 
+ .bar-item-container {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   height: 100%;
+   flex: 1;
+   margin: 0 4px;
+ }
+ 
+ .bar-wrapper {
+   flex: 1;
+   width: 24px;
+   background: #f5f7fa;
+   display: flex;
+   align-items: flex-end;
+   position: relative;
+ }
+ 
+ .bar-fill {
+   width: 100%;
+   background: #409eff;
+   min-height: 4px;
+ }
+ 
+ .bar-item-container:hover .bar-fill {
+   background: #337ecc;
+ }
+ 
+ .bar-info {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   margin-top: 8px;
+ }
+ 
+ .bar-label {
+   font-size: 12px;
+   color: #303133;
+   font-weight: 600;
+   margin-bottom: 2px;
+ }
+ 
+ .date-label {
+   font-size: 11px;
+   color: #909399;
+ }
+
+
+
+/* 商品销售占比样式 - 横向数据条布局 */
+.product-bar-chart {
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 16px;
+}
+
+.bar-item {
+  display: flex;
   align-items: center;
-  flex: 1;
-  margin: 0 4px;
+  gap: 12px;
+  height: 32px;
 }
 
-.trend-bar-container {
-  width: 100%;
-  height: 100px;
-  background: #f5f7fa;
-  border-radius: 4px;
-  position: relative;
-  overflow: hidden;
+.bar-info-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 180px;
+  min-width: 180px;
 }
 
-.trend-bar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(135deg, #409eff, #79bbff);
-  border-radius: 4px 4px 0 0;
-  transition: all 0.3s ease;
+.product-name {
+  font-size: 14px;
+  color: #606266;
+  font-weight: 500;
+  margin-bottom: 2px;
 }
 
-.trend-bar.today {
-  background: linear-gradient(135deg, #67c23a, #95d475);
-}
-
-.trend-label {
-  margin-top: 8px;
+.product-spec {
   font-size: 12px;
   color: #909399;
 }
 
-.trend-value {
-  margin-top: 4px;
-  font-size: 14px;
+.sales-count {
+  font-size: 16px;
+  color: #409eff;
   font-weight: 600;
-  color: #303133;
 }
 
-
-
-/* 商品销售占比样式 */
-.product-pie-chart {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.pie-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 0;
-}
-
-.pie-slice {
-  height: 8px;
-  border-radius: 4px;
-  transition: all 0.3s ease;
-}
-
-.pie-item:hover .pie-slice {
-  transform: scaleY(1.5);
-}
-
-.pie-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex: 1;
-}
-
-.pie-label {
-  font-size: 14px;
-  color: #606266;
-}
-
-.pie-value {
-  font-size: 14px;
-  font-weight: 600;
-  color: #303133;
-}
+.bar-container {
+   flex: 1;
+   height: 16px;
+   background: #f5f7fa;
+   overflow: hidden;
+   position: relative;
+   border: 1px solid #e4e7ed;
+   margin-right: 8px;
+ }
+ 
+ .bar-fill {
+   height: 100%;
+   position: relative;
+ }
+ 
+ .bar-item:hover .bar-fill {
+   opacity: 0.9;
+ }
+ 
+ .bar-item:hover .bar-container {
+   border-color: #c6e2ff;
+ }
 
 
 
