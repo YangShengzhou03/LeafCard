@@ -75,20 +75,8 @@ const store = {
       
       return { success: false, message: response?.message || '登录失败' }
     } catch (error) {
-      // 使用模拟数据，避免后端请求错误
-      const mockUser = {
-        id: 1,
-        username: credentials.username || 'admin',
-        nickname: '管理员',
-        role: 1,
-        avatar: 'https://picsum.photos/id/1005/200/200'
-      }
-      
-      const mockToken = 'admin-token-' + Date.now()
-      utils.saveToken(mockToken)
-      this.setUser(mockUser)
-      
-      return { success: true, message: '登录成功（模拟数据）', user: mockUser }
+      console.error('管理员登录失败:', error)
+      return { success: false, message: '登录失败，请检查网络连接' }
     } finally {
       state.loading = false
     }
@@ -113,9 +101,8 @@ const store = {
       
       return { success: false, message: response?.message || '注册失败' }
     } catch (error) {
-      // 使用模拟数据，避免后端请求错误
-      console.log('管理员注册模拟数据:', userData)
-      return { success: true, message: '注册成功（模拟数据），请登录' }
+      console.error('管理员注册失败:', error)
+      return { success: false, message: '注册失败，请检查网络连接' }
     } finally {
       state.loading = false
     }
@@ -149,23 +136,8 @@ const store = {
       
       return { success: false, message: response?.message || '登录失败' }
     } catch (error) {
-      console.warn('登录API调用失败，使用模拟数据:', error.message)
-      
-      // 使用模拟数据，避免后端请求错误
-      const mockUser = {
-        id: 1,
-        username: credentials.username || 'testuser',
-        nickname: '测试用户',
-        email: 'test@example.com',
-        role: 0,
-        avatar: 'https://picsum.photos/id/1005/200/200'
-      }
-      
-      const mockToken = 'mock-token-' + Date.now()
-      utils.saveToken(mockToken)
-      this.setUser(mockUser)
-      
-      return { success: true, message: '登录成功（模拟数据）', user: mockUser }
+      console.error('登录失败:', error)
+      return { success: false, message: '登录失败，请检查网络连接' }
     } finally {
       state.loading = false
     }
@@ -276,21 +248,8 @@ const store = {
       
       return { success: false, message: response?.message || '注册失败' }
     } catch (error) {
-      // 使用模拟数据，避免后端请求错误
-      const mockUser = {
-        id: 1,
-        username: userData.username || 'testuser',
-        nickname: userData.nickname || '测试用户',
-        email: userData.email || 'test@example.com',
-        role: 0,
-        avatar: 'https://picsum.photos/id/1005/200/200'
-      }
-      
-      const mockToken = 'mock-token-' + Date.now()
-      utils.saveToken(mockToken)
-      this.setUser(mockUser)
-      
-      return { success: true, message: '注册成功（模拟数据）', user: mockUser, token: mockToken }
+      console.error('注册失败:', error)
+      return { success: false, message: '注册失败，请检查网络连接' }
     } finally {
       state.loading = false
     }
@@ -303,8 +262,8 @@ const store = {
       await Server.post('/verification/send', { email })
       return { success: true, message: '验证码发送成功' }
     } catch (error) {
-      // 使用模拟数据，避免后端请求错误
-      return { success: true, message: '验证码发送成功（模拟数据）' }
+      console.error('发送验证码失败:', error)
+      return { success: false, message: '验证码发送失败，请重试' }
     } finally {
       state.loading = false
     }
@@ -331,16 +290,7 @@ const store = {
         }
       }
     } catch (error) {
-      // 使用模拟数据，避免后端请求错误
-      const mockUser = {
-        id: 1,
-        username: 'testuser',
-        nickname: '测试用户',
-        email: 'test@example.com',
-        role: 0,
-        avatar: 'https://picsum.photos/id/1005/200/200'
-      }
-      this.setUser(mockUser)
+      console.error('获取用户信息失败:', error)
       
       // 只有在token无效或过期时才清除token
       if (error.response && (error.response.status === 401 || error.response.status === 403)) {
@@ -372,15 +322,8 @@ const store = {
       }
       return storageData
     } catch (error) {
-      // 使用模拟数据，避免后端请求错误
-      const mockStorageData = {
-        totalStorageGB: 10,
-        usedStorageGB: 3,
-        availableStorageGB: 7,
-        usagePercentage: 30
-      }
-      state.storageInfo = mockStorageData
-      return mockStorageData
+      console.error('获取存储信息失败:', error)
+      return null
     }
   },
 
@@ -392,13 +335,8 @@ const store = {
       this.setUser(response.data)
       return { success: true, message: '更新成功' }
     } catch (error) {
-      // 使用模拟数据，避免后端请求错误
-      const updatedUser = {
-        ...state.user,
-        ...userData
-      }
-      this.setUser(updatedUser)
-      return { success: true, message: '更新成功（模拟数据）' }
+      console.error('更新用户信息失败:', error)
+      return { success: false, message: '更新失败，请重试' }
     } finally {
       state.loading = false
     }
@@ -411,8 +349,8 @@ const store = {
       await Server.put('/user/password', passwordData)
       return { success: true, message: '密码更新成功' }
     } catch (error) {
-      // 使用模拟数据，避免后端请求错误
-      return { success: true, message: '密码更新成功（模拟数据）' }
+      console.error('更新密码失败:', error)
+      return { success: false, message: '密码更新失败，请重试' }
     } finally {
       state.loading = false
     }
@@ -424,8 +362,7 @@ const store = {
       // 调用后端登出API
       await Server.post('/auth/logout')
     } catch (error) {
-      // 使用模拟数据，避免后端请求错误
-      console.log('登出API调用失败，使用模拟数据')
+      console.error('登出失败:', error)
     } finally {
       // 无论API调用是否成功，都清除本地状态
       this.clearUser()
@@ -440,26 +377,7 @@ const store = {
         await this.fetchStorageInfo()
         return true
       } catch (error) {
-        console.warn('应用初始化失败，使用模拟数据:', error.message)
-        
-        // 使用模拟数据，避免后端请求错误
-        const mockUser = {
-          id: 1,
-          username: 'testuser',
-          nickname: '测试用户',
-          email: 'test@example.com',
-          role: 0,
-          avatar: 'https://picsum.photos/id/1005/200/200'
-        }
-        this.setUser(mockUser)
-        
-        const mockStorageData = {
-          totalStorageGB: 10,
-          usedStorageGB: 3,
-          availableStorageGB: 7,
-          usagePercentage: 30
-        }
-        state.storageInfo = mockStorageData
+        console.error('应用初始化失败:', error)
         
         // 只有在token无效或过期时才清除token
         if (error.response && (error.response.status === 401 || error.response.status === 403)) {

@@ -586,10 +586,6 @@ onMounted(() => {
     loginForm.username = savedCredentials.username
     loginForm.password = savedCredentials.password
     loginForm.rememberPassword = true
-  } else {
-    // 如果没有保存的凭据，填充测试账号
-    loginForm.username = 'admin'
-    loginForm.password = '123456'
   }
 })
 </script>

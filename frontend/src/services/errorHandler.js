@@ -10,25 +10,12 @@ export const ErrorHandler = {
    * @param {Error} error 错误对象
    * @param {string} defaultMessage 默认错误消息
    * @param {boolean} showMessage 是否显示错误消息
-   * @returns {boolean} 是否使用了模拟数据
+   * @returns {boolean} 是否处理了错误
    */
   handleApiError(error, defaultMessage = '操作失败', showMessage = true) {
     console.error('API错误:', error)
     
-    // 检查是否使用了模拟数据
-    const isUsingMockData = error.isNetworkError || 
-                           error.isNotFoundError || 
-                           error.isServerError || 
-                           error.isGenericError
-    
-    if (isUsingMockData) {
-      if (showMessage) {
-        ElMessage.info('当前显示为模拟数据，请检查后端服务连接')
-      }
-      return true
-    }
-    
-    // 处理其他错误
+    // 处理错误
     let message = defaultMessage
     
     if (error.response) {
@@ -63,7 +50,7 @@ export const ErrorHandler = {
       ElMessage.error(message)
     }
     
-    return false
+    return true
   },
   
   /**

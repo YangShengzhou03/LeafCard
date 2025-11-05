@@ -161,6 +161,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { CopyDocument, Download, Upload } from '@element-plus/icons-vue'
+import Server from '@/utils/Server.js'
 
 // 生成状态
 const generating = ref(false)
@@ -207,30 +208,30 @@ const handleCurrentChange = (page) => {
 // 加载商品列表
 const loadProducts = async () => {
   try {
-    // 模拟商品数据
-    productList.value = [
-      { id: 1, name: 'VIP会员月卡' },
-      { id: 2, name: '实体礼品卡' },
-      { id: 3, name: '在线课程服务' }
-    ]
+    const response = await Server.get('/products')
+    if (response.data && response.data.success) {
+      productList.value = response.data.data || []
+    } else {
+      ElMessage.error('加载商品列表失败')
+    }
   } catch (error) {
-    ElMessage.error('加载商品列表失败')
+    console.error('加载商品列表失败:', error)
+    ElMessage.error('加载商品列表失败，请检查网络连接')
   }
 }
 
 // 加载规格列表
 const loadSpecs = async () => {
   try {
-    // 模拟规格数据
-    specList.value = [
-      { id: 1, name: '月卡' },
-      { id: 2, name: '季卡' },
-      { id: 3, name: '年卡' },
-      { id: 4, name: '标准版' },
-      { id: 5, name: '豪华版' }
-    ]
+    const response = await Server.get('/specs')
+    if (response.data && response.data.success) {
+      specList.value = response.data.data || []
+    } else {
+      ElMessage.error('加载规格列表失败')
+    }
   } catch (error) {
-    ElMessage.error('加载规格列表失败')
+    console.error('加载规格列表失败:', error)
+    ElMessage.error('加载规格列表失败，请检查网络连接')
   }
 }
 
@@ -259,15 +260,26 @@ const addToStock = async () => {
       }
     )
     
-    // 模拟添加库存操作
-    ElMessage.success(`成功添加 ${generatedKeys.value.length} 个卡密到库存`)
+    // 调用真实API添加库存
+    const response = await Server.post('/card-keys/batch', {
+      productId: generateForm.productId,
+      specId: generateForm.specId,
+      keys: generatedKeys.value.map(key => key.key)
+    })
     
-    // 清空生成的卡密
-    generatedKeys.value = []
+    if (response.data && response.data.success) {
+      ElMessage.success(`成功添加 ${generatedKeys.value.length} 个卡密到库存`)
+      
+      // 清空生成的卡密
+      generatedKeys.value = []
+    } else {
+      ElMessage.error('添加库存失败')
+    }
     
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error('添加库存失败')
+      console.error('添加库存失败:', error)
+      ElMessage.error('添加库存失败，请检查网络连接')
     }
   } finally {
     addingToStock.value = false

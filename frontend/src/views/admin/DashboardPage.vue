@@ -207,30 +207,38 @@ const loadDashboardData = async () => {
       // 获取销量前五的商品数据
       topProducts.value = data.topProducts || []
     } else {
-      // 如果API返回空数据，使用默认数据
+      // API返回空数据时，使用空数据
       stats.value = {
-        cardKeyCount: 1568,
-        productCount: 28,
-        dailySales: 156,
-        dailyRevenue: 5680,
-        cardKeyGrowth: 12.5,
-        productGrowth: 8.3,
-        dailySalesGrowth: 15.2,
-        dailyGrowth: 6.8
+        cardKeyCount: 0,
+        productCount: 0,
+        dailySales: 0,
+        dailyRevenue: 0,
+        cardKeyGrowth: 0,
+        productGrowth: 0,
+        dailySalesGrowth: 0,
+        dailyGrowth: 0
       }
       
-      topProducts.value = [
-        { name: 'VIP会员月卡', spec: '月卡', sales: 568 },
-        { name: '在线课程服务', spec: '标准版', sales: 423 },
-        { name: '实体礼品卡', spec: '豪华版', sales: 289 },
-        { name: 'VIP会员月卡', spec: '季卡', sales: 156 },
-        { name: '在线课程服务', spec: '高级版', sales: 98 }
-      ]
+      topProducts.value = []
     }
     
   } catch (error) {
-    ElMessage.error('加载仪表盘数据失败')
-    console.error('Dashboard data loading error:', error)
+    console.error('加载仪表盘数据失败:', error)
+    ElMessage.error('加载仪表盘数据失败，请检查网络连接')
+    
+    // 出错时使用空数据
+    stats.value = {
+      cardKeyCount: 0,
+      productCount: 0,
+      dailySales: 0,
+      dailyRevenue: 0,
+      cardKeyGrowth: 0,
+      productGrowth: 0,
+      dailySalesGrowth: 0,
+      dailyGrowth: 0
+    }
+    
+    topProducts.value = []
   } finally {
     loading.value = false
   }

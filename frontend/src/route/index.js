@@ -201,16 +201,7 @@ router.beforeEach((to, from, next) => {
     }
     
     if (process.env.NODE_ENV === 'development') {
-      // 开发环境下，如果用户状态为空，设置模拟用户
-      if (store.state.user === null) {
-        store.setUser({
-          id: 1,
-          username: 'admin',
-          nickname: '管理员',
-          role: 'admin',
-          avatar: 'https://picsum.photos/id/1005/200/200'
-        });
-      }
+      // 开发环境下，直接继续路由，不设置模拟用户
       next();
       return;
     }

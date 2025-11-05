@@ -245,25 +245,18 @@ const loadSpecs = async () => {
         specs.value = data.content
         totalSpecs.value = data.totalElements || 0
       } else {
-        // 如果API返回空数据，使用默认模拟数据
-        specs.value = [
-          {
-            id: 1,
-            productName: 'VIP会员',
-            name: '月卡',
-            price: 29.9,
-            totalKeys: 100,
-            usedKeys: 75,
-            status: 'active',
-            createTime: '2024-01-15 10:30:00'
-          }
-        ]
-        totalSpecs.value = specs.value.length
+        specs.value = []
+        totalSpecs.value = 0
       }
+    } else {
+      specs.value = []
+      totalSpecs.value = 0
     }
   } catch (error) {
     console.error('加载商品规格失败:', error)
-    ElMessage.error('加载商品规格失败')
+    ElMessage.error('加载商品规格失败，请检查网络连接')
+    specs.value = []
+    totalSpecs.value = 0
   } finally {
     loading.value = false
   }

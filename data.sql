@@ -1,37 +1,37 @@
 DROP DATABASE IF EXISTS card_keeper;
-CREATE DATABASE card_keeper CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE card_keeper CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '卡牌管理系统数据库';
 USE card_keeper;
 
 CREATE TABLE users (
-    id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
-    username VARCHAR(50) UNIQUE NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    nickname VARCHAR(50),
-    avatar VARCHAR(255),
-    role ENUM('admin', 'user') DEFAULT 'user' NOT NULL,
-    status ENUM('active', 'inactive') DEFAULT 'active' NOT NULL,
-    last_login_time DATETIME,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
-    INDEX idx_username (username),
-    INDEX idx_email (email),
-    INDEX idx_role (role),
-    INDEX idx_status (status)
-) ENGINE=InnoDB;
+    id CHAR(36) PRIMARY KEY DEFAULT (UUID()) COMMENT '用户唯一标识符',
+    username VARCHAR(50) UNIQUE NOT NULL COMMENT '用户名，用于登录',
+    email VARCHAR(100) UNIQUE NOT NULL COMMENT '用户邮箱',
+    password_hash VARCHAR(255) NOT NULL COMMENT '密码哈希值',
+    nickname VARCHAR(50) COMMENT '用户昵称',
+    avatar VARCHAR(255) COMMENT '用户头像URL',
+    role ENUM('admin', 'user') DEFAULT 'user' NOT NULL COMMENT '用户角色：admin-管理员，user-普通用户',
+    status ENUM('active', 'inactive') DEFAULT 'active' NOT NULL COMMENT '用户状态：active-活跃，inactive-非活跃',
+    last_login_time DATETIME COMMENT '最后登录时间',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT '创建时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL COMMENT '最后更新时间',
+    INDEX idx_username (username) COMMENT '用户名索引',
+    INDEX idx_email (email) COMMENT '邮箱索引',
+    INDEX idx_role (role) COMMENT '角色索引',
+    INDEX idx_status (status) COMMENT '状态索引'
+) ENGINE=InnoDB COMMENT='用户表，存储系统用户信息';
 
 CREATE TABLE products (
-    id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
-    name VARCHAR(100) NOT NULL,
-    description TEXT,
-    category ENUM('virtual', 'physical', 'service') DEFAULT 'virtual',
-    status ENUM('active', 'inactive') DEFAULT 'active' NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
-    INDEX idx_name (name),
-    INDEX idx_category (category),
-    INDEX idx_status (status)
-) ENGINE=InnoDB;
+    id CHAR(36) PRIMARY KEY DEFAULT (UUID()) COMMENT '产品唯一标识符',
+    name VARCHAR(100) NOT NULL COMMENT '产品名称',
+    category ENUM('游戏', '软件', '服务') NOT NULL COMMENT '产品分类：游戏-游戏产品，软件-软件产品，服务-服务产品',
+    description TEXT COMMENT '产品描述',
+    status ENUM('active', 'inactive') DEFAULT 'active' NOT NULL COMMENT '产品状态：active-活跃，inactive-非活跃',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT '创建时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL COMMENT '最后更新时间',
+    INDEX idx_name (name) COMMENT '产品名称索引',
+    INDEX idx_category (category) COMMENT '产品分类索引',
+    INDEX idx_status (status) COMMENT '产品状态索引'
+) ENGINE=InnoDB COMMENT='产品表，存储可用产品类型';
 
 CREATE TABLE specifications (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()),

@@ -190,65 +190,14 @@ const loadCardKeys = async () => {
       cardKeys.value = response.data.records || response.data.content || []
       total.value = response.data.total || response.data.totalElements || 0
     } else {
-      // 如果API返回空数据，使用默认数据
-      cardKeys.value = [
-        {
-          id: 1,
-          cardKey: 'LEAF-2024-001-ABCD-EFGH',
-          type: 'month',
-          duration: 30,
-          status: 'unused',
-          userId: null,
-          userEmail: null,
-          activateTime: null,
-          expireTime: null,
-          createTime: '2024-01-01 10:00:00',
-          productSpec: '月卡-基础版'
-        },
-        {
-          id: 2,
-          cardKey: 'LEAF-2024-002-IJKL-MNOP',
-          type: 'quarter',
-          duration: 90,
-          status: 'used',
-          userId: 1001,
-          userEmail: 'user1@example.com',
-          activateTime: '2024-01-15 14:30:00',
-          expireTime: '2024-04-15 14:30:00',
-          createTime: '2024-01-02 09:15:00',
-          productSpec: '季卡-高级版'
-        },
-        {
-          id: 3,
-          cardKey: 'LEAF-2024-003-QRST-UVWX',
-          type: 'year',
-          duration: 365,
-          status: 'disabled',
-          userId: 1002,
-          userEmail: 'user2@example.com',
-          activateTime: '2023-12-01 08:00:00',
-          expireTime: '2024-12-01 08:00:00',
-          createTime: '2023-11-28 16:45:00',
-          productSpec: '年卡-旗舰版'
-        },
-        {
-          id: 4,
-          cardKey: 'LEAF-2024-004-YZAB-CDEF',
-          type: 'permanent',
-          duration: null,
-          status: 'disabled',
-          userId: null,
-          userEmail: null,
-          activateTime: null,
-          expireTime: null,
-          createTime: '2024-01-03 11:20:00',
-          productSpec: '永久卡-至尊版'
-        }
-      ]
-      total.value = cardKeys.value.length
+      cardKeys.value = []
+      total.value = 0
     }
   } catch (error) {
-    ElMessage.error('加载卡密数据失败')
+    console.error('加载卡密数据失败:', error)
+    ElMessage.error('加载卡密数据失败，请检查网络连接')
+    cardKeys.value = []
+    total.value = 0
   } finally {
     loading.value = false
   }
@@ -285,66 +234,99 @@ const resetFilter = () => {
 }
 
 // 清空已使用卡密
-const handleClearUsed = () => {
-  ElMessageBox.confirm(
-    '确定要清空所有已使用的卡密吗？此操作不可恢复！',
-    '确认清空',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning',
-      confirmButtonClass: 'el-button--danger'
+const handleClearUsed = async () => {
+  try {
+    await ElMessageBox.confirm(
+      '确定要清空所有已使用的卡密吗？此操作不可恢复！',
+      '确认清空',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+        confirmButtonClass: 'el-button--danger'
+      }
+    )
+    
+    // 调用真实API清空已使用卡密
+    const response = await api.admin.clearUsedCardKeys()
+    
+    if (response && response.data && response.data.success) {
+      ElMessage.success('已成功清空所有已使用的卡密')
+      loadCardKeys() // 重新加载数据
+    } else {
+      ElMessage.error('清空已使用卡密失败')
     }
-  ).then(() => {
-    // 模拟清空已使用卡密操作
-    cardKeys.value = cardKeys.value.filter(cardKey => cardKey.status !== 'used')
-    total.value = cardKeys.value.length
-    ElMessage.success('已成功清空所有已使用的卡密')
-  }).catch(() => {
-    // 取消操作
-  })
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('清空已使用卡密失败:', error)
+      ElMessage.error('清空已使用卡密失败，请检查网络连接')
+    }
+  }
 }
 
 
 
 // 切换卡密状态（禁用/启用）
-const handleToggleCardKey = (row) => {
+const handleToggleCardKey = async (row) => {
   const isDisabling = row.status !== 'disabled'
   const actionText = isDisabling ? '禁用' : '启用'
   
-  ElMessageBox.confirm(
-    `确定要${actionText}卡密"${row.cardKey}"吗？`,
-    `确认${actionText}`,
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
+  try {
+    await ElMessageBox.confirm(
+      `确定要${actionText}卡密"${row.cardKey}"吗？`,
+      `确认${actionText}`,
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    
+    // 调用真实API切换卡密状态
+    const response = await api.admin.toggleCardKeyStatus(row.id, isDisabling ? 'disabled' : 'unused')
+    
+    if (response && response.data && response.data.success) {
+      ElMessage.success(`${actionText}成功`)
+      loadCardKeys() // 重新加载数据
+    } else {
+      ElMessage.error(`${actionText}失败`)
     }
-  ).then(() => {
-    // 模拟切换状态操作
-    row.status = isDisabling ? 'disabled' : 'unused'
-    ElMessage.success(`${actionText}成功`)
-  }).catch(() => {
-    // 取消操作
-  })
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error(`${actionText}卡密失败:`, error)
+      ElMessage.error(`${actionText}卡密失败，请检查网络连接`)
+    }
+  }
 }
 
 // 删除卡密
-const handleDeleteCardKey = (row) => {
-  ElMessageBox.confirm(
-    `确定要删除卡密"${row.cardKey}"吗？`,
-    '确认删除',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
+const handleDeleteCardKey = async (row) => {
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除卡密"${row.cardKey}"吗？`,
+      '确认删除',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    
+    // 调用真实API删除卡密
+    const response = await api.admin.deleteCardKey(row.id)
+    
+    if (response && response.data && response.data.success) {
+      ElMessage.success('删除成功')
+      loadCardKeys()
+    } else {
+      ElMessage.error('删除失败')
     }
-  ).then(() => {
-    ElMessage.success('删除成功')
-    loadCardKeys()
-  }).catch(() => {
-    // 取消操作
-  })
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除卡密失败:', error)
+      ElMessage.error('删除卡密失败，请检查网络连接')
+    }
+  }
 }
 
 // 分页处理

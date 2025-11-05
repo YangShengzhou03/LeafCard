@@ -61,6 +61,7 @@
 import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { CircleCheck, CircleClose, Warning } from '@element-plus/icons-vue'
+import Server from '@/utils/Server.js'
 
 // 卡密输入
 const cardKeyInput = ref('')
@@ -138,54 +139,25 @@ const handleVerify = async () => {
   verifying.value = true
   
   try {
-    // 模拟API调用 - 实际项目中应该调用真实的验证接口
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // 调用真实API验证卡密
+    const response = await Server.get(`/card-keys/verify/${cardKeyInput.value.trim()}`)
     
-    // 模拟验证结果
-    const mockResults = {
-      'ABC123': {
-        cardKey: 'ABC123',
-        status: 'active',
-        productSpec: 'VIP会员月卡',
-        price: '29.99',
-        activateTime: null,
-        createTime: '2024-01-01 10:00:00'
-      },
-      'DEF456': {
-        cardKey: 'DEF456',
-        status: 'used',
-        productSpec: '实体礼品卡',
-        price: '199.99',
-        activateTime: '2024-01-15 14:30:00',
-        createTime: '2024-01-02 14:30:00'
-      },
-      'GHI789': {
-        cardKey: 'GHI789',
-        status: 'disabled',
-        productSpec: '在线课程服务',
-        price: '399.99',
-        activateTime: null,
-        createTime: '2024-01-03 09:15:00'
-      }
-    }
-    
-    const result = mockResults[cardKeyInput.value.trim()]
-    
-    if (result) {
-      cardKeyInfo.value = result
+    if (response && response.code === 200 && response.data) {
+      cardKeyInfo.value = response.data
       showResult.value = true
       ElMessage.success('卡密验证成功')
     } else {
-      // 卡密不存在的情况
+      // 卡密不存在或验证失败
       cardKeyInfo.value = {
         cardKey: cardKeyInput.value.trim(),
         status: 'not_found'
       }
       showResult.value = true
-      ElMessage.error('卡密不存在')
+      ElMessage.error(response?.message || '卡密不存在')
     }
   } catch (error) {
-    ElMessage.error('验证失败，请重试')
+    console.error('卡密验证失败:', error)
+    ElMessage.error('验证失败，请检查网络连接')
   } finally {
     verifying.value = false
   }

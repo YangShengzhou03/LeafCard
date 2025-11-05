@@ -1,7 +1,6 @@
 import axios from 'axios'
 import { getToken, removeToken } from './utils.js'
 import { ElMessage } from 'element-plus'
-import mockDataService from './mockData.js'
 
 const Server = axios.create({
   baseURL: process.env.VUE_APP_API_URL || '/api',
@@ -38,49 +37,14 @@ Server.interceptors.response.use(
     return response
   },
   error => {
-    const tryMockData = (error) => {
-      const url = error.config?.url || ''
-      const method = error.config?.method?.toUpperCase() || 'GET'
-      const data = error.config?.data ? JSON.parse(error.config.data) : {}
-      
-      // 首先尝试使用getMockResponse方法
-      const mockResponse = mockDataService.getMockResponse(url, method, data)
-      if (mockResponse) {
-        return Promise.resolve(mockResponse)
-      }
-      
-      // 如果没有匹配的mock响应，尝试特定的路由
-      if (url.includes('/admin/stats') && method === 'GET') {
-        return Promise.resolve(mockDataService.getDashboardStats())
-      } else if (url.includes('/admin/user/list') && method === 'GET') {
-        const page = parseInt(new URLSearchParams(error.config?.params?.toString() || '').get('page') || '0')
-        const size = parseInt(new URLSearchParams(error.config?.params?.toString() || '').get('size') || '20')
-        return Promise.resolve(mockDataService.getUserList(page, size))
-      } else if (url.includes('/admin/log') && method === 'GET') {
-        const page = parseInt(new URLSearchParams(error.config?.params?.toString() || '').get('page') || '0')
-        const size = parseInt(new URLSearchParams(error.config?.params?.toString() || '').get('size') || '20')
-        return Promise.resolve(mockDataService.getLogList(page, size))
-      } else if (url.includes('/admin/config') && method === 'GET') {
-        return Promise.resolve(mockDataService.getSystemConfig())
-      }
-      return null
-    }
-    
     if (!error.response) {
-      console.log('网络连接失败，使用模拟数据')
-      error.isNetworkError = true
-      
-      const mockResult = tryMockData(error)
-      if (mockResult) {
-        return mockResult
-      }
-      
+      console.error('网络连接失败:', error)
+      ElMessage.error('网络连接失败，请检查网络连接')
       return Promise.reject(error)
     }
     
     const status = error.response.status
     
-    let mockResult
     switch (status) {
       case 401:
         ElMessage.error('登录已过期，请重新登录')
@@ -93,31 +57,13 @@ Server.interceptors.response.use(
         ElMessage.error('权限不足，无法访问该资源')
         break
       case 404:
-        console.log('请求的资源不存在，使用模拟数据')
-        error.isNotFoundError = true
-        
-        mockResult = tryMockData(error)
-        if (mockResult) {
-          return mockResult
-        }
+        ElMessage.error('请求的资源不存在')
         break
       case 500:
-        console.log('服务器内部错误，使用模拟数据')
-        error.isServerError = true
-        
-        mockResult = tryMockData(error)
-        if (mockResult) {
-          return mockResult
-        }
+        ElMessage.error('服务器内部错误，请联系管理员')
         break
       default:
-        console.log('请求失败，使用模拟数据')
-        error.isGenericError = true
-        
-        mockResult = tryMockData(error)
-        if (mockResult) {
-          return mockResult
-        }
+        ElMessage.error('请求失败，请稍后重试')
     }
     
     return Promise.reject(error)

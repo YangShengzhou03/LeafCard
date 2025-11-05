@@ -177,6 +177,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Camera } from '@element-plus/icons-vue'
+import api from '../../services/api'
 
 // 表单引用
 const profileFormRef = ref()
@@ -190,15 +191,15 @@ const changingPassword = ref(false)
 
 // 用户信息
 const userInfo = ref({
-  id: 1,
-  nickname: '管理员',
-  email: 'admin@example.com',
-  role: 'admin',
+  id: '',
+  nickname: '',
+  email: '',
+  role: '',
   avatar: '',
-  bio: '这是管理员的个人简介',
-  phone: '13800138000',
-  gender: 'male',
-  createTime: '2024-01-01 00:00:00'
+  bio: '',
+  phone: '',
+  gender: '',
+  createTime: ''
 })
 
 // 个人资料表单
@@ -285,23 +286,18 @@ const formatDate = (dateString) => {
 // 加载用户信息
 const loadUserInfo = async () => {
   try {
-    // 模拟从API获取用户信息
-    const mockUserInfo = {
-      id: 1,
-      nickname: '管理员',
-      email: 'admin@example.com',
-      role: 'admin',
-      avatar: '',
-      bio: '这是管理员的个人简介',
-      phone: '13800138000',
-      gender: 'male',
-      createTime: '2024-01-01 00:00:00'
-    }
+    // 调用API获取用户信息
+    const response = await api.user.getUserInfo()
     
-    userInfo.value = mockUserInfo
-    Object.assign(profileForm, mockUserInfo)
+    if (response && response.code === 200 && response.data) {
+      userInfo.value = response.data
+      Object.assign(profileForm, response.data)
+    } else {
+      ElMessage.error('获取用户信息失败')
+    }
   } catch (error) {
-    ElMessage.error('加载用户信息失败')
+    console.error('加载用户信息失败:', error)
+    ElMessage.error('加载用户信息失败，请检查网络连接')
   }
 }
 
@@ -313,18 +309,22 @@ const saveProfile = async () => {
     await profileFormRef.value.validate()
     saving.value = true
     
-    // 模拟保存操作
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // 调用API保存个人资料
+    const response = await api.user.updateUserInfo(profileForm)
     
-    // 更新用户信息
-    userInfo.value = { ...userInfo.value, ...profileForm }
-    
-    ElMessage.success('个人资料保存成功')
+    if (response && response.code === 200) {
+      // 更新用户信息
+      userInfo.value = { ...userInfo.value, ...profileForm }
+      ElMessage.success('个人资料保存成功')
+    } else {
+      ElMessage.error('保存失败，请重试')
+    }
   } catch (error) {
+    console.error('保存个人资料失败:', error)
     if (error.errors) {
       ElMessage.warning('请检查表单填写是否正确')
     } else {
-      ElMessage.error('保存失败')
+      ElMessage.error('保存失败，请检查网络连接')
     }
   } finally {
     saving.value = false
@@ -384,23 +384,31 @@ const savePassword = async () => {
     await passwordFormRef.value.validate()
     changingPassword.value = true
     
-    // 模拟修改密码操作
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    ElMessage.success('密码修改成功')
-    passwordDialogVisible.value = false
-    
-    // 重置密码表单
-    Object.assign(passwordForm, {
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
+    // 调用API修改密码
+    const response = await api.user.changePassword({
+      oldPassword: passwordForm.currentPassword,
+      newPassword: passwordForm.newPassword
     })
+    
+    if (response && response.code === 200) {
+      ElMessage.success('密码修改成功')
+      passwordDialogVisible.value = false
+      
+      // 重置密码表单
+      Object.assign(passwordForm, {
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      })
+    } else {
+      ElMessage.error('密码修改失败，请重试')
+    }
   } catch (error) {
+    console.error('修改密码失败:', error)
     if (error.errors) {
       ElMessage.warning('请检查表单填写是否正确')
     } else {
-      ElMessage.error('修改失败')
+      ElMessage.error('修改失败，请检查网络连接')
     }
   } finally {
     changingPassword.value = false

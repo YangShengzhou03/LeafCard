@@ -149,41 +149,14 @@ const loadProducts = async () => {
       products.value = response.data.records || response.data.content || []
       total.value = response.data.total || response.data.totalElements || 0
     } else {
-      // 如果API返回空数据，使用默认数据
-      products.value = [
-        {
-          id: 1,
-          name: 'VIP会员月卡',
-          category: 'virtual',
-          description: 'VIP会员专属月卡，享受专属权益',
-          stock: 1000,
-          status: 'active',
-          createTime: '2024-01-01 10:00:00'
-        },
-        {
-          id: 2,
-          name: '实体礼品卡',
-          category: 'physical',
-          description: '精美实体礼品卡，适合各种场合赠送',
-          stock: 50,
-          status: 'active',
-          createTime: '2024-01-02 14:30:00'
-        },
-        {
-          id: 3,
-          name: '在线课程服务',
-          category: 'service',
-          description: '专业在线课程服务，提供优质学习体验',
-          stock: 200,
-          status: 'inactive',
-          createTime: '2024-01-03 09:15:00'
-        }
-      ]
-      total.value = products.value.length
+      products.value = []
+      total.value = 0
     }
   } catch (error) {
-    ElMessage.error('加载商品数据失败')
-    console.error('Product data loading error:', error)
+    console.error('加载商品数据失败:', error)
+    ElMessage.error('加载商品数据失败，请检查网络连接')
+    products.value = []
+    total.value = 0
   } finally {
     loading.value = false
   }
@@ -213,21 +186,31 @@ const handleEditProduct = (row) => {
 }
 
 // 删除商品
-const handleDeleteProduct = (row) => {
-  ElMessageBox.confirm(
-    `确定要删除商品"${row.name}"吗？`,
-    '确认删除',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
+const handleDeleteProduct = async (row) => {
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除商品"${row.name}"吗？`,
+      '确认删除',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    
+    const response = await api.admin.deleteProduct(row.id)
+    if (response && response.code === 200) {
+      ElMessage.success('删除成功')
+      loadProducts()
+    } else {
+      ElMessage.error('删除失败，请重试')
     }
-  ).then(() => {
-    ElMessage.success('删除成功')
-    loadProducts()
-  }).catch(() => {
-    // 取消操作
-  })
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除商品失败:', error)
+      ElMessage.error('删除失败，请检查网络连接')
+    }
+  }
 }
 
 // 分页处理
