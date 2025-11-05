@@ -2,21 +2,34 @@ package com.leafcard.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.leafcard.dto.CardKeyDTO;
 import com.leafcard.entity.CardKey;
+import com.leafcard.entity.Specification;
+import com.leafcard.entity.Product;
 import com.leafcard.mapper.CardKeyMapper;
 import com.leafcard.service.CardKeyService;
+import com.leafcard.service.SpecificationService;
+import com.leafcard.service.ProductService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 卡密服务实现类
  */
 @Service
 public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> implements CardKeyService {
+
+    @Autowired
+    private SpecificationService specificationService;
+    
+    @Autowired
+    private ProductService productService;
 
     @Override
     public CardKey findByCardKey(String cardKey) {
@@ -30,6 +43,44 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
         QueryWrapper<CardKey> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("status", status);
         return baseMapper.selectList(queryWrapper);
+    }
+
+    @Override
+    public List<CardKeyDTO> getCardKeyListWithDetails() {
+        List<CardKey> cardKeys = baseMapper.selectList(null);
+        
+        return cardKeys.stream().map(cardKey -> {
+            CardKeyDTO dto = new CardKeyDTO();
+            dto.setId(cardKey.getId());
+            dto.setCardKey(cardKey.getCardKey());
+            dto.setSpecificationId(cardKey.getSpecificationId());
+            dto.setStatus(cardKey.getStatus());
+            dto.setUserEmail(cardKey.getUserEmail());
+            dto.setUserId(cardKey.getUserId());
+            dto.setActivateTime(cardKey.getActivateTime());
+            dto.setExpireTime(cardKey.getExpireTime());
+            dto.setCreatedAt(cardKey.getCreatedAt());
+            dto.setUpdatedAt(cardKey.getUpdatedAt());
+            
+            // 获取规格信息
+            if (cardKey.getSpecificationId() != null) {
+                Specification spec = specificationService.getById(cardKey.getSpecificationId());
+                if (spec != null) {
+                    dto.setSpecificationName(spec.getName());
+                    dto.setProductId(spec.getProductId());
+                    
+                    // 获取商品信息
+                    if (spec.getProductId() != null) {
+                        Product product = productService.getById(spec.getProductId());
+                        if (product != null) {
+                            dto.setProductName(product.getName());
+                        }
+                    }
+                }
+            }
+            
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     @Override

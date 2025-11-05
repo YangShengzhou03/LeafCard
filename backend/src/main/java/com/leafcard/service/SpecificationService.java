@@ -1,6 +1,7 @@
 package com.leafcard.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.leafcard.dto.SpecificationDTO;
 import com.leafcard.entity.Specification;
 
 import java.util.List;
@@ -37,4 +38,10 @@ public interface SpecificationService extends IService<Specification> {
      * @return 统计信息
      */
     Object getSpecificationStatistics();
+    
+    /**
+     * 获取规格DTO列表（包含卡密统计信息）
+     * @return 规格DTO列表
+     */
+    List<SpecificationDTO> getSpecificationDTOs();
 }

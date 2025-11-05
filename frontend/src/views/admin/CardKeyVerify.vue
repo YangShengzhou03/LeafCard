@@ -140,7 +140,7 @@ const handleVerify = async () => {
   
   try {
     // 调用真实API验证卡密
-    const response = await Server.get(`/card-keys/verify/${cardKeyInput.value.trim()}`)
+    const response = await Server.get(`/api/card-keys/verify/${cardKeyInput.value.trim()}`)
     
     if (response && response.code === 200 && response.data) {
       cardKeyInfo.value = response.data

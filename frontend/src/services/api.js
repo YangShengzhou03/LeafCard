@@ -19,7 +19,46 @@ const AdminService = {
   },
 
   getLogList(params) {
-    return operationLogApi.getOperationLogs(params.page || 1, params.size || 10)
+    return operationLogApi.getOperationLogs(
+      params.page || 1, 
+      params.size || 10,
+      params.startDate,
+      params.endDate,
+      params.operationType,
+      params.adminId
+    )
+  },
+
+  getLogStats(params) {
+    return operationLogApi.getLogStats(params.startDate, params.endDate)
+  },
+
+  exportLogs(params) {
+    return operationLogApi.exportLogs(params.startDate, params.endDate)
+  },
+
+  clearLogs() {
+    return operationLogApi.clearLogs()
+  },
+
+  getLogsByAdmin(adminId) {
+    return operationLogApi.getOperationLogsByAdmin(adminId)
+  },
+
+  getLogsByType(operationType) {
+    return operationLogApi.getOperationLogsByType(operationType)
+  },
+
+  getLogsByTarget(targetType, targetId) {
+    return operationLogApi.getOperationLogsByTarget(targetType, targetId)
+  },
+
+  logOperation(data) {
+    return operationLogApi.logOperation(data)
+  },
+
+  logDetailedOperation(data) {
+    return operationLogApi.logDetailedOperation(data)
   },
 
   getSystemConfig() {
@@ -34,6 +73,10 @@ const AdminService = {
     return cardKeyApi.getCardKeys(params.page || 1, params.size || 10, params.status)
   },
 
+  getCardKeyListWithDetails() {
+    return cardKeyApi.getCardKeyListWithDetails()
+  },
+
   generateCardKey(data) {
     return cardKeyApi.createCardKey(data)
   },
@@ -44,6 +87,10 @@ const AdminService = {
 
   deleteCardKey(id) {
     return cardKeyApi.deleteCardKey(id)
+  },
+
+  toggleCardKeyStatus(id, status) {
+    return cardKeyApi.toggleCardKeyStatus(id, status)
   },
 
   exportCardKeys(params) {

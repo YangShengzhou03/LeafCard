@@ -1,6 +1,7 @@
 package com.leafcard.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.leafcard.dto.CardKeyDTO;
 import com.leafcard.entity.CardKey;
 
 import java.util.List;
@@ -19,6 +20,11 @@ public interface CardKeyService extends IService<CardKey> {
      * 根据状态查找卡密
      */
     List<CardKey> findByStatus(String status);
+    
+    /**
+     * 获取包含商品和规格名称的卡密列表
+     */
+    List<CardKeyDTO> getCardKeyListWithDetails();
     
     /**
      * 激活卡密

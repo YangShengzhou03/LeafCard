@@ -4,11 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.leafcard.common.Result;
+import com.leafcard.dto.CardKeyDTO;
 import com.leafcard.entity.CardKey;
 import com.leafcard.service.CardKeyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,10 +44,33 @@ public class CardKeyController {
     }
 
     /**
+     * 获取包含商品和规格名称的卡密列表
+     */
+    @GetMapping("/with-details")
+    public Result<List<CardKeyDTO>> getCardKeysWithDetails() {
+        List<CardKeyDTO> cardKeyList = cardKeyService.getCardKeyListWithDetails();
+        return Result.success(cardKeyList);
+    }
+
+    /**
      * 根据卡密查询
      */
     @GetMapping("/search")
     public Result<CardKey> searchCardKey(@RequestParam String cardKey) {
+        CardKey card = cardKeyService.findByCardKey(cardKey);
+        
+        if (card != null) {
+            return Result.success(card);
+        } else {
+            return Result.notFound();
+        }
+    }
+
+    /**
+     * 验证卡密
+     */
+    @GetMapping("/verify/{cardKey}")
+    public Result<CardKey> verifyCardKey(@PathVariable String cardKey) {
         CardKey card = cardKeyService.findByCardKey(cardKey);
         
         if (card != null) {
@@ -109,6 +134,50 @@ public class CardKeyController {
             return Result.success("卡密创建成功", true);
         } else {
             return Result.error("卡密创建失败");
+        }
+    }
+
+    /**
+     * 删除卡密
+     */
+    @DeleteMapping("/{cardKey}")
+    public Result<Boolean> deleteCardKey(@PathVariable String cardKey) {
+        CardKey card = cardKeyService.findByCardKey(cardKey);
+        
+        if (card != null) {
+            boolean deleted = cardKeyService.removeById(card.getId());
+            if (deleted) {
+                return Result.success("卡密删除成功", true);
+            } else {
+                return Result.error("卡密删除失败");
+            }
+        } else {
+            return Result.notFound();
+        }
+    }
+
+    /**
+     * 切换卡密状态
+     */
+    @PostMapping("/{cardKey}/status")
+    public Result<Boolean> toggleCardKeyStatus(
+            @PathVariable String cardKey,
+            @RequestBody Map<String, String> request) {
+        
+        String status = request.get("status");
+        CardKey card = cardKeyService.findByCardKey(cardKey);
+        
+        if (card != null) {
+            card.setStatus(status);
+            boolean updated = cardKeyService.updateById(card);
+            
+            if (updated) {
+                return Result.success("卡密状态更新成功", true);
+            } else {
+                return Result.error("卡密状态更新失败");
+            }
+        } else {
+            return Result.notFound();
         }
     }
 }

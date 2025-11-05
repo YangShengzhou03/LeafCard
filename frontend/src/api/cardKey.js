@@ -58,12 +58,39 @@ export const cardKeyApi = {
   },
 
   /**
+   * 获取卡密列表（包含商品和规格详情）
+   * @returns {Promise} 卡密列表（包含完整信息）
+   */
+  getCardKeyListWithDetails() {
+    return Server.get('/api/card-keys/with-details')
+  },
+
+  /**
    * 创建卡密
    * @param {Object} cardKeyData - 卡密数据
    * @returns {Promise} 创建结果
    */
   createCardKey(cardKeyData) {
     return Server.post('/api/card-keys', cardKeyData)
+  },
+
+  /**
+   * 删除卡密
+   * @param {string} cardKey - 卡密
+   * @returns {Promise} 删除结果
+   */
+  deleteCardKey(cardKey) {
+    return Server.delete(`/api/card-keys/${cardKey}`)
+  },
+
+  /**
+   * 切换卡密状态
+   * @param {string} cardKey - 卡密
+   * @param {string} status - 新状态
+   * @returns {Promise} 切换结果
+   */
+  toggleCardKeyStatus(cardKey, status) {
+    return Server.post(`/api/card-keys/${cardKey}/status`, { status })
   }
 }
 

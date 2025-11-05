@@ -122,7 +122,7 @@
             v-model:page-size="pageSize"
             :page-sizes="[10, 20, 50, 100]"
             layout="total, sizes, prev, pager, next, jumper"
-            :total="totalSpecs"
+            :total="filteredTotal"
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
           />
@@ -172,6 +172,7 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import api from '../../services/api'
+import Server from '../../utils/Server'
 
 // 加载状态
 const loading = ref(false)
@@ -236,7 +237,30 @@ const filteredSpecs = computed(() => {
     filtered = filtered.filter(spec => spec.status === statusFilter.value)
   }
   
-  return filtered
+  // 前端分页处理
+  const startIndex = (currentPage.value - 1) * pageSize.value
+  const endIndex = startIndex + pageSize.value
+  
+  return filtered.slice(startIndex, endIndex)
+})
+
+// 计算属性：筛选后的总数
+const filteredTotal = computed(() => {
+  let filtered = specs.value
+  
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    filtered = filtered.filter(spec => 
+      spec.productName.toLowerCase().includes(query) || 
+      spec.name.toLowerCase().includes(query)
+    )
+  }
+  
+  if (statusFilter.value) {
+    filtered = filtered.filter(spec => spec.status === statusFilter.value)
+  }
+  
+  return filtered.length
 })
 
 // 计算使用率
@@ -284,33 +308,25 @@ const loadProducts = async () => {
 const loadSpecs = async () => {
   loading.value = true
   try {
-    // 调用API获取商品规格列表
-    const response = await api.admin.getSpecList({
-      page: currentPage.value,
-      size: pageSize.value,
-      keyword: searchQuery.value,
-      status: statusFilter.value
-    })
+    // 调用新的API获取商品规格列表（包含卡密统计信息）
+    const response = await Server.get('/api/specifications/dto')
     
     // 处理API响应数据格式
     if (response && response.data) {
       const data = response.data
       let specList = []
       
-      // 支持两种可能的响应格式：records/content 和 total/totalElements
-      if (data.records) {
-        specList = data.records
-        totalSpecs.value = data.total || 0
-      } else if (data.content) {
-        specList = data.content
-        totalSpecs.value = data.totalElements || 0
+      // 新的API返回的是直接的数据列表，不是分页格式
+      if (Array.isArray(data)) {
+        specList = data
+        totalSpecs.value = data.length
       } else {
         specList = []
         totalSpecs.value = 0
       }
       
       // 处理规格数据，添加商品名称和格式化创建时间
-      specs.value = specList.map(spec => {
+      const processedSpecs = specList.map(spec => {
         // 根据productId查找商品名称
         const product = products.value.find(p => p.id === spec.productId)
         const productName = product ? product.name : '未知商品'
@@ -337,6 +353,9 @@ const loadSpecs = async () => {
           createTime: createTime || '未知时间'
         }
       })
+      
+      // 存储所有规格数据用于前端分页
+      specs.value = processedSpecs
     } else {
       specs.value = []
       totalSpecs.value = 0
@@ -368,12 +387,12 @@ const resetFilters = () => {
 const handleSizeChange = (size) => {
   pageSize.value = size
   currentPage.value = 1
-  loadSpecs()
+  // 由于数据已经全部加载，不需要重新调用API
 }
 
 const handleCurrentChange = (page) => {
   currentPage.value = page
-  loadSpecs()
+  // 由于数据已经全部加载，不需要重新调用API
 }
 
 // 编辑规格

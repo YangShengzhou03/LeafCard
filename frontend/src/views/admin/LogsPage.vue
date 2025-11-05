@@ -10,7 +10,7 @@
       <!-- 筛选区域 -->
       <div class="filter-section">
         <el-row :gutter="20">
-          <el-col :span="6">
+          <el-col :span="4">
             <el-date-picker
               v-model="filter.dateRange"
               type="daterange"
@@ -18,9 +18,24 @@
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               value-format="YYYY-MM-DD"
-              @change="handleFilter"
               style="width: 100%"
             />
+          </el-col>
+          <el-col :span="3">
+            <el-select v-model="filter.operationType" placeholder="操作类型" clearable style="width: 100%">
+              <el-option label="登录" value="LOGIN" />
+              <el-option label="创建卡密" value="CARD_KEY_GENERATE" />
+              <el-option label="验证卡密" value="CARD_KEY_VERIFY" />
+              <el-option label="编辑卡密" value="CARD_KEY_EDIT" />
+              <el-option label="删除卡密" value="CARD_KEY_DELETE" />
+              <el-option label="产品管理" value="PRODUCT_MANAGE" />
+              <el-option label="规格管理" value="SPEC_MANAGE" />
+              <el-option label="用户管理" value="USER_MANAGE" />
+              <el-option label="系统配置" value="SYSTEM_CONFIG" />
+            </el-select>
+          </el-col>
+          <el-col :span="3">
+            <el-input v-model="filter.adminId" placeholder="管理员ID" clearable />
           </el-col>
           <el-col :span="4">
             <div class="action-buttons">
@@ -28,7 +43,7 @@
               <el-button @click="resetFilter">重置</el-button>
             </div>
           </el-col>
-          <el-col :span="14">
+          <el-col :span="10">
             <div class="action-buttons" style="justify-content: flex-end;">
               <el-button @click="exportLogs" :loading="exporting">
                 <el-icon><Download /></el-icon>
@@ -80,17 +95,34 @@
             <el-empty description="暂无日志数据" />
           </div>
         </template>
-        <el-table-column prop="id" label="ID" width="100" show-overflow-tooltip />
-        <el-table-column prop="operationType" label="操作类型" width="200">
+        <el-table-column prop="id" label="ID" width="80" show-overflow-tooltip />
+        <el-table-column prop="adminName" label="管理员" width="120" show-overflow-tooltip />
+        <el-table-column prop="operationType" label="操作类型" width="120">
           <template #default="{ row }">
             <el-tag :type="getLevelType(row.operationType)" size="small">
               {{ getOperationTypeName(row.operationType) }}
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column prop="targetName" label="操作目标" width="150" show-overflow-tooltip />
         <el-table-column prop="description" label="描述" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="ipAddress" label="IP地址" width="130" />
-        <el-table-column prop="createTime" label="时间" width="160" />
+        <el-table-column prop="ipAddress" label="IP地址" width="120" />
+        <el-table-column prop="requestMethod" label="请求方法" width="100">
+          <template #default="{ row }">
+            <el-tag v-if="row.requestMethod" :type="getMethodType(row.requestMethod)" size="small">
+              {{ row.requestMethod }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="responseStatus" label="状态码" width="80">
+          <template #default="{ row }">
+            <el-tag v-if="row.responseStatus" :type="getStatusType(row.responseStatus)" size="small">
+              {{ row.responseStatus }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="executionTime" label="耗时(ms)" width="100" />
+        <el-table-column prop="createdAt" label="时间" width="160" />
         <el-table-column label="操作" width="100" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" size="small" @click="viewLogDetail(row)">

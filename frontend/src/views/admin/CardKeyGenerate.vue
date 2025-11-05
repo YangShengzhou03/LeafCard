@@ -38,7 +38,7 @@
             </el-col>
             <el-col :span="5">
               <el-form-item label="商品">
-                <el-select v-model="generateForm.productId" placeholder="请选择商品" clearable class="form-input">
+                <el-select v-model="generateForm.productId" placeholder="请选择商品" clearable class="form-input" @change="handleProductChange">
                   <el-option 
                     v-for="product in productList" 
                     :key="product.id" 
@@ -125,19 +125,15 @@
         
         <el-table :data="paginatedKeys" border stripe class="result-table">
           <el-table-column type="index" label="序号" width="80" align="center" />
-          <el-table-column prop="key" label="卡密代码" min-width="220" align="center" />
-          <el-table-column prop="productName" label="商品" width="120" align="center" />
-          <el-table-column prop="specName" label="规格" width="120" align="center" />
-          <el-table-column label="操作" width="140" align="center">
+          <el-table-column prop="key" label="卡密代码" min-width="220" align="center">
             <template #default="{ row }">
-              <div class="action-buttons">
-                <el-button type="link" @click="copyCardKey(row.key)" class="copy-btn">
-                  <el-icon><CopyDocument /></el-icon>
-                  复制
-                </el-button>
-              </div>
+              <span class="key-text clickable" @click="copyCardKey(row.key)" :title="'点击复制: ' + row.key">
+                {{ row.key }}
+              </span>
             </template>
           </el-table-column>
+          <el-table-column prop="productName" label="商品" width="120" align="center" />
+          <el-table-column prop="specName" label="规格" width="120" align="center" />
         </el-table>
         
         <!-- 分页 -->
@@ -160,7 +156,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { CopyDocument, Download, Upload } from '@element-plus/icons-vue'
+import { Download, Upload } from '@element-plus/icons-vue'
 import Server from '@/utils/Server.js'
 
 // 生成状态
@@ -178,7 +174,9 @@ const generateForm = reactive({
 
 // 商品列表
 const productList = ref([])
-// 规格列表
+// 规格列表（全部规格）
+const allSpecList = ref([])
+// 当前商品对应的规格列表
 const specList = ref([])
 
 // 生成的卡密列表
@@ -209,33 +207,63 @@ const handleCurrentChange = (page) => {
 const loadProducts = async () => {
   try {
     const response = await Server.get('/api/products')
-    if (response.data && response.data.success) {
-      productList.value = response.data.data || []
+    
+    if (response.code === 200) {
+      if (response.data && response.data.records) {
+        productList.value = response.data.records || []
+      } else if (Array.isArray(response.data)) {
+        productList.value = response.data || []
+      } else {
+        productList.value = []
+      }
     } else {
       ElMessage.error('加载商品列表失败')
     }
   } catch (error) {
-    console.error('加载商品列表失败:', error)
     ElMessage.error('加载商品列表失败，请检查网络连接')
   }
 }
 
-// 加载规格列表
-const loadSpecs = async () => {
+// 加载全部规格列表（用于缓存）
+const loadAllSpecs = async () => {
   try {
     const response = await Server.get('/api/specifications')
-    if (response.data && response.data.success) {
-      specList.value = response.data.data || []
+    
+    if (response.code === 200) {
+      if (response.data && response.data.records) {
+        allSpecList.value = response.data.records || []
+      } else if (Array.isArray(response.data)) {
+        allSpecList.value = response.data || []
+      } else {
+        allSpecList.value = []
+      }
+      
+      specList.value = []
     } else {
       ElMessage.error('加载规格列表失败')
     }
   } catch (error) {
-    console.error('加载规格列表失败:', error)
     ElMessage.error('加载规格列表失败，请检查网络连接')
   }
 }
 
-// 添加库存
+// 根据商品ID加载对应的规格列表
+const loadSpecsByProduct = (productId) => {
+  if (!productId) {
+    specList.value = []
+    generateForm.specId = ''
+    return
+  }
+  
+  const filteredSpecs = allSpecList.value.filter(spec => spec.productId === productId)
+  specList.value = filteredSpecs
+  
+  if (generateForm.specId && !filteredSpecs.some(spec => spec.id === generateForm.specId)) {
+    generateForm.specId = ''
+  }
+}
+
+// 添加卡密到库存
 const addToStock = async () => {
   if (generatedKeys.value.length === 0) {
     ElMessage.warning('请先生成卡密')
@@ -260,25 +288,41 @@ const addToStock = async () => {
       }
     )
     
-    // 调用真实API添加库存
-    const response = await Server.post('/card-keys/batch', {
-      productId: generateForm.productId,
-      specId: generateForm.specId,
-      keys: generatedKeys.value.map(key => key.key)
-    })
+    // 批量创建卡密 - 逐个调用API
+    let successCount = 0
+    let errorCount = 0
     
-    if (response.data && response.data.success) {
-      ElMessage.success(`成功添加 ${generatedKeys.value.length} 个卡密到库存`)
+    for (const keyInfo of generatedKeys.value) {
+      try {
+        const response = await Server.post('/api/card-keys', {
+          cardKey: keyInfo.key,
+          specificationId: generateForm.specId,  // 修正：使用后端实体类期望的参数名
+          status: '未使用'  // 修正：使用数据库允许的ENUM值
+        })
+        
+        if (response.data && response.data.success) {
+          successCount++
+        } else {
+          errorCount++
+        }
+      } catch (error) {
+        errorCount++
+      }
+    }
+    
+    if (successCount > 0) {
+      ElMessage.success(`成功添加 ${successCount} 个卡密到库存`)
       
       // 清空生成的卡密
       generatedKeys.value = []
-    } else {
-      ElMessage.error('添加库存失败')
+    }
+    
+    if (errorCount > 0) {
+      ElMessage.warning(`${errorCount} 个卡密添加失败`)
     }
     
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('添加库存失败:', error)
       ElMessage.error('添加库存失败，请检查网络连接')
     }
   } finally {
@@ -339,16 +383,31 @@ const generateCardKeys = async () => {
     const product = productList.value.find(p => p.id === generateForm.productId)
     const spec = specList.value.find(s => s.id === generateForm.specId)
     
-    for (let i = 0; i < generateForm.count; i++) {
+    const maxAttempts = generateForm.count * 10 // 最大尝试次数，避免无限循环
+    let attempts = 0
+    
+    while (generatedKeys.value.length < generateForm.count && attempts < maxAttempts) {
       const key = generateRandomKey()
-      generatedKeys.value.push({
-        key: key,
-        productName: product ? product.name : '',
-        specName: spec ? spec.name : ''
-      })
+      
+      // 检查是否与已生成的卡密重复
+      const isDuplicateInGenerated = generatedKeys.value.some(k => k.key === key)
+      
+      if (!isDuplicateInGenerated) {
+        generatedKeys.value.push({
+          key: key,
+          productName: product ? product.name : '',
+          specName: spec ? spec.name : ''
+        })
+      }
+      
+      attempts++
     }
     
-    ElMessage.success(`成功生成 ${generateForm.count} 个卡密`)
+    if (generatedKeys.value.length < generateForm.count) {
+      ElMessage.warning(`生成了 ${generatedKeys.value.length} 个唯一卡密（尝试 ${attempts} 次后达到上限）`)
+    } else {
+      ElMessage.success(`成功生成 ${generateForm.count} 个唯一卡密`)
+    }
   } catch (error) {
     ElMessage.error('生成卡密失败')
   } finally {
@@ -367,6 +426,16 @@ const getSpecName = (specId) => {
   const spec = specList.value.find(s => s.id === specId)
   return spec ? spec.name : ''
 }
+
+// 商品选择变化事件
+const handleProductChange = (productId) => {
+  loadSpecsByProduct(productId)
+}
+
+onMounted(() => {
+  loadProducts()
+  loadAllSpecs()
+})
 
 // 导出卡密
 const exportCardKeys = () => {
@@ -418,11 +487,6 @@ const resetForm = () => {
   })
   generatedKeys.value = []
 }
-
-onMounted(() => {
-  loadProducts()
-  loadSpecs()
-})
 </script>
 
 <style scoped>
@@ -583,6 +647,24 @@ onMounted(() => {
   font-size: 14px;
   color: #333;
   user-select: all;
+}
+
+.key-text.clickable {
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.key-text.clickable:hover {
+  background-color: #f0f7ff;
+  color: #1890ff;
+  box-shadow: 0 1px 3px rgba(24, 144, 255, 0.2);
+}
+
+.key-text.clickable:active {
+  background-color: #e6f7ff;
+  transform: scale(0.98);
 }
 
 .copy-btn {

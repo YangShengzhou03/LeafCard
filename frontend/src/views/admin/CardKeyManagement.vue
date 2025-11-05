@@ -156,9 +156,9 @@ const filteredCardKeys = computed(() => {
 // 状态标签类型映射
 const getStatusTagType = (status) => {
   const typeMap = {
-    unused: 'success',
-    used: 'info',
-    disabled: 'danger'
+    '未使用': 'success',
+    '已使用': 'info',
+    '已禁用': 'danger'
   }
   return typeMap[status] || 'warning'
 }
@@ -166,11 +166,11 @@ const getStatusTagType = (status) => {
 // 状态文本映射
 const getStatusText = (status) => {
   const textMap = {
-    unused: '未使用',
-    used: '已使用',
-    disabled: '已禁用'
+    '未使用': '未使用',
+    '已使用': '已使用',
+    '已禁用': '已禁用'
   }
-  return textMap[status] || '未知'
+  return textMap[status] || status || '未知'
 }
 
 
@@ -179,16 +179,25 @@ const getStatusText = (status) => {
 const loadCardKeys = async () => {
   loading.value = true
   try {
-    const response = await api.admin.getCardKeyList({
-      page: currentPage.value,
-      size: pageSize.value,
-      keyword: searchQuery.value,
-      status: statusFilter.value
-    })
+    // 使用新的API接口获取包含商品和规格名称的卡密列表
+    const response = await api.admin.getCardKeyListWithDetails()
     
     if (response && response.data) {
-      cardKeys.value = response.data.records || response.data.content || []
-      total.value = response.data.total || response.data.totalElements || 0
+      // 将返回的数据转换为前端需要的格式
+      cardKeys.value = response.data.map(cardKey => ({
+        id: cardKey.id,
+        cardKey: cardKey.cardKey,
+        status: cardKey.status,
+        productSpec: cardKey.productName && cardKey.specificationName 
+          ? `${cardKey.productName} - ${cardKey.specificationName}` 
+          : '未设置',
+        userEmail: cardKey.userEmail || '',
+        userId: cardKey.userId || '',
+        activateTime: cardKey.activateTime ? formatDateTime(cardKey.activateTime) : '',
+        createTime: cardKey.createdAt ? formatDateTime(cardKey.createdAt) : '',
+        updatedAt: cardKey.updatedAt ? formatDateTime(cardKey.updatedAt) : ''
+      }))
+      total.value = cardKeys.value.length
     } else {
       cardKeys.value = []
       total.value = 0
@@ -200,6 +209,24 @@ const loadCardKeys = async () => {
     total.value = 0
   } finally {
     loading.value = false
+  }
+}
+
+// 格式化日期时间
+const formatDateTime = (dateTimeStr) => {
+  if (!dateTimeStr) return ''
+  try {
+    const date = new Date(dateTimeStr)
+    return date.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    })
+  } catch (error) {
+    return dateTimeStr
   }
 }
 

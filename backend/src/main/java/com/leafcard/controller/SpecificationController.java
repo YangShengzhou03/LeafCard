@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.leafcard.common.Result;
+import com.leafcard.dto.SpecificationDTO;
 import com.leafcard.entity.Specification;
 import com.leafcard.service.SpecificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,5 +99,14 @@ public class SpecificationController {
     public Result<Object> getStatistics() {
         Object statistics = specificationService.getSpecificationStatistics();
         return Result.success(statistics);
+    }
+
+    /**
+     * 获取规格DTO列表（包含卡密统计信息）
+     */
+    @GetMapping("/dto")
+    public Result<List<SpecificationDTO>> getSpecificationDTOs() {
+        List<SpecificationDTO> specificationDTOs = specificationService.getSpecificationDTOs();
+        return Result.success(specificationDTOs);
     }
 }
