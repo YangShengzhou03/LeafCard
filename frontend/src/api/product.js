@@ -16,7 +16,7 @@ export const productApi = {
     const params = { page, size }
     if (category) params.category = category
     if (status) params.status = status
-    return Server.get('/products', params)
+    return Server.get('/api/products', params)
   },
 
   /**
@@ -25,7 +25,7 @@ export const productApi = {
    * @returns {Promise} 产品信息
    */
   getProductById(id) {
-    return Server.get(`/products/${id}`)
+    return Server.get(`/api/products/${id}`)
   },
 
   /**
@@ -34,7 +34,7 @@ export const productApi = {
    * @returns {Promise} 创建结果
    */
   createProduct(productData) {
-    return Server.post('/products', productData)
+    return Server.post('/api/products', productData)
   },
 
   /**
@@ -44,7 +44,7 @@ export const productApi = {
    * @returns {Promise} 更新结果
    */
   updateProduct(id, productData) {
-    return Server.put(`/products/${id}`, productData)
+    return Server.put(`/api/products/${id}`, productData)
   },
 
   /**
@@ -53,7 +53,7 @@ export const productApi = {
    * @returns {Promise} 删除结果
    */
   deleteProduct(id) {
-    return Server.delete(`/products/${id}`)
+    return Server.delete(`/api/products/${id}`)
   },
 
   /**
@@ -61,7 +61,7 @@ export const productApi = {
    * @returns {Promise} 统计信息
    */
   getProductStatistics() {
-    return Server.get('/products/statistics')
+    return Server.get('/api/products/statistics')
   },
 
   /**
@@ -70,7 +70,7 @@ export const productApi = {
    * @returns {Promise} 产品列表
    */
   getProductsByCategory(category) {
-    return Server.get(`/products/category/${category}`)
+    return Server.get(`/api/products/category/${category}`)
   }
 }
 

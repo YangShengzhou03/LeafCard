@@ -3,15 +3,15 @@ import { userApi, productApi, specificationApi, cardKeyApi, operationLogApi } fr
 
 const AdminService = {
   login(data) {
-    return Server.post('/admin/login', data)
+    return Server.post('/api/admin/login', data)
   },
 
   register(data) {
-    return Server.post('/admin/register', data)
+    return Server.post('/api/admin/register', data)
   },
 
   getDashboardStats() {
-    return Server.get('/admin/dashboard')
+    return Server.get('/api/admin/dashboard')
   },
 
   getUserList(params) {
@@ -23,11 +23,11 @@ const AdminService = {
   },
 
   getSystemConfig() {
-    return Server.get('/admin/config')
+    return Server.get('/api/admin/config')
   },
 
   updateSystemConfig(data) {
-    return Server.put('/admin/config', data)
+    return Server.put('/api/admin/config', data)
   },
 
   getCardKeyList(params) {
@@ -47,7 +47,7 @@ const AdminService = {
   },
 
   exportCardKeys(params) {
-    return Server.get('/admin/card-keys/export', params, { responseType: 'blob' })
+    return Server.get('/api/admin/card-keys/export', params, { responseType: 'blob' })
   },
 
   getProductList(params) {
@@ -89,59 +89,59 @@ const UserService = {
   },
 
   register(data) {
-    return Server.post('/auth/register', data)
+    return Server.post('/api/auth/register', data)
   },
 
   getCaptcha() {
-    return Server.get('/auth/captcha')
+    return Server.get('/api/auth/captcha')
   },
 
   getCurrentUser() {
-    return Server.get('/auth/me')
+    return Server.get('/api/auth/me')
   },
 
   updateUserInfo(data) {
-    return Server.put('/auth/me', data)
+    return Server.put('/api/auth/me', data)
   },
 
   changePassword(data) {
-    return Server.put('/auth/password', data)
+    return Server.put('/api/auth/password', data)
   },
 
   getStorageInfo() {
-    return Server.get('/user/storage')
+    return Server.get('/api/user/storage')
   },
 
   getFileList(params) {
-    return Server.get('/user/files', params)
+    return Server.get('/api/user/files', params)
   },
 
   uploadFile(data) {
-    return Server.upload('/user/files/upload', data)
+    return Server.upload('/api/user/files/upload', data)
   },
 
   downloadFile(id) {
-    return Server.get(`/user/files/${id}/download`, {}, { responseType: 'blob' })
+    return Server.get(`/api/user/files/${id}/download`, {}, { responseType: 'blob' })
   },
 
   deleteFile(id) {
-    return Server.delete(`/user/files/${id}`)
+    return Server.delete(`/api/user/files/${id}`)
   },
 
   getShareList(params) {
-    return Server.get('/user/shares', params)
+    return Server.get('/api/user/shares', params)
   },
 
   createShare(data) {
-    return Server.post('/user/shares', data)
+    return Server.post('/api/user/shares', data)
   },
 
   deleteShare(id) {
-    return Server.delete(`/user/shares/${id}`)
+    return Server.delete(`/api/user/shares/${id}`)
   },
 
   verifyCardKey(data) {
-    return Server.post('/user/card-keys/verify', data)
+    return Server.post('/api/user/card-keys/verify', data)
   }
 }
 

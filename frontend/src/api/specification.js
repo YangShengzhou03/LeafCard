@@ -11,7 +11,7 @@ export const specificationApi = {
    * @returns {Promise} 规格列表
    */
   getSpecifications(page = 1, size = 10) {
-    return Server.get('/specifications', { page, size })
+    return Server.get('/api/specifications', { page, size })
   },
 
   /**
@@ -20,7 +20,7 @@ export const specificationApi = {
    * @returns {Promise} 规格信息
    */
   getSpecificationById(id) {
-    return Server.get(`/specifications/${id}`)
+    return Server.get(`/api/specifications/${id}`)
   },
 
   /**
@@ -29,7 +29,7 @@ export const specificationApi = {
    * @returns {Promise} 规格列表
    */
   getSpecificationsByProduct(productId) {
-    return Server.get(`/specifications/product/${productId}`)
+    return Server.get(`/api/specifications/product/${productId}`)
   },
 
   /**
@@ -38,7 +38,7 @@ export const specificationApi = {
    * @returns {Promise} 规格列表
    */
   getSpecificationsByStatus(status) {
-    return Server.get(`/specifications/status/${status}`)
+    return Server.get(`/api/specifications/status/${status}`)
   },
 
   /**
@@ -47,7 +47,7 @@ export const specificationApi = {
    * @returns {Promise} 创建结果
    */
   createSpecification(specificationData) {
-    return Server.post('/specifications', specificationData)
+    return Server.post('/api/specifications', specificationData)
   },
 
   /**
@@ -57,7 +57,7 @@ export const specificationApi = {
    * @returns {Promise} 更新结果
    */
   updateSpecification(id, specificationData) {
-    return Server.put(`/specifications/${id}`, specificationData)
+    return Server.put(`/api/specifications/${id}`, specificationData)
   },
 
   /**
@@ -66,7 +66,7 @@ export const specificationApi = {
    * @returns {Promise} 删除结果
    */
   deleteSpecification(id) {
-    return Server.delete(`/specifications/${id}`)
+    return Server.delete(`/api/specifications/${id}`)
   },
 
   /**
@@ -74,7 +74,7 @@ export const specificationApi = {
    * @returns {Promise} 统计信息
    */
   getSpecificationStatistics() {
-    return Server.get('/specifications/statistics')
+    return Server.get('/api/specifications/statistics')
   }
 }
 

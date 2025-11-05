@@ -12,7 +12,7 @@ export const adminApi = {
    * @returns {Promise} 登录结果
    */
   login(loginData) {
-    return Server.post('/admin/login', loginData)
+    return Server.post('/api/admin/login', loginData)
   },
 
   /**
@@ -23,7 +23,7 @@ export const adminApi = {
    * @returns {Promise} 注册结果
    */
   register(registerData) {
-    return Server.post('/admin/register', registerData)
+    return Server.post('/api/admin/register', registerData)
   },
 
   /**
@@ -31,7 +31,7 @@ export const adminApi = {
    * @returns {Promise} 管理员信息
    */
   getProfile() {
-    return Server.get('/admin/profile')
+    return Server.get('/api/admin/profile')
   },
 
   /**
@@ -40,7 +40,7 @@ export const adminApi = {
    * @returns {Promise} 更新结果
    */
   updateProfile(profileData) {
-    return Server.put('/admin/profile', profileData)
+    return Server.put('/api/admin/profile', profileData)
   },
 
   /**
@@ -51,7 +51,7 @@ export const adminApi = {
    * @returns {Promise} 修改结果
    */
   changePassword(passwordData) {
-    return Server.put('/admin/password', passwordData)
+    return Server.put('/api/admin/password', passwordData)
   }
 }
 

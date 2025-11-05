@@ -12,7 +12,7 @@ export const userApi = {
    * @returns {Promise} 登录结果
    */
   login(loginData) {
-    return Server.post('/users/login', loginData)
+    return Server.post('/api/users/login', loginData)
   },
 
   /**
@@ -22,7 +22,7 @@ export const userApi = {
    * @returns {Promise} 用户列表
    */
   getUsers(page = 1, size = 10) {
-    return Server.get('/users', { page, size })
+    return Server.get('/api/users', { page, size })
   },
 
   /**
@@ -31,7 +31,7 @@ export const userApi = {
    * @returns {Promise} 用户信息
    */
   getUserById(id) {
-    return Server.get(`/users/${id}`)
+    return Server.get(`/api/users/${id}`)
   },
 
   /**
@@ -40,7 +40,7 @@ export const userApi = {
    * @returns {Promise} 用户信息
    */
   getUserByUsername(username) {
-    return Server.get(`/users/username/${username}`)
+    return Server.get(`/api/users/username/${username}`)
   },
 
   /**
@@ -49,7 +49,7 @@ export const userApi = {
    * @returns {Promise} 创建结果
    */
   createUser(userData) {
-    return Server.post('/users', userData)
+    return Server.post('/api/users', userData)
   },
 
   /**
@@ -59,7 +59,7 @@ export const userApi = {
    * @returns {Promise} 更新结果
    */
   updateUser(id, userData) {
-    return Server.put(`/users/${id}`, userData)
+    return Server.put(`/api/users/${id}`, userData)
   },
 
   /**
@@ -68,7 +68,7 @@ export const userApi = {
    * @returns {Promise} 删除结果
    */
   deleteUser(id) {
-    return Server.delete(`/users/${id}`)
+    return Server.delete(`/api/users/${id}`)
   },
 
   /**
@@ -76,7 +76,7 @@ export const userApi = {
    * @returns {Promise} 统计信息
    */
   getUserStatistics() {
-    return Server.get('/users/statistics')
+    return Server.get('/api/users/statistics')
   }
 }
 

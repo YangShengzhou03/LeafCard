@@ -11,7 +11,7 @@ export const operationLogApi = {
    * @returns {Promise} 操作日志列表
    */
   getOperationLogs(page = 1, size = 10) {
-    return Server.get('/operation-logs', { page, size })
+    return Server.get('/api/operation-logs', { page, size })
   },
 
   /**
@@ -20,7 +20,7 @@ export const operationLogApi = {
    * @returns {Promise} 操作日志列表
    */
   getOperationLogsByUser(userId) {
-    return Server.get(`/operation-logs/user/${userId}`)
+    return Server.get(`/api/operation-logs/user/${userId}`)
   },
 
   /**
@@ -29,7 +29,7 @@ export const operationLogApi = {
    * @returns {Promise} 操作日志列表
    */
   getOperationLogsByType(operationType) {
-    return Server.get(`/operation-logs/type/${operationType}`)
+    return Server.get(`/api/operation-logs/type/${operationType}`)
   },
 
   /**
@@ -39,7 +39,7 @@ export const operationLogApi = {
    * @returns {Promise} 操作日志列表
    */
   getOperationLogsByTarget(targetType, targetId) {
-    return Server.get('/operation-logs/target', { targetType, targetId })
+    return Server.get('/api/operation-logs/target', { targetType, targetId })
   },
 
   /**
@@ -55,7 +55,7 @@ export const operationLogApi = {
    */
   logOperation(logData) {
     const { userId, operationType, targetType, targetId, description, ipAddress } = logData
-    return Server.post('/operation-logs', {
+    return Server.post('/api/operation-logs', {
       userId,
       operationType,
       targetType,

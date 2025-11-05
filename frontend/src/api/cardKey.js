@@ -14,7 +14,7 @@ export const cardKeyApi = {
   getCardKeys(page = 1, size = 10, status = null) {
     const params = { page, size }
     if (status) params.status = status
-    return Server.get('/card-keys', params)
+    return Server.get('/api/card-keys', params)
   },
 
   /**
@@ -23,7 +23,7 @@ export const cardKeyApi = {
    * @returns {Promise} 卡密信息
    */
   searchCardKey(cardKey) {
-    return Server.get('/card-keys/search', { cardKey })
+    return Server.get('/api/card-keys/search', { cardKey })
   },
 
   /**
@@ -34,7 +34,7 @@ export const cardKeyApi = {
    * @returns {Promise} 激活结果
    */
   activateCard(cardKey, userId, userEmail) {
-    return Server.post(`/card-keys/${cardKey}/activate`, {
+    return Server.post(`/api/card-keys/${cardKey}/activate`, {
       userId,
       userEmail
     })
@@ -46,7 +46,7 @@ export const cardKeyApi = {
    * @returns {Promise} 禁用结果
    */
   disableCard(cardKey) {
-    return Server.post(`/card-keys/${cardKey}/disable`)
+    return Server.post(`/api/card-keys/${cardKey}/disable`)
   },
 
   /**
@@ -54,7 +54,7 @@ export const cardKeyApi = {
    * @returns {Promise} 统计信息
    */
   getCardStatistics() {
-    return Server.get('/card-keys/statistics')
+    return Server.get('/api/card-keys/statistics')
   },
 
   /**
@@ -63,7 +63,7 @@ export const cardKeyApi = {
    * @returns {Promise} 创建结果
    */
   createCardKey(cardKeyData) {
-    return Server.post('/card-keys', cardKeyData)
+    return Server.post('/api/card-keys', cardKeyData)
   }
 }
 
