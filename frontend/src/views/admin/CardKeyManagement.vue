@@ -134,7 +134,7 @@ const total = ref(0)
 
 // 计算属性：筛选后的卡密列表
 const filteredCardKeys = computed(() => {
-  let filtered = cardKeys.value
+  let filtered = [...cardKeys.value]
   
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
@@ -178,8 +178,6 @@ const getStatusText = (status) => {
   return textMap[status] || status || '未知'
 }
 
-
-
 // 加载卡密数据
 const loadCardKeys = async () => {
   loading.value = true
@@ -205,20 +203,8 @@ const loadCardKeys = async () => {
       
       cardKeys.value = newCardKeys
       
-      // 手动计算筛选后的数据数量
-      let filtered = newCardKeys
-      if (searchQuery.value) {
-        const query = searchQuery.value.toLowerCase()
-        filtered = filtered.filter(cardKey => 
-          cardKey.cardKey.toLowerCase().includes(query) ||
-          (cardKey.userEmail && cardKey.userEmail.toLowerCase().includes(query))
-        )
-      }
-      if (statusFilter.value) {
-        filtered = filtered.filter(cardKey => cardKey.status === statusFilter.value)
-      }
-      
-      total.value = filtered.length
+      // 更新总数
+      total.value = filteredCardKeys.value.length
     } else {
       cardKeys.value = []
       total.value = 0
@@ -231,6 +217,21 @@ const loadCardKeys = async () => {
   } finally {
     loading.value = false
   }
+}
+
+// 搜索处理
+const handleSearch = () => {
+  currentPage.value = 1
+  // 直接更新总数，避免重复计算
+  total.value = filteredCardKeys.value.length
+}
+
+// 重置筛选
+const resetFilter = () => {
+  searchQuery.value = ''
+  statusFilter.value = ''
+  currentPage.value = 1
+  total.value = cardKeys.value.length
 }
 
 // 格式化日期时间
@@ -251,12 +252,6 @@ const formatDateTime = (dateTimeStr) => {
   }
 }
 
-// 搜索处理
-const handleSearch = () => {
-  currentPage.value = 1
-  loadCardKeys()
-}
-
 // 复制卡密
 const copyCardKey = async (cardKey) => {
   try {
@@ -272,13 +267,6 @@ const copyCardKey = async (cardKey) => {
     document.body.removeChild(textArea)
     ElMessage.success('卡密已复制到剪贴板')
   }
-}
-
-// 重置筛选
-const resetFilter = () => {
-  searchQuery.value = ''
-  statusFilter.value = ''
-  handleSearch()
 }
 
 // 清空已使用卡密
@@ -398,18 +386,26 @@ onMounted(() => {
 
 <style scoped>
 .admin-cardkey-management {
-  padding: 0;
+  padding: 16px;
   background-color: #f0f2f5;
+  min-height: calc(100vh - 32px);
 }
 
 .cardkey-card {
-  margin-bottom: 16px;
+  margin-bottom: 0;
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: none;
 }
 
 .cardkey-card :deep(.el-card__body) {
-  padding: 0;
+  padding: 20px;
+}
+
+.cardkey-card :deep(.el-card__header) {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e6e8eb;
+  background-color: #fafafa;
 }
 
 .card-header {
@@ -422,11 +418,11 @@ onMounted(() => {
 }
 
 .search-bar {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   padding: 20px;
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e6e8eb;
 }
 
 .search-bar :deep(.el-col) {
@@ -440,22 +436,18 @@ onMounted(() => {
 
 .search-bar :deep(.button-group) {
   justify-content: flex-end;
-}
-
-.search-bar :deep(.button-group .el-button) {
-  margin-left: 8px;
+  gap: 12px;
 }
 
 .table-container {
   width: 100%;
-  border-radius: 8px;
+  border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e6e8eb;
 }
 
 .table-container :deep(.el-table) {
-  border-radius: 8px;
-  border: 1px solid #ebeef5;
+  border-radius: 6px;
 }
 
 .table-container :deep(.el-table__header-wrapper) {
@@ -481,9 +473,8 @@ onMounted(() => {
 .pagination-container {
   display: flex;
   justify-content: flex-end;
-  margin-top: 12px;
-  padding: 16px;
-  background-color: #fafafa;
+  margin-top: 20px;
+  padding: 16px 0 0;
   border-top: 1px solid #e6e8eb;
 }
 
@@ -514,5 +505,70 @@ onMounted(() => {
 
 .action-btn {
   min-width: 60px;
+}
+
+/* 表格样式优化 */
+.cardkey-card :deep(.el-table__header) {
+  background-color: #f5f7fa;
+}
+
+.cardkey-card :deep(.el-table th) {
+  background-color: #f5f7fa;
+  color: #606266;
+  font-weight: 600;
+}
+
+.cardkey-card :deep(.el-table--striped .el-table__body tr.el-table__row--striped td) {
+  background-color: #fafafa;
+}
+
+/* 按钮样式优化 */
+.cardkey-card :deep(.el-button) {
+  border-radius: 4px;
+}
+
+.cardkey-card :deep(.el-button--primary) {
+  background-color: #409eff;
+  border-color: #409eff;
+}
+
+.cardkey-card :deep(.el-button--danger) {
+  background-color: #f56c6c;
+  border-color: #f56c6c;
+}
+
+@media (max-width: 768px) {
+  .admin-cardkey-management {
+    padding: 10px;
+  }
+  
+  .cardkey-card :deep(.el-card__body) {
+    padding: 16px;
+  }
+  
+  .search-bar {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .search-bar :deep(.button-group) {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .table-container :deep(.el-table) {
+    font-size: 12px;
+  }
+  
+  .table-container :deep(.el-table th),
+  .table-container :deep(.el-table td) {
+    padding: 8px 0;
+  }
+  
+  .cardkey-code,
+  .product-spec,
+  .time-text {
+    font-size: 11px;
+  }
 }
 </style>
