@@ -30,7 +30,7 @@ public class OperationLog {
     @TableField("ip_address")
     private String ipAddress;
     
-    @TableField(value = "created_at", fill = FieldFill.INSERT)
+    @TableField("created_at")
     private LocalDateTime createdAt;
 
     // Getter and Setter methods

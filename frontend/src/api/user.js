@@ -89,6 +89,44 @@ export const userApi = {
    */
   resetPassword(resetData) {
     return Server.post('/api/admins/reset-password', resetData)
+  },
+
+  /**
+   * 发送重置密码验证码
+   * @param {Object} data - 发送验证码数据
+   * @param {string} data.email - 邮箱
+   * @returns {Promise} 发送结果
+   */
+  sendResetCode(data) {
+    return Server.post('/api/admins/send-reset-code', data)
+  },
+
+  /**
+   * 获取用户信息
+   * @returns {Promise} 用户信息
+   */
+  getUserInfo() {
+    return Server.get('/api/admins/info')
+  },
+
+  /**
+   * 更新用户信息
+   * @param {Object} userData - 用户数据
+   * @returns {Promise} 更新结果
+   */
+  updateUserInfo(userData) {
+    return Server.put('/api/admins/info', userData)
+  },
+
+  /**
+   * 修改密码
+   * @param {Object} passwordData - 密码数据
+   * @param {string} passwordData.oldPassword - 旧密码
+   * @param {string} passwordData.newPassword - 新密码
+   * @returns {Promise} 修改结果
+   */
+  changePassword(passwordData) {
+    return Server.put('/api/admins/password', passwordData)
   }
 }
 

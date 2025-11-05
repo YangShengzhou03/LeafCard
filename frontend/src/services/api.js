@@ -92,6 +92,22 @@ const UserService = {
     return Server.post('/api/auth/register', data)
   },
 
+  createUser(data) {
+    return userApi.createUser(data)
+  },
+
+  resetPassword(data) {
+    return userApi.resetPassword(data)
+  },
+
+  sendResetCode(data) {
+    return userApi.sendResetCode(data)
+  },
+
+  getUserInfo() {
+    return userApi.getUserInfo()
+  },
+
   getCaptcha() {
     return Server.get('/api/auth/captcha')
   },

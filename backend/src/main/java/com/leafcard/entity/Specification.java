@@ -37,10 +37,10 @@ public class Specification {
     @TableField("status")
     private String status;
     
-    @TableField(value = "created_at", fill = FieldFill.INSERT)
+    @TableField("created_at")
     private LocalDateTime createdAt;
     
-    @TableField(value = "updated_at", fill = FieldFill.INSERT_UPDATE)
+    @TableField("updated_at")
     private LocalDateTime updatedAt;
 
     // Getter and Setter methods
