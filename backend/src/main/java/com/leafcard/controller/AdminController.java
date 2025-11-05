@@ -7,6 +7,7 @@ import com.leafcard.service.AdminService;
 import com.leafcard.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,15 +24,20 @@ public class AdminController {
     private JwtUtil jwtUtil;
 
     /**
-     * 管理员登录
+     * 管理员登录（使用邮箱登录）
      */
     @PostMapping("/login")
     public Result<LoginResponse> login(@RequestBody Map<String, String> loginRequest) {
-        String username = loginRequest.get("username");
+        String email = loginRequest.get("email");
         String password = loginRequest.get("password");
         
-        Admin admin = adminService.login(username, password);
-        if (admin != null) {
+        // 根据邮箱查找管理员
+        Admin admin = adminService.findByEmail(email);
+        if (admin != null && admin.getPasswordHash().equals(password)) {
+            // 更新最后登录时间
+            admin.setLastLoginTime(java.time.LocalDateTime.now());
+            adminService.updateById(admin);
+            
             // 生成JWT token
             String token = jwtUtil.generateToken(admin.getId(), admin.getUsername());
             
@@ -39,7 +45,7 @@ public class AdminController {
             LoginResponse loginResponse = new LoginResponse(token, admin);
             return Result.success("登录成功", loginResponse);
         } else {
-            return Result.error("用户名或密码错误");
+            return Result.error("邮箱或密码错误");
         }
     }
 
@@ -62,14 +68,14 @@ public class AdminController {
      */
     @PostMapping
     public Result<Boolean> createAdmin(@RequestBody Admin admin) {
-        // 检查用户名是否已存在
-        if (adminService.findByUsername(admin.getUsername()) != null) {
-            return Result.error("用户名已存在");
-        }
-        
         // 检查邮箱是否已存在
         if (adminService.findByEmail(admin.getEmail()) != null) {
             return Result.error("邮箱已存在");
+        }
+        
+        // 如果用户名未提供，设置默认值
+        if (admin.getUsername() == null || admin.getUsername().trim().isEmpty()) {
+            admin.setUsername("leafAdmin");
         }
         
         boolean saved = adminService.save(admin);
@@ -113,5 +119,27 @@ public class AdminController {
         } else {
             return Result.error("密码重置失败");
         }
+    }
+
+    /**
+     * 分页查询管理员列表
+     */
+    @GetMapping
+    public Result<Object> getAdmins(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        
+        // 使用MyBatis Plus的分页查询
+        com.baomidou.mybatisplus.extension.plugins.pagination.Page<Admin> pageInfo = 
+            new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(page, size);
+        
+        com.baomidou.mybatisplus.extension.plugins.pagination.Page<Admin> result = adminService.page(pageInfo);
+        
+        return Result.success("管理员列表查询成功", Map.of(
+            "page", result.getCurrent(),
+            "size", result.getSize(),
+            "total", result.getTotal(),
+            "records", result.getRecords()
+        ));
     }
 }

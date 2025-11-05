@@ -7,7 +7,7 @@ USE leaf_card;
 -- 管理员表（简化版，只有管理员）
 CREATE TABLE admins (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()) COMMENT '管理员唯一标识符',
-    username VARCHAR(50) UNIQUE NOT NULL COMMENT '用户名',
+    username VARCHAR(50) NOT NULL DEFAULT 'leafAdmin' COMMENT '用户名',
     email VARCHAR(100) UNIQUE NOT NULL COMMENT '邮箱',
     password_hash VARCHAR(255) NOT NULL COMMENT '密码哈希值',
     status ENUM('active', 'inactive') DEFAULT 'active' NOT NULL COMMENT '状态：active-活跃，inactive-非活跃',

@@ -17,9 +17,4 @@ public interface AdminService extends IService<Admin> {
      * 根据邮箱查找管理员
      */
     Admin findByEmail(String email);
-    
-    /**
-     * 管理员登录
-     */
-    Admin login(String username, String password);
 }

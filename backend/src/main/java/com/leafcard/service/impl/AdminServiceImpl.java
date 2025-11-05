@@ -31,16 +31,5 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         return this.getOne(queryWrapper);
     }
 
-    @Override
-    public Admin login(String username, String password) {
-        Admin admin = findByUsername(username);
-        // 在实际应用中，这里应该使用密码加密验证
-        // 例如：BCrypt.checkpw(password, admin.getPasswordHash())
-        if (admin != null && admin.getPasswordHash().equals(password)) {
-            admin.setLastLoginTime(LocalDateTime.now());
-            this.updateById(admin);
-            return admin;
-        }
-        return null;
-    }
+    // 登录逻辑已移到Controller中，使用邮箱登录
 }

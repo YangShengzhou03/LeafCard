@@ -3,11 +3,11 @@ import { userApi, productApi, specificationApi, cardKeyApi, operationLogApi } fr
 
 const AdminService = {
   login(data) {
-    return Server.post('/api/admin/login', data)
+    return Server.post('/api/admins/login', data)
   },
 
   register(data) {
-    return Server.post('/api/admin/register', data)
+    return Server.post('/api/admins', data)
   },
 
   getDashboardStats() {

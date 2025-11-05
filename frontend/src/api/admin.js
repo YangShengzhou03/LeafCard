@@ -12,7 +12,7 @@ export const adminApi = {
    * @returns {Promise} 登录结果
    */
   login(loginData) {
-    return Server.post('/api/admin/login', loginData)
+    return Server.post('/api/admins/login', loginData)
   },
 
   /**
@@ -23,24 +23,26 @@ export const adminApi = {
    * @returns {Promise} 注册结果
    */
   register(registerData) {
-    return Server.post('/api/admin/register', registerData)
+    return Server.post('/api/admins', registerData)
   },
 
   /**
    * 获取管理员信息
+   * @param {string} id - 管理员ID
    * @returns {Promise} 管理员信息
    */
-  getProfile() {
-    return Server.get('/api/admin/profile')
+  getProfile(id) {
+    return Server.get(`/api/admins/${id}`)
   },
 
   /**
    * 更新管理员信息
+   * @param {string} id - 管理员ID
    * @param {Object} profileData - 管理员数据
    * @returns {Promise} 更新结果
    */
-  updateProfile(profileData) {
-    return Server.put('/api/admin/profile', profileData)
+  updateProfile(id, profileData) {
+    return Server.put(`/api/admins/${id}`, profileData)
   },
 
   /**
@@ -51,7 +53,18 @@ export const adminApi = {
    * @returns {Promise} 修改结果
    */
   changePassword(passwordData) {
-    return Server.put('/api/admin/password', passwordData)
+    return Server.post('/api/admins/reset-password', passwordData)
+  },
+
+  /**
+   * 获取管理员列表
+   * @param {Object} params - 查询参数
+   * @param {number} params.page - 页码
+   * @param {number} params.size - 每页大小
+   * @returns {Promise} 管理员列表
+   */
+  getAdmins(params = {}) {
+    return Server.get('/api/admins', { params })
   }
 }
 
