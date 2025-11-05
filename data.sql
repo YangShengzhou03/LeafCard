@@ -1,132 +1,116 @@
-DROP DATABASE IF EXISTS card_keeper;
-CREATE DATABASE card_keeper CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '卡牌管理系统数据库';
-USE card_keeper;
+-- 数据库初始化脚本
+-- 如果数据库存在则删除，然后重新创建
+DROP DATABASE IF EXISTS leaf_card;
+CREATE DATABASE leaf_card CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '枫叶卡管理系统数据库';
+USE leaf_card;
 
-CREATE TABLE users (
-    id CHAR(36) PRIMARY KEY DEFAULT (UUID()) COMMENT '用户唯一标识符',
-    username VARCHAR(50) UNIQUE NOT NULL COMMENT '用户名，用于登录',
-    email VARCHAR(100) UNIQUE NOT NULL COMMENT '用户邮箱',
+-- 管理员表（简化版，只有管理员）
+CREATE TABLE admins (
+    id CHAR(36) PRIMARY KEY DEFAULT (UUID()) COMMENT '管理员唯一标识符',
+    username VARCHAR(50) UNIQUE NOT NULL COMMENT '用户名',
+    email VARCHAR(100) UNIQUE NOT NULL COMMENT '邮箱',
     password_hash VARCHAR(255) NOT NULL COMMENT '密码哈希值',
-    nickname VARCHAR(50) COMMENT '用户昵称',
-    avatar VARCHAR(255) COMMENT '用户头像URL',
-    role ENUM('admin', 'user') DEFAULT 'user' NOT NULL COMMENT '用户角色：admin-管理员，user-普通用户',
-    status ENUM('active', 'inactive') DEFAULT 'active' NOT NULL COMMENT '用户状态：active-活跃，inactive-非活跃',
+    status ENUM('active', 'inactive') DEFAULT 'active' NOT NULL COMMENT '状态：active-活跃，inactive-非活跃',
     last_login_time DATETIME COMMENT '最后登录时间',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT '创建时间',
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL COMMENT '最后更新时间',
-    INDEX idx_username (username) COMMENT '用户名索引',
-    INDEX idx_email (email) COMMENT '邮箱索引',
-    INDEX idx_role (role) COMMENT '角色索引',
-    INDEX idx_status (status) COMMENT '状态索引'
-) ENGINE=InnoDB COMMENT='用户表，存储系统用户信息';
+    INDEX idx_username (username),
+    INDEX idx_email (email),
+    INDEX idx_status (status)
+) ENGINE=InnoDB COMMENT='管理员表';
 
+-- 产品表
 CREATE TABLE products (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()) COMMENT '产品唯一标识符',
     name VARCHAR(100) NOT NULL COMMENT '产品名称',
-    category ENUM('游戏', '软件', '服务') NOT NULL COMMENT '产品分类：游戏-游戏产品，软件-软件产品，服务-服务产品',
     description TEXT COMMENT '产品描述',
-    status ENUM('active', 'inactive') DEFAULT 'active' NOT NULL COMMENT '产品状态：active-活跃，inactive-非活跃',
+    status ENUM('active', 'inactive') DEFAULT 'active' NOT NULL COMMENT '产品状态',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT '创建时间',
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL COMMENT '最后更新时间',
-    INDEX idx_name (name) COMMENT '产品名称索引',
-    INDEX idx_category (category) COMMENT '产品分类索引',
-    INDEX idx_status (status) COMMENT '产品状态索引'
-) ENGINE=InnoDB COMMENT='产品表，存储可用产品类型';
+    INDEX idx_name (name),
+    INDEX idx_status (status)
+) ENGINE=InnoDB COMMENT='产品表';
 
+-- 规格表（修复字段缺失问题）
 CREATE TABLE specifications (
-    id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
-    product_id CHAR(36) NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    description TEXT,
-    duration_days INT DEFAULT 30,
-    price DECIMAL(10,2) DEFAULT 0.00,
-    currency VARCHAR(10) DEFAULT 'CNY',
-    stock_quantity INT DEFAULT 0,
-    status ENUM('active', 'inactive') DEFAULT 'active' NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
+    id CHAR(36) PRIMARY KEY DEFAULT (UUID()) COMMENT '规格唯一标识符',
+    product_id CHAR(36) NOT NULL COMMENT '产品ID',
+    name VARCHAR(100) NOT NULL COMMENT '规格名称',
+    description TEXT COMMENT '规格描述',
+    duration_days INT DEFAULT 0 COMMENT '有效期（天）',
+    price DECIMAL(10,2) DEFAULT 0.00 COMMENT '价格',
+    stock_quantity INT DEFAULT 0 COMMENT '库存数量',
+    status ENUM('active', 'inactive') DEFAULT 'active' NOT NULL COMMENT '状态',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT '创建时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL COMMENT '最后更新时间',
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
     INDEX idx_product_id (product_id),
     INDEX idx_name (name),
     INDEX idx_status (status)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB COMMENT='规格表';
 
+-- 卡密表（修复字段缺失和冗余问题）
 CREATE TABLE card_keys (
-    id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
-    card_key VARCHAR(100) UNIQUE NOT NULL,
-    specification_id CHAR(36) NOT NULL,
-    status ENUM('未使用', '已使用', '已禁用') DEFAULT '未使用' NOT NULL,
-    user_id CHAR(36),
-    user_email VARCHAR(100),
-    activate_time DATETIME,
-    expire_time DATETIME,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
+    id CHAR(36) PRIMARY KEY DEFAULT (UUID()) COMMENT '卡密唯一标识符',
+    card_key VARCHAR(100) UNIQUE NOT NULL COMMENT '卡密',
+    specification_id CHAR(36) NOT NULL COMMENT '规格ID',
+    status ENUM('未使用', '已使用', '已禁用') DEFAULT '未使用' NOT NULL COMMENT '状态',
+    user_email VARCHAR(100) COMMENT '用户邮箱（激活时填写）',
+    activate_time DATETIME COMMENT '激活时间',
+    expire_time DATETIME COMMENT '过期时间',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT '创建时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL COMMENT '最后更新时间',
     FOREIGN KEY (specification_id) REFERENCES specifications(id) ON DELETE RESTRICT,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     INDEX idx_card_key (card_key),
     INDEX idx_status (status),
     INDEX idx_specification_id (specification_id),
-    INDEX idx_user_id (user_id),
+    INDEX idx_user_email (user_email),
     INDEX idx_activate_time (activate_time),
     INDEX idx_expire_time (expire_time)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB COMMENT='卡密表';
 
+-- 操作日志表
 CREATE TABLE operation_logs (
-    id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
-    user_id CHAR(36),
-    operation_type ENUM('card_create', 'card_activate', 'card_use', 'card_disable', 'product_create', 'product_update', 'user_login') NOT NULL,
-    target_id CHAR(36),
-    target_type ENUM('card_key', 'product'),
-    description TEXT,
-    ip_address VARCHAR(50),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
-    INDEX idx_user_id (user_id),
+    id CHAR(36) PRIMARY KEY DEFAULT (UUID()) COMMENT '日志唯一标识符',
+    admin_id CHAR(36) COMMENT '管理员ID',
+    operation_type ENUM('card_create', 'card_activate', 'card_disable', 'product_create', 'product_update', 'admin_login') NOT NULL COMMENT '操作类型',
+    target_id CHAR(36) COMMENT '目标ID',
+    target_type ENUM('card_key', 'product') COMMENT '目标类型',
+    description TEXT COMMENT '描述',
+    ip_address VARCHAR(50) COMMENT 'IP地址',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT '创建时间',
+    FOREIGN KEY (admin_id) REFERENCES admins(id) ON DELETE SET NULL,
+    INDEX idx_admin_id (admin_id),
     INDEX idx_operation_type (operation_type),
     INDEX idx_created_at (created_at)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB COMMENT='操作日志表';
 
-INSERT INTO users (username, email, password_hash, nickname, role, status) VALUES
-('admin', 'admin@leafcard.com', '$2a$10$r3dJk7Q6hV6hY7U8i9jKlOeNvMwVq1pQrXrYsTtUvWxYzAbCdEfG', '系统管理员', 'admin', 'active'),
-('user1', 'user1@leafcard.com', '$2a$10$r3dJk7Q6hV6hY7U8i9jKlOeNvMwVq1pQrXrYsTtUvWxYzAbCdEfG', '普通用户', 'user', 'active');
+-- 只初始化一个管理员账号
+INSERT INTO admins (username, email, password_hash, status) VALUES
+('admin', 'admin@leafcard.com', '$2a$10$r3dJk7Q6hV6hY7U8i9jKlOeNvMwVq1pQrXrYsTtUvWxYzAbCdEfG', 'active');
 
-INSERT INTO products (name, description, category, status) VALUES
-('VIP会员', 'VIP会员专属权益，享受高级服务', 'virtual', 'active'),
-('普通会员', '普通会员基础权益，满足日常需求', 'virtual', 'active'),
-('体验试用', '新用户专享体验服务', 'virtual', 'active'),
-('实体礼品', '精美实体礼品，适合各种场合赠送', 'physical', 'active'),
-('在线课程', '专业在线课程服务，提供优质学习体验', 'service', 'inactive');
+-- 简化产品数据，只保留核心产品
+INSERT INTO products (name, description, status) VALUES
+('VIP会员', 'VIP会员专属权益，享受高级服务', 'active'),
+('普通会员', '普通会员基础权益，满足日常需求', 'active');
 
+-- 简化规格数据，每个产品保留1-2个规格
 INSERT INTO specifications (product_id, name, description, duration_days, price, stock_quantity, status) VALUES
-((SELECT id FROM products WHERE name = 'VIP会员'), '月卡', 'VIP会员专属月卡，享受专属权益', 30, 29.90, 1000, 'active'),
-((SELECT id FROM products WHERE name = 'VIP会员'), '季卡', 'VIP会员专属季卡，享受专属权益', 90, 79.90, 500, 'active'),
-((SELECT id FROM products WHERE name = 'VIP会员'), '年卡', 'VIP会员专属年卡，享受专属权益', 365, 299.00, 200, 'active'),
-((SELECT id FROM products WHERE name = '普通会员'), '月卡', '普通会员月卡，基础权益', 30, 19.90, 2000, 'active'),
-((SELECT id FROM products WHERE name = '普通会员'), '季卡', '普通会员季卡，基础权益', 90, 49.90, 800, 'active'),
-((SELECT id FROM products WHERE name = '体验试用'), '体验卡', '新用户专享体验卡', 7, 0.00, 100, 'active'),
-((SELECT id FROM products WHERE name = '实体礼品'), '礼品卡', '精美实体礼品卡，适合各种场合赠送', 90, 199.00, 50, 'active'),
-((SELECT id FROM products WHERE name = '在线课程'), '基础课程', '在线课程基础服务', 180, 299.00, 50, 'inactive'),
-((SELECT id FROM products WHERE name = '在线课程'), '进阶课程', '在线课程进阶服务', 365, 499.00, 30, 'inactive');
+((SELECT id FROM products WHERE name = 'VIP会员'), '月卡', 'VIP会员专属月卡，享受专属权益', 30, 29.90, 100, 'active'),
+((SELECT id FROM products WHERE name = 'VIP会员'), '年卡', 'VIP会员专属年卡，享受专属权益', 365, 299.00, 50, 'active'),
+((SELECT id FROM products WHERE name = '普通会员'), '月卡', '普通会员月卡，基础权益', 30, 19.90, 200, 'active');
 
-INSERT INTO card_keys (card_key, specification_id, status, user_id, user_email, activate_time, expire_time) VALUES
-('LEAF-2024-001-ABCD-EFGH', (SELECT id FROM specifications WHERE name = '月卡' AND product_id = (SELECT id FROM products WHERE name = 'VIP会员')), '未使用', NULL, NULL, NULL, NULL),
-('LEAF-2024-002-IJKL-MNOP', (SELECT id FROM specifications WHERE name = '季卡' AND product_id = (SELECT id FROM products WHERE name = 'VIP会员')), '已使用', (SELECT id FROM users WHERE username = 'user1'), 'user1@leafcard.com', '2024-01-15 14:30:00', '2024-04-15 14:30:00'),
-('LEAF-2024-003-QRST-UVWX', (SELECT id FROM specifications WHERE name = '年卡' AND product_id = (SELECT id FROM products WHERE name = 'VIP会员')), '已禁用', (SELECT id FROM users WHERE username = 'user1'), 'user1@leafcard.com', '2023-12-01 08:00:00', '2024-12-01 08:00:00'),
-('LEAF-2024-004-YZAB-CDEF', (SELECT id FROM specifications WHERE name = '月卡' AND product_id = (SELECT id FROM products WHERE name = '普通会员')), '未使用', NULL, NULL, NULL, NULL),
-('LEAF-2024-005-GHIJ-KLMN', (SELECT id FROM specifications WHERE name = '月卡' AND product_id = (SELECT id FROM products WHERE name = 'VIP会员')), '已使用', (SELECT id FROM users WHERE username = 'user1'), 'user1@leafcard.com', '2024-01-10 09:15:00', '2024-02-10 09:15:00'),
-('LEAF-2024-006-OPQR-STUV', (SELECT id FROM specifications WHERE name = '体验卡' AND product_id = (SELECT id FROM products WHERE name = '体验试用')), '未使用', NULL, NULL, NULL, NULL),
-('LEAF-2024-007-WXYZ-ABCD', (SELECT id FROM specifications WHERE name = '礼品卡' AND product_id = (SELECT id FROM products WHERE name = '实体礼品')), '已禁用', NULL, NULL, NULL, NULL),
-('LEAF-2024-008-EFGH-IJKL', (SELECT id FROM specifications WHERE name = '季卡' AND product_id = (SELECT id FROM products WHERE name = 'VIP会员')), '未使用', NULL, NULL, NULL, NULL),
-('LEAF-2024-009-MNOP-QRST', (SELECT id FROM specifications WHERE name = '年卡' AND product_id = (SELECT id FROM products WHERE name = 'VIP会员')), '已使用', (SELECT id FROM users WHERE username = 'user1'), 'user1@leafcard.com', '2024-01-20 16:45:00', '2025-01-20 16:45:00'),
-('LEAF-2024-010-UVWX-YZAB', (SELECT id FROM specifications WHERE name = '月卡' AND product_id = (SELECT id FROM products WHERE name = '普通会员')), '未使用', NULL, NULL, NULL, NULL);
+-- 简化卡密数据，只保留少量测试卡密
+INSERT INTO card_keys (card_key, specification_id, status, user_email, activate_time, expire_time) VALUES
+('LEAF-TEST-001', (SELECT id FROM specifications WHERE name = '月卡' AND product_id = (SELECT id FROM products WHERE name = 'VIP会员')), '未使用', NULL, NULL, NULL),
+('LEAF-TEST-002', (SELECT id FROM specifications WHERE name = '年卡' AND product_id = (SELECT id FROM products WHERE name = 'VIP会员')), '未使用', NULL, NULL, NULL),
+('LEAF-TEST-003', (SELECT id FROM specifications WHERE name = '月卡' AND product_id = (SELECT id FROM products WHERE name = '普通会员')), '未使用', NULL, NULL, NULL);
 
 
 CREATE VIEW card_key_detail_view AS
 SELECT 
     ck.*,
     p.name as product_name,
-    p.category as product_category,
     s.name as specification_name,
     s.description as specification_description,
     s.duration_days,
