@@ -44,7 +44,7 @@
       <!-- 商品列表 -->
       <div class="table-container">
         <el-table :data="filteredProducts" v-loading="loading" stripe style="width: 100%">
-          <el-table-column prop="id" label="ID" width="60" align="center" />
+          <el-table-column prop="id" label="ID" width="180" align="center" show-overflow-tooltip />
           <el-table-column prop="name" label="商品名称" width="160" show-overflow-tooltip />
           <el-table-column prop="description" label="描述" min-width="180" show-overflow-tooltip>
             <template #default="{ row }">

@@ -35,7 +35,7 @@
               </el-select>
             </el-col>
             <el-col :span="14" class="button-group">
-              <el-button type="primary" @click="showAddUserDialog = true">
+              <el-button type="primary" @click="addUser">
                 添加用户
               </el-button>
             </el-col>
@@ -319,6 +319,13 @@ const saveUser = async () => {
       ElMessage.error('保存用户失败: ' + (error.response?.data?.message || error.message))
     }
   }
+}
+
+// 添加用户 - 重置编辑状态
+const addUser = () => {
+  editingUser.value = null
+  resetUserForm()
+  showAddUserDialog.value = true
 }
 
 // 切换用户状态
