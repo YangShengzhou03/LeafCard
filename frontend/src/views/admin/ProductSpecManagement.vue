@@ -295,17 +295,48 @@ const loadSpecs = async () => {
     // 处理API响应数据格式
     if (response && response.data) {
       const data = response.data
+      let specList = []
+      
       // 支持两种可能的响应格式：records/content 和 total/totalElements
       if (data.records) {
-        specs.value = data.records
+        specList = data.records
         totalSpecs.value = data.total || 0
       } else if (data.content) {
-        specs.value = data.content
+        specList = data.content
         totalSpecs.value = data.totalElements || 0
       } else {
-        specs.value = []
+        specList = []
         totalSpecs.value = 0
       }
+      
+      // 处理规格数据，添加商品名称和格式化创建时间
+      specs.value = specList.map(spec => {
+        // 根据productId查找商品名称
+        const product = products.value.find(p => p.id === spec.productId)
+        const productName = product ? product.name : '未知商品'
+        
+        // 格式化创建时间
+        let createTime = spec.createTime || spec.createdAt || spec.create_time || ''
+        if (createTime) {
+          // 如果是时间戳，转换为日期格式
+          if (typeof createTime === 'number' || /^\d+$/.test(createTime)) {
+            createTime = new Date(parseInt(createTime)).toLocaleString()
+          } else if (typeof createTime === 'string') {
+            // 尝试解析日期字符串
+            try {
+              createTime = new Date(createTime).toLocaleString()
+            } catch (e) {
+              console.log(e)
+            }
+          }
+        }
+        
+        return {
+          ...spec,
+          productName: productName,
+          createTime: createTime || '未知时间'
+        }
+      })
     } else {
       specs.value = []
       totalSpecs.value = 0

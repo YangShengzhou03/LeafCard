@@ -96,6 +96,10 @@ const UserService = {
     return userApi.createUser(data)
   },
 
+  deleteUser(id) {
+    return userApi.deleteUser(id)
+  },
+
   resetPassword(data) {
     return userApi.resetPassword(data)
   },

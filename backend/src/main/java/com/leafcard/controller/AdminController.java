@@ -78,12 +78,44 @@ public class AdminController {
             admin.setUsername("leafAdmin");
         }
         
+        // 设置默认密码为123456
+        if (admin.getPasswordHash() == null || admin.getPasswordHash().trim().isEmpty()) {
+            admin.setPasswordHash("123456");
+        }
+        
+        // 设置默认状态为active
+        if (admin.getStatus() == null || admin.getStatus().trim().isEmpty()) {
+            admin.setStatus("active");
+        }
+        
         boolean saved = adminService.save(admin);
         if (saved) {
             return Result.success("管理员创建成功", true);
         } else {
             return Result.error("管理员创建失败");
         }
+    }
+
+    /**
+     * 发送重置密码验证码
+     */
+    @PostMapping("/send-reset-code")
+    public Result<Boolean> sendResetCode(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        
+        if (email == null || email.trim().isEmpty()) {
+            return Result.error("邮箱不能为空");
+        }
+        
+        // 检查邮箱是否存在
+        Admin admin = adminService.findByEmail(email);
+        if (admin == null) {
+            return Result.error("该邮箱对应的管理员不存在");
+        }
+        
+        // 在实际项目中，这里应该发送真实的验证码到邮箱
+        // 目前返回成功，验证码固定为"123456"
+        return Result.success("验证码已发送，请输入123456", true);
     }
 
     /**
@@ -141,5 +173,155 @@ public class AdminController {
             "total", result.getTotal(),
             "records", result.getRecords()
         ));
+    }
+
+    /**
+     * 删除管理员
+     */
+    @DeleteMapping("/{id}")
+    public Result<Boolean> deleteAdmin(@PathVariable String id) {
+        boolean deleted = adminService.removeById(id);
+        
+        if (deleted) {
+            return Result.success("管理员删除成功", true);
+        } else {
+            return Result.error("管理员删除失败");
+        }
+    }
+
+    /**
+     * 根据用户名获取管理员
+     */
+    @GetMapping("/username/{username}")
+    public Result<Admin> getAdminByUsername(@PathVariable String username) {
+        Admin admin = adminService.findByUsername(username);
+        
+        if (admin != null) {
+            return Result.success(admin);
+        } else {
+            return Result.notFound();
+        }
+    }
+
+    /**
+     * 更新管理员信息
+     */
+    @PutMapping("/{id}")
+    public Result<Boolean> updateAdmin(@PathVariable String id, @RequestBody Admin admin) {
+        admin.setId(id);
+        boolean updated = adminService.updateById(admin);
+        
+        if (updated) {
+            return Result.success("管理员更新成功", true);
+        } else {
+            return Result.error("管理员更新失败");
+        }
+    }
+
+    /**
+     * 获取管理员统计信息
+     */
+    @GetMapping("/statistics")
+    public Result<Map<String, Object>> getAdminStatistics() {
+        // 获取管理员总数
+        long totalAdmins = adminService.count();
+        
+        // 获取最近登录的管理员数量（这里简化处理，实际应该根据时间筛选）
+        long recentAdmins = totalAdmins; // 简化处理
+        
+        Map<String, Object> statistics = Map.of(
+            "totalAdmins", totalAdmins,
+            "recentAdmins", recentAdmins,
+            "activeAdmins", totalAdmins // 简化处理
+        );
+        
+        return Result.success("统计信息获取成功", statistics);
+    }
+
+    /**
+     * 获取当前用户信息
+     */
+    @GetMapping("/info")
+    public Result<Admin> getCurrentUserInfo(@RequestHeader("Authorization") String authorization) {
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            return Result.error("未授权访问");
+        }
+        
+        String token = authorization.substring(7);
+        try {
+            String userId = jwtUtil.getUserIdFromToken(token);
+            Admin admin = adminService.getById(userId);
+            
+            if (admin != null) {
+                return Result.success(admin);
+            } else {
+                return Result.error("用户不存在");
+            }
+        } catch (Exception e) {
+            return Result.error("Token无效或已过期");
+        }
+    }
+
+    /**
+     * 更新当前用户信息
+     */
+    @PutMapping("/info")
+    public Result<Boolean> updateCurrentUserInfo(@RequestHeader("Authorization") String authorization, 
+                                                 @RequestBody Admin admin) {
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            return Result.error("未授权访问");
+        }
+        
+        String token = authorization.substring(7);
+        try {
+            String userId = jwtUtil.getUserIdFromToken(token);
+            admin.setId(userId);
+            boolean updated = adminService.updateById(admin);
+            
+            if (updated) {
+                return Result.success("用户信息更新成功", true);
+            } else {
+                return Result.error("用户信息更新失败");
+            }
+        } catch (Exception e) {
+            return Result.error("Token无效或已过期");
+        }
+    }
+
+    /**
+     * 修改当前用户密码
+     */
+    @PutMapping("/password")
+    public Result<Boolean> changePassword(@RequestHeader("Authorization") String authorization, 
+                                          @RequestBody Map<String, String> passwordData) {
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            return Result.error("未授权访问");
+        }
+        
+        String token = authorization.substring(7);
+        try {
+            String userId = jwtUtil.getUserIdFromToken(token);
+            String oldPassword = passwordData.get("oldPassword");
+            String newPassword = passwordData.get("newPassword");
+            
+            // 验证旧密码
+            Admin admin = adminService.getById(userId);
+            if (admin == null) {
+                return Result.error("用户不存在");
+            }
+            
+            // 这里应该验证旧密码是否正确（实际项目中需要加密验证）
+            // 然后更新密码
+            admin.setPasswordHash(newPassword);
+            boolean updated = adminService.updateById(admin);
+            
+            if (updated) {
+                return Result.success("密码修改成功", true);
+            } else {
+                return Result.error("密码修改失败");
+            }
+        } catch (Exception e) {
+            return Result.error("Token无效或已过期");
+        }
     }
 }

@@ -47,16 +47,6 @@
             <el-table-column prop="id" label="ID" width="100" align="center" show-overflow-tooltip />
             <el-table-column prop="name" label="商品名称" min-width="180" align="left" :show-overflow-tooltip="true" />
             <el-table-column prop="description" label="商品描述" min-width="200" align="left" :show-overflow-tooltip="true" />
-            <el-table-column prop="price" label="价格" width="120" align="center">
-              <template #default="scope">
-                ¥{{ scope.row.price || 0 }}
-              </template>
-            </el-table-column>
-            <el-table-column prop="stock" label="库存" width="100" align="center">
-              <template #default="scope">
-                {{ scope.row.stock || 0 }}
-              </template>
-            </el-table-column>
             <el-table-column prop="status" label="状态" width="100" align="center">
               <template #default="scope">
                 <el-tag :type="scope.row.status === 'active' ? 'success' : 'danger'">
@@ -64,9 +54,9 @@
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="createTime" label="创建时间" width="180" align="center" :show-overflow-tooltip="true">
+            <el-table-column prop="createdAt" label="创建时间" width="180" align="center" :show-overflow-tooltip="true">
               <template #default="scope">
-                {{ scope.row.createTime || '-' }}
+                {{ formatDateTime(scope.row.createdAt) || '-' }}
               </template>
             </el-table-column>
           <el-table-column label="操作" width="180" align="center" fixed="right">
@@ -112,16 +102,10 @@
         <el-form-item label="商品描述" prop="description">
           <el-input v-model="productForm.description" type="textarea" :rows="3" placeholder="请输入商品描述" />
         </el-form-item>
-        <el-form-item label="价格" prop="price">
-          <el-input-number v-model="productForm.price" :min="0" :precision="2" style="width: 100%" />
-        </el-form-item>
-        <el-form-item label="库存" prop="stock">
-          <el-input-number v-model="productForm.stock" :min="0" style="width: 100%" />
-        </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-radio-group v-model="productForm.status">
             <el-radio label="active">上架</el-radio>
-            <el-radio label="disabled">下架</el-radio>
+            <el-radio label="inactive">下架</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -164,16 +148,12 @@ const editingProduct = ref(null)
 const productForm = reactive({
   name: '',
   description: '',
-  price: 0,
-  stock: 0,
   status: 'active'
 })
 
 // 表单验证规则
 const productRules = {
-  name: [{ required: true, message: '请输入商品名称', trigger: 'blur' }],
-  price: [{ required: true, message: '请输入价格', trigger: 'blur' }],
-  stock: [{ required: true, message: '请输入库存', trigger: 'blur' }]
+  name: [{ required: true, message: '请输入商品名称', trigger: 'blur' }]
 }
 
 // 计算属性：筛选后的商品列表
@@ -295,8 +275,6 @@ const resetForm = () => {
   Object.assign(productForm, {
     name: '',
     description: '',
-    price: 0,
-    stock: 0,
     status: 'active'
   })
 }
@@ -326,6 +304,25 @@ const handleDeleteProduct = async (row) => {
       console.error('删除商品失败:', error)
       ElMessage.error('删除失败，请检查网络连接')
     }
+  }
+}
+
+// 时间格式化函数
+const formatDateTime = (dateTime) => {
+  if (!dateTime) return ''
+  try {
+    const date = new Date(dateTime)
+    return date.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    })
+  } catch (error) {
+    console.error('时间格式化错误:', error)
+    return dateTime
   }
 }
 

@@ -87,6 +87,32 @@ public class AuthController {
     }
 
     /**
+     * 更新当前用户信息
+     */
+    @PutMapping("/me")
+    public Result<Boolean> updateCurrentUser(@RequestHeader("Authorization") String authorization, 
+                                            @RequestBody Admin admin) {
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            return Result.error("未授权访问");
+        }
+        
+        String token = authorization.substring(7);
+        try {
+            String userId = jwtUtil.getUserIdFromToken(token);
+            admin.setId(userId);
+            boolean updated = adminService.updateById(admin);
+            
+            if (updated) {
+                return Result.success("用户信息更新成功", true);
+            } else {
+                return Result.error("用户信息更新失败");
+            }
+        } catch (Exception e) {
+            return Result.error("Token无效或已过期");
+        }
+    }
+
+    /**
      * 用户注册
      */
     @PostMapping("/register")

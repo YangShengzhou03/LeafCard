@@ -48,32 +48,26 @@
             :data="filteredUsers" 
             style="width: 100%" 
             v-loading="loading" 
-            :header-cell-style="{ textAlign: 'center', background: '#f5f7fa' }"
-            :cell-style="{ textAlign: 'center' }"
             stripe
           >
-            <el-table-column prop="id" label="ID" width="120" align="center" :show-overflow-tooltip="true">
+            <el-table-column prop="id" label="ID" min-width="80" align="center">
               <template #default="scope">
-                <span class="truncate-id">{{ scope.row.id }}</span>
+                <span class="truncate-id">{{ scope.row.id ? scope.row.id.toString().substring(0, 3) + '...' : '' }}</span>
               </template>
             </el-table-column>
-            <el-table-column prop="username" label="用户名" width="120" align="center" :show-overflow-tooltip="true">
-              <template #default="scope">
-                {{ scope.row.username || scope.row.email.split('@')[0] }}
-              </template>
-            </el-table-column>
-            <el-table-column prop="email" label="邮箱" width="180" align="left" :show-overflow-tooltip="true" class-name="email-column" />
+            <el-table-column prop="username" label="用户名" min-width="120" align="center" :show-overflow-tooltip="true" />
+            <el-table-column prop="email" label="邮箱" min-width="200" align="center" :show-overflow-tooltip="true" />
 
-            <el-table-column prop="status" label="状态" width="100" align="center">
+            <el-table-column prop="status" label="状态" min-width="100" align="center">
               <template #default="scope">
                 <el-tag :type="scope.row.status === 'active' ? 'success' : 'danger'">
                   {{ scope.row.status === 'active' ? '正常' : '禁用' }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="createdAt" label="注册时间" width="180" align="center" :show-overflow-tooltip="true" />
-            <el-table-column prop="lastLoginTime" label="最后上线时间" width="180" align="center" :show-overflow-tooltip="true" />
-            <el-table-column label="操作" width="260" fixed="right" align="center">
+            <el-table-column prop="createdAt" label="注册时间" min-width="160" align="center" :show-overflow-tooltip="true" />
+            <el-table-column prop="lastLoginTime" label="最后上线时间" min-width="160" align="center" :show-overflow-tooltip="true" />
+            <el-table-column label="操作" min-width="280" fixed="right" align="center">
               <template #default="scope">
                 <el-button size="small" @click="editUser(scope.row)">编辑</el-button>
                 <el-button 
@@ -148,6 +142,7 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import api from '../../services/api'
+import { userApi } from '../../api'
 
 // 数据状态
 const loading = ref(false)
@@ -246,9 +241,9 @@ const resetPassword = async (user) => {
       }
     )
     
-    // 使用用户API重置密码
-    await api.user.changePassword({ 
-      userId: user.id, 
+    // 使用正确的重置密码API - 管理员重置用户密码
+    await api.user.resetPassword({ 
+      email: user.email, 
       newPassword: '123456' 
     })
     ElMessage.success(`密码重置成功，新密码为：123456`)
@@ -289,16 +284,20 @@ const saveUser = async () => {
     // 调用后端API保存用户数据
     const userData = {
       email: userForm.email,
-      password: userForm.password,
       status: userForm.status === 'active' ? 1 : 0
     }
     
+    // 如果是添加用户且有密码，添加密码字段
+    if (!editingUser.value && userForm.password) {
+      userData.password = userForm.password
+    }
+    
     if (editingUser.value) {
-      // 更新用户
-      await api.user.updateUserInfo(userData)
+      // 更新用户 - 直接使用userApi
+      await userApi.updateUser(editingUser.value.id, userData)
     } else {
-      // 添加用户 - 使用用户注册接口
-      await api.user.register(userData)
+      // 添加用户 - 直接使用userApi
+      await userApi.createUser(userData)
     }
     
     ElMessage.success(editingUser.value ? '用户更新成功' : '用户添加成功')
@@ -326,8 +325,8 @@ const toggleUserStatus = async (user) => {
     const newStatus = user.status === 'active' ? 'disabled' : 'active'
     const enabled = newStatus === 'active'
     
-    // 更新用户状态
-    await api.user.updateUserInfo({
+    // 更新用户状态 - 直接使用userApi
+    await userApi.updateUser(user.id, {
       status: enabled ? 1 : 0
     })
     
@@ -352,8 +351,8 @@ const deleteUser = async (user) => {
       }
     )
     
-    // 调用删除用户API
-    await api.user.deleteUser(user.id)
+    // 调用删除用户API - 直接使用userApi
+    await userApi.deleteUser(user.id)
     ElMessage.success('用户删除成功')
     loadUsers()
   } catch (error) {
@@ -509,10 +508,11 @@ onMounted(() => {
   transition: all 0.3s ease;
 }
 
-/* 表格样式优化 */
+/* 表格样式优化 - 分散对齐和自适应布局 */
 :deep(.el-table) {
   min-width: 100%;
   font-size: 14px;
+  table-layout: auto !important; /* 启用自动表格布局 */
 }
 
 :deep(.el-table__header) {
@@ -524,11 +524,14 @@ onMounted(() => {
   color: #495057;
   font-weight: 600;
   border-bottom: 2px solid #dee2e6;
+  text-align: center !important; /* 强制表头居中对齐 */
+  white-space: nowrap;
 }
 
 :deep(.el-table td) {
   border-bottom: 1px solid #e9ecef;
   padding: 12px 8px;
+  text-align: center !important; /* 强制单元格居中对齐 */
 }
 
 :deep(.el-table__body-wrapper) {
@@ -538,21 +541,70 @@ onMounted(() => {
 :deep(.el-table .cell) {
   white-space: nowrap;
   line-height: 1.4;
+  text-align: center !important; /* 强制单元格内容居中对齐 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
 }
 
 :deep(.el-table .el-table__row:hover) {
   background-color: #f8f9fa;
 }
 
-/* 邮箱列特殊样式 */
-:deep(.el-table .email-column .cell) {
-  text-align: left;
-  padding-left: 12px;
-}
-
-/* 操作按钮样式 */
+/* 操作按钮样式 - 分散对齐 */
 :deep(.el-table .el-button) {
   margin: 2px;
+  min-width: 60px;
+}
+
+/* 确保操作列按钮组分散对齐 */
+:deep(.el-table .el-table__cell:last-child .cell) {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* 自适应列宽调整 */
+:deep(.el-table .el-table__cell) {
+  min-width: 80px;
+}
+
+:deep(.el-table .el-table__cell:nth-child(1)) { /* ID列 */
+  min-width: 80px;
+  max-width: 100px;
+}
+
+:deep(.el-table .el-table__cell:nth-child(2)) { /* 用户名列 */
+  min-width: 120px;
+  max-width: 150px;
+}
+
+:deep(.el-table .el-table__cell:nth-child(3)) { /* 邮箱列 */
+  min-width: 200px;
+  max-width: 280px;
+}
+
+:deep(.el-table .el-table__cell:nth-child(4)) { /* 状态列 */
+  min-width: 100px;
+  max-width: 120px;
+}
+
+:deep(.el-table .el-table__cell:nth-child(5)) { /* 注册时间列 */
+  min-width: 160px;
+  max-width: 200px;
+}
+
+:deep(.el-table .el-table__cell:nth-child(6)) { /* 最后上线时间列 */
+  min-width: 160px;
+  max-width: 200px;
+}
+
+:deep(.el-table .el-table__cell:nth-child(7)) { /* 操作列 */
+  min-width: 280px;
+  max-width: 320px;
 }
 
 /* 对话框样式调整 */
