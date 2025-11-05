@@ -4,7 +4,7 @@
       <template #header>
         <div class="card-header">
           <span>管理员仪表盘</span>
-          <el-button type="link" @click="refreshData" :loading="loading">
+          <el-button type="text" @click="refreshData" :loading="loading">
             <el-icon><Refresh /></el-icon>
             刷新
           </el-button>
@@ -220,11 +220,25 @@ const loadDashboardData = async () => {
       }
       
       topProducts.value = []
+      
+      // 空数据时给出提示
+      ElMessage.warning('仪表盘数据为空，请检查数据配置')
     }
     
   } catch (error) {
     console.error('加载仪表盘数据失败:', error)
-    ElMessage.error('加载仪表盘数据失败，请检查网络连接')
+    
+    // 根据错误类型给出不同的提示
+    if (error.response && error.response.status === 401) {
+      // 401错误已经在拦截器中处理，这里不需要重复提示
+      console.log('Token过期，已跳转登录页面')
+    } else if (error.code === 'NETWORK_ERROR' || !error.response) {
+      ElMessage.error('网络连接失败，请检查网络连接')
+    } else if (error.response.status === 500) {
+      ElMessage.error('服务器内部错误，请联系管理员')
+    } else {
+      ElMessage.error('加载仪表盘数据失败，请稍后重试')
+    }
     
     // 出错时使用空数据
     stats.value = {

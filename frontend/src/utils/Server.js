@@ -1,9 +1,10 @@
 import axios from 'axios'
 import { getToken, removeToken } from './utils.js'
 import { ElMessage } from 'element-plus'
+import router from '@/route'
 
 const Server = axios.create({
-  baseURL: process.env.VITE_API_BASE_URL || 'http://localhost:8081',
+  baseURL: process.env.VITE_API_BASE_URL || '/api',
   timeout: 10000
 })
 
@@ -49,8 +50,8 @@ Server.interceptors.response.use(
       case 401:
         ElMessage.error('登录已过期，请重新登录')
         removeToken()
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login'
+        if (router.currentRoute.value.path !== '/login') {
+          router.replace('/login')
         }
         break
       case 403:

@@ -9,8 +9,8 @@
       
       <!-- 筛选区域 -->
       <div class="filter-section">
-        <el-row :gutter="20">
-          <el-col :span="4">
+        <el-row :gutter="16">
+          <el-col :span="5">
             <el-date-picker
               v-model="filter.dateRange"
               type="daterange"
@@ -21,7 +21,7 @@
               style="width: 100%"
             />
           </el-col>
-          <el-col :span="3">
+          <el-col :span="4">
             <el-select v-model="filter.operationType" placeholder="操作类型" clearable style="width: 100%">
               <el-option label="登录" value="LOGIN" />
               <el-option label="创建卡密" value="CARD_KEY_GENERATE" />
@@ -34,16 +34,13 @@
               <el-option label="系统配置" value="SYSTEM_CONFIG" />
             </el-select>
           </el-col>
-          <el-col :span="3">
-            <el-input v-model="filter.adminId" placeholder="管理员ID" clearable />
-          </el-col>
           <el-col :span="4">
             <div class="action-buttons">
               <el-button type="primary" @click="handleFilter">查询</el-button>
               <el-button @click="resetFilter">重置</el-button>
             </div>
           </el-col>
-          <el-col :span="10">
+          <el-col :span="11">
             <div class="action-buttons" style="justify-content: flex-end;">
               <el-button @click="exportLogs" :loading="exporting">
                 <el-icon><Download /></el-icon>
@@ -60,7 +57,7 @@
       
       <!-- 统计信息 -->
       <div class="stats-section">
-        <el-row :gutter="20">
+        <el-row :gutter="16">
           <el-col :span="6">
             <div class="stat-item">
               <span class="stat-label">登录：</span>
@@ -407,18 +404,26 @@ onMounted(() => {
 
 <style scoped>
 .admin-logs-page {
-  padding: 0;
+  padding: 0px;
   background-color: #f0f2f5;
+  min-height: calc(100vh - 32px);
 }
 
 .logs-card {
-  margin-bottom: 16px;
+  margin-bottom: 0;
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: none;
 }
 
 .logs-card :deep(.el-card__body) {
-  padding: 16px;
+  padding: 20px;
+}
+
+.logs-card :deep(.el-card__header) {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e6e8eb;
+  background-color: #fafafa;
 }
 
 .card-header {
@@ -436,37 +441,48 @@ onMounted(() => {
 }
 
 .filter-section {
-  margin-bottom: 16px;
-  padding: 16px;
+  margin-bottom: 20px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e6e8eb;
+}
+
+.filter-section .el-row {
+  align-items: center;
 }
 
 .action-buttons {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 12px;
 }
 
 .stats-section {
-  margin-bottom: 16px;
-  padding: 16px;
+  margin-bottom: 20px;
+  padding: 20px;
   border: 1px solid #e6e8eb;
   background-color: #fafafa;
-  border-radius: 4px;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .stat-item {
   text-align: center;
+  padding: 8px;
 }
 
 .stat-label {
   font-size: 14px;
   color: #606266;
+  display: block;
+  margin-bottom: 4px;
 }
 
 .stat-value {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
-  margin-left: 5px;
+  display: block;
 }
 
 .stat-value.success {
@@ -494,10 +510,9 @@ onMounted(() => {
 }
 
 .pagination-container {
-  margin-top: 16px;
+  margin-top: 20px;
   text-align: right;
-  padding: 16px;
-  background-color: #fafafa;
+  padding: 16px 0 0;
   border-top: 1px solid #e6e8eb;
 }
 
@@ -508,6 +523,43 @@ onMounted(() => {
   font-family: monospace;
   max-height: 300px;
   overflow-y: auto;
+  border-radius: 4px;
+  border: 1px solid #e6e8eb;
+}
+
+/* 表格样式优化 */
+.logs-card :deep(.el-table) {
+  border-radius: 6px;
+  border: 1px solid #e6e8eb;
+}
+
+.logs-card :deep(.el-table__header) {
+  background-color: #f5f7fa;
+}
+
+.logs-card :deep(.el-table th) {
+  background-color: #f5f7fa;
+  color: #606266;
+  font-weight: 600;
+}
+
+.logs-card :deep(.el-table--striped .el-table__body tr.el-table__row--striped td) {
+  background-color: #fafafa;
+}
+
+/* 按钮样式优化 */
+.logs-card :deep(.el-button) {
+  border-radius: 4px;
+}
+
+.logs-card :deep(.el-button--primary) {
+  background-color: #409eff;
+  border-color: #409eff;
+}
+
+.logs-card :deep(.el-button--danger) {
+  background-color: #f56c6c;
+  border-color: #f56c6c;
 }
 
 @media (max-width: 768px) {
@@ -515,9 +567,40 @@ onMounted(() => {
     padding: 10px;
   }
   
+  .logs-card :deep(.el-card__body) {
+    padding: 16px;
+  }
+  
+  .filter-section {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .stats-section {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
   .header-actions {
     flex-direction: column;
     gap: 5px;
+  }
+  
+  .stat-item {
+    margin-bottom: 8px;
+  }
+  
+  .stat-label {
+    font-size: 12px;
+  }
+  
+  .stat-value {
+    font-size: 16px;
   }
 }
 </style>

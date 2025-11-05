@@ -34,8 +34,16 @@ export function formatFileSize(bytes) {
 // 解析JWT token
 export function parseJWT(token) {
   try {
+    // 检查token格式
+    if (!token || typeof token !== 'string' || token.split('.').length !== 3) {
+      console.warn('无效的token格式');
+      return {};
+    }
+    
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    
+    // 处理base64解码
     const jsonPayload = decodeURIComponent(
       atob(base64)
         .split('')
@@ -45,9 +53,19 @@ export function parseJWT(token) {
         .join('')
     );
     
-    return JSON.parse(jsonPayload);
+    const payload = JSON.parse(jsonPayload);
+    
+    // 检查token是否过期
+    if (payload.exp && payload.exp * 1000 < Date.now()) {
+      console.warn('Token已过期');
+      removeToken(); // 自动清除过期token
+      return {};
+    }
+    
+    return payload;
   } catch (error) {
     console.error('JWT解析错误:', error);
+    removeToken(); // 解析失败时清除无效token
     return {};
   }
 }
@@ -179,4 +197,59 @@ export function getRelativeTime(date) {
   if (hours > 0) return `${hours}小时前`
   if (minutes > 0) return `${minutes}分钟前`
   return '刚刚'
+}
+
+// 检查网络连接状态
+export function checkNetworkStatus() {
+  return new Promise((resolve) => {
+    if (navigator.onLine === false) {
+      resolve(false)
+      return
+    }
+    
+    // 尝试请求一个小的资源来确认网络连接
+    const img = new Image()
+    img.onload = () => resolve(true)
+    img.onerror = () => resolve(false)
+    img.src = 'https://www.google.com/favicon.ico?t=' + Date.now()
+    
+    // 设置超时
+    setTimeout(() => resolve(false), 3000)
+  })
+}
+
+// 网络状态监听器
+export function setupNetworkListener(callback) {
+  if (typeof window !== 'undefined') {
+    window.addEventListener('online', () => {
+      callback(true)
+    })
+    
+    window.addEventListener('offline', () => {
+      callback(false)
+    })
+  }
+}
+
+// 重试机制
+export async function retryWithBackoff(operation, maxRetries = 3, baseDelay = 1000) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await operation()
+    } catch (error) {
+      if (attempt === maxRetries - 1) {
+        throw error
+      }
+      
+      // 检查是否是网络错误
+      if (error.code === 'NETWORK_ERROR' || !error.response) {
+        // 等待一段时间后重试
+        const delay = baseDelay * Math.pow(2, attempt)
+        await new Promise(resolve => setTimeout(resolve, delay))
+      } else {
+        // 非网络错误，直接抛出
+        throw error
+      }
+    }
+  }
 }
