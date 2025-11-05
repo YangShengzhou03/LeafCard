@@ -87,7 +87,7 @@ CREATE TABLE operation_logs (
 
 -- 只初始化一个管理员账号
 INSERT INTO admins (username, email, password_hash, status) VALUES
-('admin', 'admin@leafcard.com', '$2a$10$r3dJk7Q6hV6hY7U8i9jKlOeNvMwVq1pQrXrYsTtUvWxYzAbCdEfG', 'active');
+('admin', 'admin@leafcard.com', '123456', 'active');
 
 -- 简化产品数据，只保留核心产品
 INSERT INTO products (name, description, status) VALUES
