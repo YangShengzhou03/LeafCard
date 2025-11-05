@@ -95,6 +95,13 @@
                 <el-button size="small" type="info" @click="resetPassword(scope.row)">重置密码</el-button>
               </template>
             </el-table-column>
+            
+            <!-- 空状态 -->
+            <template #empty>
+              <div class="empty-container" style="padding: 40px 0;">
+                <el-empty description="暂无用户数据" image-size="120" />
+              </div>
+            </template>
           </el-table>
         </div>
         
@@ -357,6 +364,12 @@ onMounted(() => {
   border: 1px solid #e6e6e6;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.users-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
 }
 
 .users-card :deep(.el-card__body) {
@@ -378,6 +391,11 @@ onMounted(() => {
   background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.search-bar:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .search-bar :deep(.el-col) {
@@ -395,6 +413,11 @@ onMounted(() => {
 
 .search-bar :deep(.button-group .el-button) {
   margin-left: 8px;
+  transition: all 0.2s ease;
+}
+
+.search-bar :deep(.button-group .el-button:hover) {
+  transform: translateY(-1px);
 }
 
 .table-container {
@@ -402,6 +425,11 @@ onMounted(() => {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.table-container:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 .table-container :deep(.el-table) {
@@ -422,11 +450,24 @@ onMounted(() => {
 
 .table-container :deep(.el-table td) {
   padding: 12px 0;
+  transition: background-color 0.2s ease;
+}
+
+.table-container :deep(.el-table tr:hover td) {
+  background-color: #f8f9fa;
 }
 
 .table-container :deep(.el-table .cell) {
   padding: 0 12px;
   word-break: break-word;
+}
+
+.table-container :deep(.el-button) {
+  transition: all 0.2s ease;
+}
+
+.table-container :deep(.el-button:hover) {
+  transform: translateY(-1px);
 }
 
 .truncate-id {
@@ -440,10 +481,15 @@ onMounted(() => {
 .pagination-container {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: 12px;
   padding: 16px;
   background-color: #fafafa;
   border-top: 1px solid #e6e8eb;
+}
+
+.empty-container {
+  padding: 40px 0;
+  transition: all 0.3s ease;
 }
 
 /* 表格样式优化 */

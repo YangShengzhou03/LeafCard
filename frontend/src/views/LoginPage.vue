@@ -274,8 +274,7 @@ const registerForm = reactive({
 // 密码强度检测
 const passwordStrength = reactive({
   level: 'weak', // weak, medium, strong
-  width: 0,
-  text: ''
+  width: 0
 })
 
 // 忘记密码表单
@@ -1002,12 +1001,7 @@ onMounted(() => {
   background: linear-gradient(90deg, #27ae60 0%, #2ecc71 100%);
 }
 
-.strength-text {
-  font-size: 12px;
-  color: #666;
-  text-align: right;
-  font-weight: 500;
-}
+
 
 /* 对话框样式 */
 .forgot-dialog :deep(.el-dialog) {

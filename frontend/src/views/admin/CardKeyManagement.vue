@@ -39,6 +39,11 @@
       <!-- 卡密列表 -->
       <div class="table-container">
         <el-table :data="filteredCardKeys" style="width: 100%" v-loading="loading" :scroll="{ x: 1200 }">
+          <template #empty>
+             <div style="padding: 40px 0;">
+               <el-empty description="暂无卡密数据" />
+             </div>
+           </template>
           <el-table-column prop="id" label="ID" width="80" align="center" />
           <el-table-column prop="cardKey" label="卡密代码" min-width="200" align="left" :show-overflow-tooltip="true">
             <template #default="scope">
@@ -124,7 +129,7 @@ const statusFilter = ref('')
 
 // 分页信息
 const currentPage = ref(1)
-const pageSize = ref(20)
+const pageSize = ref(10)
 const total = ref(0)
 
 

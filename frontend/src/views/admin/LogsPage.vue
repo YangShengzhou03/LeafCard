@@ -75,6 +75,11 @@
       
       <!-- 日志列表 -->
       <el-table v-loading="loading" :data="logs" style="width: 100%" stripe>
+        <template #empty>
+          <div style="padding: 40px 0;">
+            <el-empty description="暂无日志数据" />
+          </div>
+        </template>
         <el-table-column prop="id" label="ID" width="100" show-overflow-tooltip />
         <el-table-column prop="operationType" label="操作类型" width="200">
           <template #default="{ row }">
@@ -144,7 +149,7 @@ const clearing = ref(false)
 const logs = ref([])
 const totalLogs = ref(0)
 const currentPage = ref(1)
-const pageSize = ref(20)
+const pageSize = ref(10)
 const showLogDetail = ref(false)
 const selectedLog = ref(null)
 
