@@ -15,26 +15,26 @@
               v-model="searchQuery"
               placeholder="商品名称"
               clearable
-              @clear="handleSearch"
-              @keyup.enter="handleSearch"
+              @clear="handleSearch()"
+              @keyup.enter="handleSearch()"
             >
               <template #append>
-                <el-button @click="handleSearch">
+                <el-button @click="handleSearch()">
                   <el-icon><Search /></el-icon>
                 </el-button>
               </template>
             </el-input>
           </el-col>
           <el-col :span="4">
-            <el-select v-model="statusFilter" placeholder="商品状态" clearable @change="handleSearch">
+            <el-select v-model="statusFilter" placeholder="商品状态" clearable @change="handleSearch()">
               <el-option label="全部" value="" />
               <el-option label="在售" value="active" />
               <el-option label="下架" value="inactive" />
             </el-select>
           </el-col>
           <el-col :span="14" class="button-group">
-            <el-button type="primary" @click="handleSearch">查询</el-button>
-            <el-button @click="resetFilters">重置</el-button>
+            <el-button type="primary" @click="handleSearch()">查询</el-button>
+            <el-button @click="resetFilters()">重置</el-button>
             <div style="flex: 1;"></div>
             <el-button type="primary" @click="handleAddProduct">新增商品</el-button>
           </el-col>
@@ -44,28 +44,37 @@
       <!-- 商品列表 -->
       <div class="table-container">
         <el-table :data="filteredProducts" v-loading="loading" stripe style="width: 100%">
-          <el-table-column prop="id" label="ID" width="180" align="center" show-overflow-tooltip />
-          <el-table-column prop="name" label="商品名称" width="160" show-overflow-tooltip />
-          <el-table-column prop="description" label="描述" min-width="180" show-overflow-tooltip>
-            <template #default="{ row }">
-              {{ row.description || '暂无描述' }}
-            </template>
-          </el-table-column>
-          <el-table-column prop="stock" label="库存" width="70" align="center" />
-          <el-table-column prop="status" label="状态" width="70" align="center">
-            <template #default="{ row }">
-              <el-tag :type="row.status === 'active' ? 'success' : 'info'" size="small">
-                {{ row.status === 'active' ? '在售' : '下架' }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column prop="createTime" label="创建时间" width="160" align="center" />
-          <el-table-column label="操作" width="110" align="center" fixed="right">
-            <template #default="{ row }">
-              <el-button size="small" type="primary" link @click="handleEditProduct(row)">编辑</el-button>
-              <el-button size="small" type="danger" link @click="handleDeleteProduct(row)">删除</el-button>
-            </template>
-          </el-table-column>
+            <el-table-column prop="id" label="ID" width="100" align="center" show-overflow-tooltip />
+            <el-table-column prop="name" label="商品名称" min-width="180" align="left" :show-overflow-tooltip="true" />
+            <el-table-column prop="description" label="商品描述" min-width="200" align="left" :show-overflow-tooltip="true" />
+            <el-table-column prop="price" label="价格" width="120" align="center">
+              <template #default="scope">
+                ¥{{ scope.row.price || 0 }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="stock" label="库存" width="100" align="center">
+              <template #default="scope">
+                {{ scope.row.stock || 0 }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="status" label="状态" width="100" align="center">
+              <template #default="scope">
+                <el-tag :type="scope.row.status === 'active' ? 'success' : 'danger'">
+                  {{ scope.row.status === 'active' ? '上架' : '下架' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="createTime" label="创建时间" width="180" align="center" :show-overflow-tooltip="true">
+              <template #default="scope">
+                {{ scope.row.createTime || '-' }}
+              </template>
+            </el-table-column>
+          <el-table-column label="操作" width="180" align="center" fixed="right">
+              <template #default="{ row }">
+                <el-button size="small" @click="handleEditProduct(row)">编辑</el-button>
+                <el-button size="small" type="danger" @click="handleDeleteProduct(row)">删除</el-button>
+              </template>
+            </el-table-column>
           
           <!-- 空状态 -->
           <template #empty>
@@ -89,11 +98,45 @@
         />
       </div>
     </el-card>
+    
+    <!-- 添加/编辑商品对话框 -->
+    <el-dialog
+      v-model="showAddDialog"
+      :title="editingProduct ? '编辑商品' : '添加商品'"
+      width="500px"
+    >
+      <el-form :model="productForm" :rules="productRules" ref="productFormRef" label-width="80px">
+        <el-form-item label="商品名称" prop="name">
+          <el-input v-model="productForm.name" placeholder="请输入商品名称" />
+        </el-form-item>
+        <el-form-item label="商品描述" prop="description">
+          <el-input v-model="productForm.description" type="textarea" :rows="3" placeholder="请输入商品描述" />
+        </el-form-item>
+        <el-form-item label="价格" prop="price">
+          <el-input-number v-model="productForm.price" :min="0" :precision="2" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="库存" prop="stock">
+          <el-input-number v-model="productForm.stock" :min="0" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="状态" prop="status">
+          <el-radio-group v-model="productForm.status">
+            <el-radio label="active">上架</el-radio>
+            <el-radio label="disabled">下架</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="showAddDialog = false">取消</el-button>
+          <el-button type="primary" @click="saveProduct">确定</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import api from '../../services/api'
@@ -112,6 +155,26 @@ const statusFilter = ref('')
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
+
+// 对话框状态
+const showAddDialog = ref(false)
+const editingProduct = ref(null)
+
+// 表单数据
+const productForm = reactive({
+  name: '',
+  description: '',
+  price: 0,
+  stock: 0,
+  status: 'active'
+})
+
+// 表单验证规则
+const productRules = {
+  name: [{ required: true, message: '请输入商品名称', trigger: 'blur' }],
+  price: [{ required: true, message: '请输入价格', trigger: 'blur' }],
+  stock: [{ required: true, message: '请输入库存', trigger: 'blur' }]
+}
 
 // 计算属性：筛选后的商品列表
 const filteredProducts = computed(() => {
@@ -177,12 +240,65 @@ const resetFilters = () => {
 
 // 新增商品
 const handleAddProduct = () => {
-  ElMessage.info('新增商品功能开发中')
+  showAddDialog.value = true
+  editingProduct.value = null
+  resetForm()
 }
 
 // 编辑商品
 const handleEditProduct = (row) => {
-  ElMessage.info(`编辑商品: ${row.name}`)
+  editingProduct.value = row
+  Object.assign(productForm, row)
+  showAddDialog.value = true
+}
+
+// 保存商品
+const saveProduct = async () => {
+  try {
+    if (editingProduct.value) {
+      // 调用API更新商品
+      await api.admin.editProduct(editingProduct.value.id, productForm)
+      
+      // 更新本地数据
+      const index = products.value.findIndex(p => p.id === editingProduct.value.id)
+      if (index !== -1) {
+        products.value[index] = { ...products.value[index], ...productForm }
+      }
+    } else {
+      // 调用API添加新商品
+      const response = await api.admin.createProduct(productForm)
+      
+      // 添加新商品到本地列表
+      const newProduct = {
+        id: response.data?.id || Date.now(),
+        ...productForm,
+        createTime: new Date().toLocaleString()
+      }
+      products.value.unshift(newProduct)
+    }
+    
+    showAddDialog.value = false
+    ElMessage.success(editingProduct.value ? '更新成功' : '添加成功')
+    resetForm()
+    
+    // 重新加载数据确保数据一致性
+    loadProducts()
+  } catch (error) {
+    console.error('保存商品失败:', error)
+    ElMessage.error('操作失败')
+  }
+}
+
+// 重置表单
+const resetForm = () => {
+  editingProduct.value = null
+  Object.assign(productForm, {
+    name: '',
+    description: '',
+    price: 0,
+    stock: 0,
+    status: 'active'
+  })
 }
 
 // 删除商品

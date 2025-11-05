@@ -60,7 +60,7 @@ public class OperationLogController {
     public Result<List<OperationLog>> getOperationLogsByTarget(
             @RequestParam String targetType,
             @RequestParam String targetId) {
-        List<OperationLog> logs = operationLogService.findByTarget(targetType, targetId);
+        List<OperationLog> logs = operationLogService.findByTarget(targetType, Integer.parseInt(targetId));
         return Result.success(logs);
     }
 

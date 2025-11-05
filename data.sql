@@ -21,7 +21,7 @@ CREATE TABLE admins (
 
 -- 产品表
 CREATE TABLE products (
-    id CHAR(36) PRIMARY KEY DEFAULT (UUID()) COMMENT '产品唯一标识符',
+    id INT PRIMARY KEY AUTO_INCREMENT COMMENT '产品唯一标识符',
     name VARCHAR(100) NOT NULL COMMENT '产品名称',
     description TEXT COMMENT '产品描述',
     category VARCHAR(50) DEFAULT 'default' COMMENT '产品分类',
@@ -35,8 +35,8 @@ CREATE TABLE products (
 
 -- 规格表（修复字段缺失问题）
 CREATE TABLE specifications (
-    id CHAR(36) PRIMARY KEY DEFAULT (UUID()) COMMENT '规格唯一标识符',
-    product_id CHAR(36) NOT NULL COMMENT '产品ID',
+    id INT PRIMARY KEY AUTO_INCREMENT COMMENT '规格唯一标识符',
+    product_id INT NOT NULL COMMENT '产品ID',
     name VARCHAR(100) NOT NULL COMMENT '规格名称',
     description TEXT COMMENT '规格描述',
     duration_days INT DEFAULT 0 COMMENT '有效期（天）',
@@ -53,30 +53,32 @@ CREATE TABLE specifications (
 
 -- 卡密表（修复字段缺失和冗余问题）
 CREATE TABLE card_keys (
-    id CHAR(36) PRIMARY KEY DEFAULT (UUID()) COMMENT '卡密唯一标识符',
+    id INT PRIMARY KEY AUTO_INCREMENT COMMENT '卡密唯一标识符',
     card_key VARCHAR(100) UNIQUE NOT NULL COMMENT '卡密',
-    specification_id CHAR(36) NOT NULL COMMENT '规格ID',
+    specification_id INT NOT NULL COMMENT '规格ID',
     status ENUM('未使用', '已使用', '已禁用') DEFAULT '未使用' NOT NULL COMMENT '状态',
     user_email VARCHAR(100) COMMENT '用户邮箱（激活时填写）',
+    user_id VARCHAR(100) COMMENT '用户ID（激活时填写）',
     activate_time DATETIME COMMENT '激活时间',
     expire_time DATETIME COMMENT '过期时间',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT '创建时间',
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL COMMENT '最后更新时间',
-    FOREIGN KEY (specification_id) REFERENCES specifications(id) ON DELETE RESTRICT,
+    FOREIGN KEY (specification_id) REFERENCES specifications(id) ON DELETE CASCADE,
     INDEX idx_card_key (card_key),
     INDEX idx_status (status),
     INDEX idx_specification_id (specification_id),
     INDEX idx_user_email (user_email),
+    INDEX idx_user_id (user_id),
     INDEX idx_activate_time (activate_time),
     INDEX idx_expire_time (expire_time)
 ) ENGINE=InnoDB COMMENT='卡密表';
 
 -- 操作日志表
 CREATE TABLE operation_logs (
-    id CHAR(36) PRIMARY KEY DEFAULT (UUID()) COMMENT '日志唯一标识符',
+    id INT PRIMARY KEY AUTO_INCREMENT COMMENT '日志唯一标识符',
     admin_id CHAR(36) COMMENT '管理员ID',
     operation_type ENUM('card_create', 'card_activate', 'card_disable', 'product_create', 'product_update', 'admin_login') NOT NULL COMMENT '操作类型',
-    target_id CHAR(36) COMMENT '目标ID',
+    target_id INT COMMENT '目标ID',
     target_type ENUM('card_key', 'product') COMMENT '目标类型',
     description TEXT COMMENT '描述',
     ip_address VARCHAR(50) COMMENT 'IP地址',
@@ -89,7 +91,7 @@ CREATE TABLE operation_logs (
 
 -- 只初始化一个管理员账号
 INSERT INTO admins (username, email, password_hash, status) VALUES
-('admin', 'admin@leafcard.com', '123456', 'active');
+('admin', 'admin@qq.com', '123456', 'active');
 
 -- 简化产品数据，只保留核心产品
 INSERT INTO products (name, description, category, status) VALUES

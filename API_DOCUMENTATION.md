@@ -206,7 +206,6 @@ Leaf Card 是一个卡密管理系统，提供用户管理、产品管理、规�
                 "description": "VIP会员专属月卡，享受专属权益",
                 "durationDays": 30,
                 "price": 29.9,
-                "currency": "CNY",
                 "stockQuantity": 1000,
                 "status": "active",
                 "createdAt": "2024-01-01T00:00:00",

@@ -45,8 +45,16 @@
         <!-- 商品规格列表 -->
         <div class="table-container">
           <el-table :data="filteredSpecs" style="width: 100%" v-loading="loading" :scroll="{ x: 1200 }">
-            <el-table-column prop="id" label="ID" width="80" align="center" />
-            <el-table-column prop="productName" label="商品名称" min-width="180" align="left" :show-overflow-tooltip="true" />
+            <el-table-column prop="id" label="ID" width="100" align="center">
+              <template #default="scope">
+                <span class="id-display">{{ formatId(scope.row.id) }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="productName" label="商品名称" min-width="180" align="left" :show-overflow-tooltip="true">
+              <template #default="scope">
+                {{ scope.row.productName || '-' }}
+              </template>
+            </el-table-column>
             <el-table-column prop="name" label="规格名称" min-width="150" align="left" :show-overflow-tooltip="true" />
             <el-table-column prop="price" label="价格" width="120" align="center">
               <template #default="scope">
@@ -78,7 +86,7 @@
               </template>
             </el-table-column>
             <el-table-column prop="createTime" label="创建时间" width="180" align="center" :show-overflow-tooltip="true" />
-            <el-table-column label="操作" width="200" fixed="right" align="center">
+            <el-table-column label="操作" width="250" fixed="right" align="center">
               <template #default="scope">
                 <el-button size="small" @click="editSpec(scope.row)">编辑</el-button>
                 <el-button 
@@ -88,7 +96,13 @@
                 >
                   {{ scope.row.status === 'active' ? '停用' : '启用' }}
                 </el-button>
-
+                <el-button 
+                  size="small" 
+                  type="danger" 
+                  @click="deleteSpec(scope.row)"
+                >
+                  删除
+                </el-button>
               </template>
             </el-table-column>
             
@@ -123,8 +137,15 @@
       width="500px"
     >
       <el-form :model="specForm" :rules="specRules" ref="specFormRef" label-width="100px">
-        <el-form-item label="商品名称" prop="productName">
-          <el-input v-model="specForm.productName" placeholder="请输入商品名称" />
+        <el-form-item label="商品名称" prop="productId">
+          <el-select v-model="specForm.productId" placeholder="请选择商品" style="width: 100%">
+            <el-option
+              v-for="product in products"
+              :key="product.id"
+              :label="product.name"
+              :value="product.id"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="规格名称" prop="name">
           <el-input v-model="specForm.name" placeholder="请输入规格名称" />
@@ -158,6 +179,9 @@ const loading = ref(false)
 // 商品规格列表
 const specs = ref([])
 
+// 商品列表（用于下拉选择）
+const products = ref([])
+
 // 搜索条件
 const searchQuery = ref('')
 const statusFilter = ref('')
@@ -173,21 +197,28 @@ const editingSpec = ref(null)
 
 // 表单数据
 const specForm = reactive({
+  productId: '',
   productName: '',
   name: '',
   price: 0
 })
 
-
+// 格式化ID显示
+const formatId = (id) => {
+  if (!id) return ''
+  // 直接显示前8位，后面用省略号
+  if (id.length > 8) {
+    return `${id.substring(0, 8)}...`
+  }
+  return id
+}
 
 // 表单验证规则
 const specRules = {
-  productName: [{ required: true, message: '请输入商品名称', trigger: 'blur' }],
+  productId: [{ required: true, message: '请选择商品', trigger: 'change' }],
   name: [{ required: true, message: '请输入规格名称', trigger: 'blur' }],
   price: [{ required: true, message: '请输入价格', trigger: 'blur' }]
 }
-
-
 
 // 计算属性：筛选后的规格列表
 const filteredSpecs = computed(() => {
@@ -220,6 +251,33 @@ const getUsageRateClass = (used, total) => {
   if (rate >= 80) return 'high-usage'
   if (rate >= 50) return 'medium-usage'
   return 'low-usage'
+}
+
+// 加载商品列表
+const loadProducts = async () => {
+  try {
+    const response = await api.admin.getProductList({
+      page: 1,
+      size: 1000, // 获取所有商品
+      status: 'active' // 只获取上架的商品
+    })
+    
+    if (response && response.data) {
+      const data = response.data
+      if (data.records) {
+        products.value = data.records
+      } else if (data.content) {
+        products.value = data.content
+      } else {
+        products.value = []
+      }
+    } else {
+      products.value = []
+    }
+  } catch (error) {
+    console.error('加载商品列表失败:', error)
+    products.value = []
+  }
 }
 
 // 加载商品规格数据
@@ -290,7 +348,11 @@ const handleCurrentChange = (page) => {
 // 编辑规格
 const editSpec = (spec) => {
   editingSpec.value = spec
-  Object.assign(specForm, spec)
+  Object.assign(specForm, {
+    productId: spec.productId || '',
+    name: spec.name || '',
+    price: spec.price || 0
+  })
   showAddDialog.value = true
 }
 
@@ -319,28 +381,81 @@ const toggleSpecStatus = async (spec) => {
   }
 }
 
-
+// 删除规格
+const deleteSpec = async (spec) => {
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除规格"${spec.name}"吗？此操作不可恢复！`,
+      '确认删除',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    
+    // 调用API删除规格
+    const response = await api.admin.deleteSpec(spec.id)
+    if (response && response.code === 200) {
+      ElMessage.success('删除成功')
+      
+      // 从本地列表中移除
+      const index = specs.value.findIndex(s => s.id === spec.id)
+      if (index !== -1) {
+        specs.value.splice(index, 1)
+      }
+      
+      // 重新加载数据确保数据一致性
+      loadSpecs()
+    } else {
+      ElMessage.error('删除失败，请重试')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除规格失败:', error)
+      ElMessage.error('删除失败，请检查网络连接')
+    }
+  }
+}
 
 // 保存规格
 const saveSpec = async () => {
   try {
+    // 获取选中的商品信息
+    const selectedProduct = products.value.find(p => p.id === specForm.productId)
+    if (!selectedProduct) {
+      ElMessage.error('请选择有效的商品')
+      return
+    }
+    
+    // 准备提交的数据
+    const submitData = {
+      ...specForm,
+      productName: selectedProduct.name
+    }
+    
     if (editingSpec.value) {
       // 调用API更新规格
-      await api.admin.editSpec(editingSpec.value.id, specForm)
+      await api.admin.editSpec(editingSpec.value.id, submitData)
       
       // 更新本地数据
       const index = specs.value.findIndex(s => s.id === editingSpec.value.id)
       if (index !== -1) {
-        specs.value[index] = { ...specs.value[index], ...specForm }
+        specs.value[index] = { 
+          ...specs.value[index], 
+          ...submitData,
+          productName: selectedProduct.name
+        }
       }
     } else {
       // 调用API添加新规格
-      const response = await api.admin.createSpec(specForm)
+      const response = await api.admin.createSpec(submitData)
       
       // 添加新规格到本地列表
       const newSpec = {
         id: response.data?.id || Date.now(),
-        ...specForm,
+        ...submitData,
+        productName: selectedProduct.name,
         totalKeys: 0,
         usedKeys: 0,
         status: 'active',
@@ -361,20 +476,20 @@ const saveSpec = async () => {
   }
 }
 
-
-
 // 重置表单
 const resetForm = () => {
   editingSpec.value = null
   Object.assign(specForm, {
+    productId: '',
     productName: '',
     name: '',
     price: 0
   })
 }
 
-onMounted(() => {
-  loadSpecs()
+onMounted(async () => {
+  await loadProducts()
+  await loadSpecs()
 })
 </script>
 
@@ -392,6 +507,12 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+}
+
+.id-display {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #666;
 }
 
 .high-usage {

@@ -38,7 +38,7 @@ public class SpecificationController {
      */
     @GetMapping("/{id}")
     public Result<Specification> getSpecification(@PathVariable String id) {
-        Specification specification = specificationService.getById(id);
+        Specification specification = specificationService.getById(Integer.parseInt(id));
         if (specification == null) {
             return Result.notFound();
         }
@@ -77,7 +77,7 @@ public class SpecificationController {
      */
     @PutMapping("/{id}")
     public Result<Boolean> updateSpecification(@PathVariable String id, @RequestBody Specification specification) {
-        specification.setId(id);
+        specification.setId(Integer.parseInt(id));
         boolean result = specificationService.updateById(specification);
         return result ? Result.success("规格更新成功", true) : Result.error("规格更新失败");
     }
@@ -87,7 +87,7 @@ public class SpecificationController {
      */
     @DeleteMapping("/{id}")
     public Result<Boolean> deleteSpecification(@PathVariable String id) {
-        boolean result = specificationService.removeById(id);
+        boolean result = specificationService.removeById(Integer.parseInt(id));
         return result ? Result.success("规格删除成功", true) : Result.error("规格删除失败");
     }
 

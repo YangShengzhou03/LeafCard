@@ -33,7 +33,7 @@ public class OperationLogServiceImpl extends ServiceImpl<OperationLogMapper, Ope
     }
 
     @Override
-    public List<OperationLog> findByTarget(String targetType, String targetId) {
+    public List<OperationLog> findByTarget(String targetType, Integer targetId) {
         QueryWrapper<OperationLog> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("target_type", targetType);
         queryWrapper.eq("target_id", targetId);
@@ -47,7 +47,7 @@ public class OperationLogServiceImpl extends ServiceImpl<OperationLogMapper, Ope
         operationLog.setAdminId(adminId);
         operationLog.setOperationType(operationType);
         operationLog.setTargetType(targetType);
-        operationLog.setTargetId(targetId);
+        operationLog.setTargetId(Integer.parseInt(targetId));
         operationLog.setDescription(description);
         operationLog.setIpAddress(ipAddress);
         operationLog.setCreatedAt(LocalDateTime.now());

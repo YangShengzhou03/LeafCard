@@ -30,7 +30,7 @@ public interface OperationLogService extends IService<OperationLog> {
      * @param targetId 目标ID
      * @return 操作日志列表
      */
-    List<OperationLog> findByTarget(String targetType, String targetId);
+    List<OperationLog> findByTarget(String targetType, Integer targetId);
     
     /**
      * 记录操作日志

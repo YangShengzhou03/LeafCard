@@ -51,7 +51,7 @@ public class ProductController {
      */
     @GetMapping("/{id}")
     public Result<Product> getProduct(@PathVariable String id) {
-        Product product = productService.getById(id);
+        Product product = productService.getById(Integer.parseInt(id));
         
         if (product != null) {
             return Result.success(product);
@@ -79,7 +79,7 @@ public class ProductController {
      */
     @PutMapping("/{id}")
     public Result<Boolean> updateProduct(@PathVariable String id, @RequestBody Product product) {
-        product.setId(id);
+        product.setId(Integer.parseInt(id));
         boolean updated = productService.updateById(product);
         
         if (updated) {
@@ -94,7 +94,7 @@ public class ProductController {
      */
     @DeleteMapping("/{id}")
     public Result<Boolean> deleteProduct(@PathVariable String id) {
-        boolean deleted = productService.removeById(id);
+        boolean deleted = productService.removeById(Integer.parseInt(id));
         
         if (deleted) {
             return Result.success("产品删除成功", true);

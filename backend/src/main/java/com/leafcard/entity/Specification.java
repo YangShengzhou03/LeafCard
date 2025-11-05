@@ -10,11 +10,11 @@ import java.time.LocalDateTime;
 @TableName("specifications")
 public class Specification {
     
-    @TableId(type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(type = IdType.AUTO)
+    private Integer id;
     
     @TableField("product_id")
-    private String productId;
+    private Integer productId;
     
     @TableField("name")
     private String name;
@@ -27,9 +27,6 @@ public class Specification {
     
     @TableField("price")
     private Double price;
-    
-    @TableField("currency")
-    private String currency;
     
     @TableField("stock_quantity")
     private Integer stockQuantity;
@@ -44,19 +41,19 @@ public class Specification {
     private LocalDateTime updatedAt;
 
     // Getter and Setter methods
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public String getProductId() {
+    public Integer getProductId() {
         return productId;
     }
 
-    public void setProductId(String productId) {
+    public void setProductId(Integer productId) {
         this.productId = productId;
     }
 
@@ -90,14 +87,6 @@ public class Specification {
 
     public void setPrice(Double price) {
         this.price = price;
-    }
-
-    public String getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(String currency) {
-        this.currency = currency;
     }
 
     public Integer getStockQuantity() {

@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 @TableName("products")
 public class Product {
     
-    @TableId(type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(type = IdType.AUTO)
+    private Integer id;
     
     @TableField("name")
     private String name;
@@ -32,11 +32,11 @@ public class Product {
     private LocalDateTime updatedAt;
 
     // Getter and Setter methods
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

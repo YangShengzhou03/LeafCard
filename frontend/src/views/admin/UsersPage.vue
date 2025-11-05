@@ -48,7 +48,6 @@
             :data="filteredUsers" 
             style="width: 100%" 
             v-loading="loading" 
-            :scroll="{ x: 1200 }"
             :header-cell-style="{ textAlign: 'center', background: '#f5f7fa' }"
             :cell-style="{ textAlign: 'center' }"
             stripe
@@ -58,31 +57,23 @@
                 <span class="truncate-id">{{ scope.row.id }}</span>
               </template>
             </el-table-column>
-            <el-table-column prop="username" label="用户名" min-width="150" align="center" :show-overflow-tooltip="true">
+            <el-table-column prop="username" label="用户名" width="120" align="center" :show-overflow-tooltip="true">
               <template #default="scope">
                 {{ scope.row.username || scope.row.email.split('@')[0] }}
               </template>
             </el-table-column>
-            <el-table-column prop="email" label="邮箱" min-width="200" align="left" :show-overflow-tooltip="true" class-name="email-column" />
-            <el-table-column prop="cardKeyCount" label="卡密数量" width="120" align="center">
-              <template #default="scope">
-                {{ scope.row.cardKeyCount || 0 }}
-              </template>
-            </el-table-column>
-            <el-table-column prop="activatedCardKeys" label="已使用" width="100" align="center">
-              <template #default="scope">
-                {{ scope.row.activatedCardKeys || 0 }}
-              </template>
-            </el-table-column>
-            <el-table-column prop="status" label="状态" width="120" align="center">
+            <el-table-column prop="email" label="邮箱" width="180" align="left" :show-overflow-tooltip="true" class-name="email-column" />
+
+            <el-table-column prop="status" label="状态" width="100" align="center">
               <template #default="scope">
                 <el-tag :type="scope.row.status === 'active' ? 'success' : 'danger'">
                   {{ scope.row.status === 'active' ? '正常' : '禁用' }}
                 </el-tag>
               </template>
             </el-table-column>
+            <el-table-column prop="createdAt" label="注册时间" width="180" align="center" :show-overflow-tooltip="true" />
             <el-table-column prop="lastLoginTime" label="最后上线时间" width="180" align="center" :show-overflow-tooltip="true" />
-            <el-table-column label="操作" width="220" fixed="right" align="center">
+            <el-table-column label="操作" width="260" fixed="right" align="center">
               <template #default="scope">
                 <el-button size="small" @click="editUser(scope.row)">编辑</el-button>
                 <el-button 
@@ -93,6 +84,7 @@
                   {{ scope.row.status === 'active' ? '停用' : '启用' }}
                 </el-button>
                 <el-button size="small" type="info" @click="resetPassword(scope.row)">重置密码</el-button>
+                <el-button size="small" type="danger" @click="deleteUser(scope.row)">删除</el-button>
               </template>
             </el-table-column>
             
@@ -346,6 +338,31 @@ const toggleUserStatus = async (user) => {
   }
 }
 
+// 删除用户
+const deleteUser = async (user) => {
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除用户 "${user.email}" 吗？此操作不可恢复！`,
+      '确认删除',
+      {
+        confirmButtonText: '确定删除',
+        cancelButtonText: '取消',
+        type: 'error',
+        confirmButtonClass: 'el-button--danger'
+      }
+    )
+    
+    // 调用删除用户API
+    await api.user.deleteUser(user.id)
+    ElMessage.success('用户删除成功')
+    loadUsers()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('删除用户失败: ' + (error.response?.data?.message || error.message))
+    }
+  }
+}
+
 // 重置用户表单
 const resetUserForm = () => {
   Object.assign(userForm, {
@@ -364,23 +381,22 @@ onMounted(() => {
 .admin-users {
   padding: 0;
   background-color: #f0f2f5;
+  width: 100%;
+  min-height: 100vh;
 }
 
 .users-card {
-  margin-bottom: 16px;
-  border: 1px solid #e6e6e6;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.users-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  transform: translateY(-1px);
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  width: 100%;
+  min-height: 100vh;
 }
 
 .users-card :deep(.el-card__body) {
   padding: 0;
+  width: 100%;
 }
 
 .card-header {
@@ -393,16 +409,12 @@ onMounted(() => {
 }
 
 .search-bar {
-  margin-bottom: 16px;
+  margin-bottom: 0;
   padding: 20px;
   background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.search-bar:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 0;
+  box-shadow: none;
+  border-bottom: 1px solid #e6e8eb;
 }
 
 .search-bar :deep(.el-col) {
@@ -429,14 +441,11 @@ onMounted(() => {
 
 .table-container {
   width: 100%;
-  border-radius: 8px;
+  border-radius: 0;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-}
-
-.table-container:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: none;
+  margin: 0;
+  padding: 0;
 }
 
 .table-container :deep(.el-table) {
@@ -488,10 +497,11 @@ onMounted(() => {
 .pagination-container {
   display: flex;
   justify-content: flex-end;
-  margin-top: 12px;
+  margin-top: 0;
   padding: 16px;
   background-color: #fafafa;
   border-top: 1px solid #e6e8eb;
+  width: 100%;
 }
 
 .empty-container {

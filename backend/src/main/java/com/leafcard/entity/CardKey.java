@@ -10,14 +10,14 @@ import java.time.LocalDateTime;
 @TableName("card_keys")
 public class CardKey {
     
-    @TableId(type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(type = IdType.AUTO)
+    private Integer id;
     
     @TableField("card_key")
     private String cardKey;
     
     @TableField("specification_id")
-    private String specificationId;
+    private Integer specificationId;
     
     @TableField("status")
     private String status;
@@ -41,11 +41,11 @@ public class CardKey {
     private LocalDateTime updatedAt;
 
     // Getter and Setter methods
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -57,11 +57,11 @@ public class CardKey {
         this.cardKey = cardKey;
     }
 
-    public String getSpecificationId() {
+    public Integer getSpecificationId() {
         return specificationId;
     }
 
-    public void setSpecificationId(String specificationId) {
+    public void setSpecificationId(Integer specificationId) {
         this.specificationId = specificationId;
     }
 

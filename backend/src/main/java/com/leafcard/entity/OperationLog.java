@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 @TableName("operation_logs")
 public class OperationLog {
     
-    @TableId(type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(type = IdType.AUTO)
+    private Integer id;
     
     @TableField("admin_id")
     private String adminId;
@@ -19,7 +19,7 @@ public class OperationLog {
     private String operationType;
     
     @TableField("target_id")
-    private String targetId;
+    private Integer targetId;
     
     @TableField("target_type")
     private String targetType;
@@ -34,11 +34,11 @@ public class OperationLog {
     private LocalDateTime createdAt;
 
     // Getter and Setter methods
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -58,11 +58,11 @@ public class OperationLog {
         this.operationType = operationType;
     }
 
-    public String getTargetId() {
+    public Integer getTargetId() {
         return targetId;
     }
 
-    public void setTargetId(String targetId) {
+    public void setTargetId(Integer targetId) {
         this.targetId = targetId;
     }
 
