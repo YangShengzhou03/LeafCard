@@ -22,11 +22,8 @@
           
           <div class="info-section">
             <h2 class="user-name">{{ userInfo.nickname || '未设置昵称' }}</h2>
+            <p class="user-email">{{ userInfo.email }}</p>
             <div class="info-grid">
-              <div class="info-item">
-                <span class="info-label">邮箱：</span>
-                <span class="info-value">{{ userInfo.email }}</span>
-              </div>
               <div class="info-item">
                 <span class="info-label">注册时间：</span>
                 <span class="info-value">{{ formatDate(userInfo.createTime) }}</span>
@@ -269,8 +266,7 @@ onMounted(() => {
 
 <style scoped>
 .admin-profile {
-  min-height: calc(100vh - 60px);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: transparent;
   padding: 24px;
   display: flex;
   justify-content: center;
@@ -280,17 +276,16 @@ onMounted(() => {
 .profile-card {
   width: 100%;
   max-width: 900px;
-  border-radius: 16px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  border: none;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
   overflow: hidden;
 }
 
 .profile-card :deep(.el-card__header) {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
   padding: 20px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .card-header {
@@ -298,21 +293,20 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   font-weight: 600;
-  font-size: 20px;
-  color: white;
+  font-size: 18px;
+  color: #1f2937;
 }
 
 .card-header .el-button {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background-color: #3b82f6;
+  border-color: #3b82f6;
   color: white;
   font-weight: 500;
-  transition: all 0.3s ease;
 }
 
 .card-header .el-button:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-1px);
+  background-color: #2563eb;
+  border-color: #2563eb;
 }
 
 .profile-card :deep(.el-card__body) {
@@ -326,7 +320,7 @@ onMounted(() => {
 
 .user-info-display {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 32px;
   padding: 20px 0;
 }
@@ -338,14 +332,11 @@ onMounted(() => {
 }
 
 .user-avatar {
-  border: 4px solid #f0f2f5;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.user-avatar:hover {
-  transform: scale(1.05);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  border: 3px solid #f1f5f9;
+  background-color: #3b82f6;
+  color: white;
+  font-size: 24px;
+  font-weight: 600;
 }
 
 .info-section {
@@ -353,19 +344,22 @@ onMounted(() => {
 }
 
 .user-name {
-  margin: 0 0 8px 0;
-  font-size: 28px;
-  font-weight: 700;
+  margin: 0 0 4px 0;
+  font-size: 24px;
+  font-weight: 600;
   color: #1f2937;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+}
+
+.user-email {
+  margin: 0 0 16px 0;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 400;
 }
 
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 16px;
   margin-top: 20px;
 }
@@ -375,25 +369,21 @@ onMounted(() => {
   align-items: center;
   padding: 16px;
   background: #f8fafc;
-  border-radius: 12px;
-  border-left: 4px solid #667eea;
-  transition: all 0.3s ease;
-}
-
-.info-item:hover {
-  background: #f1f5f9;
-  transform: translateX(4px);
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
 }
 
 .info-label {
   font-weight: 600;
   color: #4b5563;
-  min-width: 80px;
+  min-width: 90px;
+  font-size: 14px;
 }
 
 .info-value {
   color: #1f2937;
   font-weight: 500;
+  font-size: 14px;
 }
 
 .avatar-upload {
@@ -403,41 +393,36 @@ onMounted(() => {
 }
 
 .preview-avatar {
-  border: 3px solid #e5e7eb;
-  transition: all 0.3s ease;
-}
-
-.preview-avatar:hover {
-  border-color: #667eea;
+  border: 2px solid #e5e7eb;
+  background-color: #3b82f6;
+  color: white;
+  font-weight: 600;
 }
 
 .avatar-upload .el-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
+  background-color: #3b82f6;
+  border-color: #3b82f6;
   color: white;
   font-weight: 500;
-  transition: all 0.3s ease;
 }
 
 .avatar-upload .el-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  background-color: #2563eb;
+  border-color: #2563eb;
 }
 
 .el-dialog {
-  border-radius: 16px;
-  overflow: hidden;
+  border-radius: 8px;
 }
 
 .el-dialog :deep(.el-dialog__header) {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  margin: 0;
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
   padding: 20px 24px;
 }
 
 .el-dialog :deep(.el-dialog__title) {
-  color: white;
+  color: #1f2937;
   font-weight: 600;
 }
 
@@ -448,23 +433,23 @@ onMounted(() => {
 .el-dialog :deep(.el-dialog__footer) {
   padding: 20px 24px;
   border-top: 1px solid #e5e7eb;
+  background-color: #f8fafc;
 }
 
 .dialog-footer .el-button {
-  border-radius: 8px;
-  padding: 10px 24px;
+  border-radius: 6px;
+  padding: 10px 20px;
   font-weight: 500;
-  transition: all 0.3s ease;
 }
 
 .dialog-footer .el-button--primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
+  background-color: #3b82f6;
+  border-color: #3b82f6;
 }
 
 .dialog-footer .el-button--primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  background-color: #2563eb;
+  border-color: #2563eb;
 }
 
 @media (max-width: 768px) {
@@ -500,7 +485,7 @@ onMounted(() => {
   }
   
   .user-name {
-    font-size: 24px;
+    font-size: 20px;
   }
   
   .info-item {
