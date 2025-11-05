@@ -428,17 +428,15 @@ onMounted(() => {
 <style scoped>
 .admin-profile {
   padding: 0;
-  background-color: #f0f2f5;
+  background-color: #f5f7fa;
 }
 
 .profile-card {
   margin-bottom: 16px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .profile-card :deep(.el-card__body) {
-  padding: 24px;
+  padding: 20px;
 }
 
 .card-header {
@@ -457,30 +455,30 @@ onMounted(() => {
 .basic-info {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 32px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid #e6e8eb;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e4e7ed;
 }
 
 .avatar-section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-right: 32px;
+  margin-right: 24px;
 }
 
 .user-avatar {
-  margin-bottom: 12px;
-  background-color: #409eff;
+  margin-bottom: 8px;
+  background-color: #2c5aa0;
   color: white;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: bold;
 }
 
 .avatar-actions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .info-section {
@@ -488,20 +486,20 @@ onMounted(() => {
 }
 
 .user-name {
-  margin: 0 0 8px 0;
-  font-size: 24px;
+  margin: 0 0 6px 0;
+  font-size: 20px;
   font-weight: 600;
   color: #303133;
 }
 
 .user-email {
-  margin: 0 0 8px 0;
+  margin: 0 0 6px 0;
   color: #606266;
   font-size: 14px;
 }
 
 .user-role {
-  margin: 0 0 8px 0;
+  margin: 0 0 6px 0;
 }
 
 .user-join-time {
@@ -511,21 +509,21 @@ onMounted(() => {
 }
 
 .edit-form {
-  margin-bottom: 32px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid #e6e8eb;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e4e7ed;
 }
 
 .section-title {
-  margin: 0 0 16px 0;
-  font-size: 18px;
+  margin: 0 0 12px 0;
+  font-size: 16px;
   font-weight: 600;
   color: #303133;
 }
 
 .security-items {
-  border: 1px solid #e6e8eb;
-  border-radius: 4px;
+  border: 1px solid #e4e7ed;
+  border-radius: 2px;
   overflow: hidden;
 }
 
@@ -533,9 +531,9 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
+  padding: 12px 16px;
   background-color: white;
-  border-bottom: 1px solid #e6e8eb;
+  border-bottom: 1px solid #e4e7ed;
 }
 
 .security-item:last-child {
@@ -543,7 +541,7 @@ onMounted(() => {
 }
 
 .item-info h4 {
-  margin: 0 0 4px 0;
+  margin: 0 0 2px 0;
   font-size: 14px;
   font-weight: 600;
   color: #303133;
@@ -564,11 +562,11 @@ onMounted(() => {
   
   .avatar-section {
     margin-right: 0;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
   }
   
   .edit-form .el-col {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
   }
 }
 </style>

@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Layout from '../components/Layout.vue'
-import Login from '../views/Login.vue'
-import Dashboard from '../views/Dashboard.vue'
+import LoginPage from '../views/LoginPage.vue'
+import DashboardPage from '../views/admin/DashboardPage.vue'
 
 Vue.use(VueRouter)
 
@@ -10,7 +10,7 @@ const routes = [
   {
     path: '/login',
     name: 'Login',
-    component: Login
+    component: LoginPage
   },
   {
     path: '/',
@@ -20,57 +20,57 @@ const routes = [
       {
         path: 'dashboard',
         name: 'Dashboard',
-        component: Dashboard
+        component: DashboardPage
       },
       {
         path: 'products',
         name: 'Products',
-        component: () => import('../views/Products.vue')
+        component: () => import('../views/admin/ProductManagement.vue')
       },
       {
         path: 'products/add',
         name: 'AddProduct',
-        component: () => import('../views/ProductForm.vue')
+        component: () => import('../views/admin/ProductSpecManagement.vue')
       },
       {
         path: 'products/edit/:id',
         name: 'EditProduct',
-        component: () => import('../views/ProductForm.vue')
+        component: () => import('../views/admin/ProductSpecManagement.vue')
       },
       {
         path: 'specifications',
         name: 'Specifications',
-        component: () => import('../views/Specifications.vue')
+        component: () => import('../views/admin/ProductSpecManagement.vue')
       },
       {
         path: 'specifications/add',
         name: 'AddSpecification',
-        component: () => import('../views/SpecificationForm.vue')
+        component: () => import('../views/admin/ProductSpecManagement.vue')
       },
       {
         path: 'specifications/edit/:id',
         name: 'EditSpecification',
-        component: () => import('../views/SpecificationForm.vue')
+        component: () => import('../views/admin/ProductSpecManagement.vue')
       },
       {
         path: 'card-keys',
         name: 'CardKeys',
-        component: () => import('../views/CardKeys.vue')
+        component: () => import('../views/admin/CardKeyManagement.vue')
       },
       {
         path: 'card-keys/add',
         name: 'AddCardKey',
-        component: () => import('../views/CardKeyForm.vue')
+        component: () => import('../views/admin/CardKeyGenerate.vue')
       },
       {
         path: 'users',
         name: 'Users',
-        component: () => import('../views/Users.vue')
+        component: () => import('../views/admin/UsersPage.vue')
       },
       {
         path: 'logs',
         name: 'OperationLogs',
-        component: () => import('../views/OperationLogs.vue')
+        component: () => import('../views/admin/LogsPage.vue')
       }
     ]
   }

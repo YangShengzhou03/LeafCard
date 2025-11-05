@@ -600,115 +600,63 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: #f5f7fa;
   padding: 24px;
-  position: relative;
-  overflow: hidden;
 }
 
-.login-container::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(44, 90, 160, 0.03) 0%, transparent 70%);
-  animation: float 8s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  50% { transform: translate(-10px, -10px) rotate(1deg); }
-}
-
-/* 登录卡片 */
 .login-card {
   width: 100%;
   max-width: 600px;
-  position: relative;
-  z-index: 1;
 }
 
 .card-inner {
   background: #ffffff;
-  border-radius: 12px;
-  padding: 32px 36px;
-  box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.06),
-    0 4px 12px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(224, 224, 224, 0.6);
+  border-radius: 8px;
+  padding: 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   display: flex;
-  align-items: stretch;
   gap: 24px;
-  backdrop-filter: blur(8px);
-  min-height: 360px;
 }
 
-/* Logo部分 */
 .logo-section {
   text-align: center;
   flex: 0 0 160px;
   padding: 24px 12px;
-  border-right: 1px solid rgba(224, 224, 224, 0.5);
+  border-right: 1px solid #e4e7ed;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  position: relative;
-}
-
-.logo-section::after {
-  content: '';
-  position: absolute;
-  right: -1px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 1px;
-  height: 75%;
-  background: linear-gradient(to bottom, transparent, rgba(224, 224, 224, 0.6), transparent);
 }
 
 .logo {
-  position: relative;
-  width: 60px;
-  height: 60px;
-  margin: 0 auto 16px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #2c5aa0 0%, #1e4a8c 100%);
+  background: #2c5aa0;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(44, 90, 160, 0.2);
+  border-radius: 8px;
+  width: 60px;
+  height: 60px;
+  margin-bottom: 16px;
 }
 
 .logo-text {
+  font-size: 28px;
+  font-weight: bold;
   color: white;
-  font-size: 24px;
-  font-weight: 600;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .app-title {
-  color: #1a1a1a;
-  margin: 0 0 4px 0;
-  font-size: 18px;
+  font-size: 24px;
   font-weight: 600;
-  letter-spacing: -0.3px;
-  background: linear-gradient(135deg, #1a1a1a 0%, #2c5aa0 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #2c5aa0;
+  margin: 8px 0 4px;
 }
 
 .subtitle {
-  color: #666;
+  font-size: 14px;
+  color: #909399;
   margin: 0;
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 0.1px;
-  line-height: 1.3;
 }
 
 /* 表单区域 */

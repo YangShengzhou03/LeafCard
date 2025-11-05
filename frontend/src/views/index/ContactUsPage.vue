@@ -56,98 +56,95 @@ export default {
 <style scoped>
 .contact-us-page {
   min-height: 100vh;
-  background-color: #f8fafc;
+  background-color: #f5f7fa;
 }
 
 .page-header {
-  background: #2d3748;
+  background: #2c5aa0;
   color: white;
-  padding: 60px 0;
+  padding: 40px 0;
   text-align: center;
 }
 
 .page-header h1 {
-  font-size: 36px;
-  margin-bottom: 16px;
-  font-weight: 700;
+  font-size: 32px;
+  margin-bottom: 12px;
+  font-weight: 600;
 }
 
 .page-header p {
-  font-size: 18px;
-  opacity: 0.9;
+  font-size: 16px;
   max-width: 600px;
   margin: 0 auto;
 }
 
 .page-content {
-  padding: 60px 0 80px;
+  padding: 40px 0 60px;
 }
 
 .contact-sections {
   display: flex;
   flex-direction: column;
-  gap: 60px;
+  gap: 40px;
 }
 
 .contact-section {
   background: white;
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .section-header {
-  background: #2d3748;
-  padding: 24px 32px;
+  background: #2c5aa0;
+  padding: 20px 24px;
   color: white;
 }
 
 .section-header h2 {
-  font-size: 24px;
+  font-size: 20px;
   margin: 0;
   font-weight: 600;
 }
 
 .contact-methods {
-  padding: 32px;
+  padding: 24px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
 }
 
 .contact-method {
-  background: #f8fafc;
-  border-radius: 8px;
-  padding: 24px;
+  background: #f5f7fa;
+  border-radius: 4px;
+  padding: 20px;
   text-align: center;
 }
 
 .contact-method h3 {
-  font-size: 18px;
-  margin-bottom: 12px;
-  color: #2c3e50;
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #303133;
   font-weight: 600;
 }
 
 .contact-method p {
-  color: #4a5568;
+  color: #606266;
   line-height: 1.6;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .contact-link {
   display: inline-block;
-  color: #3182ce;
-  font-weight: 600;
+  color: #2c5aa0;
+  font-weight: 500;
   text-decoration: none;
-  padding: 8px 16px;
-  border: 1px solid #3182ce;
-  border-radius: 4px;
-  transition: all 0.2s;
+  padding: 6px 12px;
+  border: 1px solid #2c5aa0;
+  border-radius: 2px;
 }
 
 .contact-link:hover {
-  background: #3182ce;
+  background: #2c5aa0;
   color: white;
 }
 
@@ -159,23 +156,23 @@ export default {
 
 @media (max-width: 768px) {
   .page-header h1 {
-    font-size: 28px;
+    font-size: 24px;
   }
   
   .page-header p {
-    font-size: 16px;
+    font-size: 14px;
   }
   
   .section-header {
-    padding: 20px;
+    padding: 16px 20px;
   }
   
   .section-header h2 {
-    font-size: 20px;
+    font-size: 18px;
   }
   
   .contact-methods {
-    padding: 24px 20px;
+    padding: 20px;
     grid-template-columns: 1fr;
   }
 }

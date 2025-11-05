@@ -81,98 +81,69 @@ export default {
 <style scoped>
 .user-guide-page {
   min-height: 100vh;
-  background-color: #f8fafc;
+  background-color: #f5f7fa;
 }
 
 .page-header {
-  background: #2d3748;
+  background: #2c5aa0;
   color: white;
-  padding: 60px 0;
+  padding: 40px 0;
   text-align: center;
 }
 
 .page-header h1 {
-  font-size: 36px;
-  margin-bottom: 16px;
-  font-weight: 700;
+  font-size: 32px;
+  margin-bottom: 12px;
+  font-weight: 600;
 }
 
 .page-header p {
-  font-size: 18px;
-  opacity: 0.9;
+  font-size: 16px;
   max-width: 600px;
   margin: 0 auto;
 }
 
 .page-content {
-  padding: 60px 0 80px;
+  padding: 40px 0 60px;
 }
 
 .guide-sections {
   display: flex;
   flex-direction: column;
-  gap: 60px;
+  gap: 40px;
 }
 
 .guide-section {
   background: white;
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .section-header {
-  background: #2d3748;
-  padding: 24px 32px;
+  background: #2c5aa0;
+  padding: 20px 24px;
   color: white;
 }
 
 .section-header h2 {
-  font-size: 24px;
+  font-size: 20px;
   margin: 0;
   font-weight: 600;
 }
 
 .guide-content {
-  padding: 32px;
+  padding: 24px;
 }
 
 .collapse-content {
-  padding: 16px 0;
+  padding: 12px 0;
 }
 
 .collapse-content p {
-  color: #4a5568;
+  color: #606266;
   line-height: 1.6;
   margin: 0;
   font-size: 14px;
-  text-align: justify; /* 两端对齐 */
-  text-align-last: left; /* 最后一行左对齐 */
-}
-
-/* 自定义手风琴样式 */
-:deep(.el-collapse) {
-  border: none;
-}
-
-:deep(.el-collapse-item__header) {
-  font-size: 16px;
-  font-weight: 600;
-  color: #2c3e50;
-  padding: 16px 0;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-:deep(.el-collapse-item__content) {
-  padding-bottom: 0;
-}
-
-:deep(.el-collapse-item:last-child .el-collapse-item__header) {
-  border-bottom: none;
-}
-
-:deep(.el-collapse-item__arrow) {
-  color: #4a5568;
 }
 
 .container {
@@ -183,34 +154,23 @@ export default {
 
 @media (max-width: 768px) {
   .page-header h1 {
-    font-size: 28px;
+    font-size: 24px;
   }
   
   .page-header p {
-    font-size: 16px;
+    font-size: 14px;
   }
   
   .section-header {
-    padding: 20px;
+    padding: 16px 20px;
   }
   
   .section-header h2 {
-    font-size: 20px;
+    font-size: 18px;
   }
   
   .guide-content {
-    padding: 24px 20px;
-  }
-  
-  :deep(.el-collapse-item__header) {
-    font-size: 14px;
-    padding: 12px 0;
-  }
-  
-  .collapse-content p {
-    font-size: 13px;
-    text-align: left; /* 移动端使用左对齐 */
-    text-align-last: left;
+    padding: 20px;
   }
 }
 </style>
