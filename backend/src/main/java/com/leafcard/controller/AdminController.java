@@ -24,16 +24,6 @@ public class AdminController {
     public Result<Admin> login(@RequestBody Map<String, String> loginRequest) {
         String username = loginRequest.get("username");
         String password = loginRequest.get("password");
-        String verificationCode = loginRequest.get("verificationCode");
-        
-        // 验证码验证逻辑：只要输入"123456"就视为正确
-        if (verificationCode == null || verificationCode.trim().isEmpty()) {
-            return Result.error("请输入验证码");
-        }
-        
-        if (!"123456".equals(verificationCode.trim())) {
-            return Result.error("验证码错误，请输入123456");
-        }
         
         Admin admin = adminService.login(username, password);
         if (admin != null) {
@@ -77,6 +67,41 @@ public class AdminController {
             return Result.success("管理员创建成功", true);
         } else {
             return Result.error("管理员创建失败");
+        }
+    }
+
+    /**
+     * 重置管理员密码
+     */
+    @PostMapping("/reset-password")
+    public Result<Boolean> resetPassword(@RequestBody Map<String, String> resetRequest) {
+        String email = resetRequest.get("email");
+        String verificationCode = resetRequest.get("verificationCode");
+        String newPassword = resetRequest.get("newPassword");
+        
+        // 验证码验证逻辑：只要输入"123456"就视为正确
+        if (verificationCode == null || verificationCode.trim().isEmpty()) {
+            return Result.error("请输入验证码");
+        }
+        
+        if (!"123456".equals(verificationCode.trim())) {
+            return Result.error("验证码错误，请输入123456");
+        }
+        
+        // 根据邮箱查找管理员
+        Admin admin = adminService.findByEmail(email);
+        if (admin == null) {
+            return Result.error("该邮箱对应的管理员不存在");
+        }
+        
+        // 更新密码
+        admin.setPasswordHash(newPassword);
+        boolean updated = adminService.updateById(admin);
+        
+        if (updated) {
+            return Result.success("密码重置成功", true);
+        } else {
+            return Result.error("密码重置失败");
         }
     }
 }

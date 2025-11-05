@@ -77,6 +77,18 @@ export const userApi = {
    */
   getUserStatistics() {
     return Server.get('/api/admins/statistics')
+  },
+
+  /**
+   * 重置管理员密码
+   * @param {Object} resetData - 重置密码数据
+   * @param {string} resetData.email - 邮箱
+   * @param {string} resetData.verificationCode - 验证码
+   * @param {string} resetData.newPassword - 新密码
+   * @returns {Promise} 重置结果
+   */
+  resetPassword(resetData) {
+    return Server.post('/api/admins/reset-password', resetData)
   }
 }
 
