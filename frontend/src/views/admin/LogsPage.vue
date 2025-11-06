@@ -10,7 +10,7 @@
       <!-- 筛选区域 -->
       <div class="filter-section">
         <el-row :gutter="16">
-          <el-col :span="5">
+          <el-col :span="6">
             <el-date-picker
               v-model="filter.dateRange"
               type="daterange"
@@ -40,7 +40,7 @@
               <el-button @click="resetFilter">重置</el-button>
             </div>
           </el-col>
-          <el-col :span="11">
+          <el-col :span="10">
             <div class="action-buttons" style="justify-content: flex-end;">
               <el-button @click="exportLogs" :loading="exporting">
                 <el-icon><Download /></el-icon>
@@ -55,36 +55,6 @@
         </el-row>
       </div>
       
-      <!-- 统计信息 -->
-      <div class="stats-section">
-        <el-row :gutter="16">
-          <el-col :span="6">
-            <div class="stat-item">
-              <span class="stat-label">登录：</span>
-              <span class="stat-value success">{{ stats.loginCount }}</span>
-            </div>
-          </el-col>
-          <el-col :span="6">
-            <div class="stat-item">
-              <span class="stat-label">卡密操作：</span>
-              <span class="stat-value primary">{{ stats.cardKeyCount }}</span>
-            </div>
-          </el-col>
-          <el-col :span="6">
-            <div class="stat-item">
-              <span class="stat-label">商品规格管理：</span>
-              <span class="stat-value info">{{ stats.productSpecCount }}</span>
-            </div>
-          </el-col>
-          <el-col :span="6">
-            <div class="stat-item">
-              <span class="stat-label">总计：</span>
-              <span class="stat-value total">{{ stats.totalCount }}</span>
-            </div>
-          </el-col>
-        </el-row>
-      </div>
-      
       <!-- 日志列表 -->
       <el-table v-loading="loading" :data="logs" style="width: 100%" stripe>
         <template #empty>
@@ -92,41 +62,17 @@
             <el-empty description="暂无日志数据" />
           </div>
         </template>
-        <el-table-column prop="id" label="ID" width="80" show-overflow-tooltip />
-        <el-table-column prop="adminName" label="管理员" width="120" show-overflow-tooltip />
-        <el-table-column prop="operationType" label="操作类型" width="120">
+        <el-table-column prop="id" label="日志ID" width="100" show-overflow-tooltip />
+        <el-table-column prop="operationType" label="操作" width="120">
           <template #default="{ row }">
             <el-tag :type="getLevelType(row.operationType)" size="small">
               {{ getOperationTypeName(row.operationType) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="targetName" label="操作目标" width="150" show-overflow-tooltip />
-        <el-table-column prop="description" label="描述" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="description" label="操作内容" min-width="150" show-overflow-tooltip />
         <el-table-column prop="ipAddress" label="IP地址" width="120" />
-        <el-table-column prop="requestMethod" label="请求方法" width="100">
-          <template #default="{ row }">
-            <el-tag v-if="row.requestMethod" :type="getMethodType(row.requestMethod)" size="small">
-              {{ row.requestMethod }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="responseStatus" label="状态码" width="80">
-          <template #default="{ row }">
-            <el-tag v-if="row.responseStatus" :type="getStatusType(row.responseStatus)" size="small">
-              {{ row.responseStatus }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="executionTime" label="耗时(ms)" width="100" />
-        <el-table-column prop="createdAt" label="时间" width="160" />
-        <el-table-column label="操作" width="100" fixed="right">
-          <template #default="{ row }">
-            <el-button type="primary" size="small" @click="viewLogDetail(row)">
-              详情
-            </el-button>
-          </template>
-        </el-table-column>
+        <el-table-column prop="createdAt" label="操作时间" width="160" />
       </el-table>
       
       <!-- 分页 -->
@@ -144,22 +90,19 @@
     </el-card>
     
     <!-- 日志详情对话框 -->
-    <el-dialog v-model="showLogDetail" title="日志详情" width="600px">
+    <el-dialog v-model="showLogDetail" title="日志详情" width="500px">
       <div v-if="selectedLog">
         <el-descriptions :column="1" border>
-          <el-descriptions-item label="ID">{{ selectedLog.id }}</el-descriptions-item>
-          <el-descriptions-item label="操作类型">
+          <el-descriptions-item label="日志ID">{{ selectedLog.id }}</el-descriptions-item>
+          <el-descriptions-item label="操作">
             <el-tag :type="getLevelType(selectedLog.operationType)">
               {{ getOperationTypeName(selectedLog.operationType) }}
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="IP地址">{{ selectedLog.ipAddress }}</el-descriptions-item>
-          <el-descriptions-item label="时间">{{ selectedLog.createTime }}</el-descriptions-item>
-          <el-descriptions-item label="描述">{{ selectedLog.description }}</el-descriptions-item>
+          <el-descriptions-item label="操作时间">{{ selectedLog.createdAt }}</el-descriptions-item>
+          <el-descriptions-item label="操作内容">{{ selectedLog.description }}</el-descriptions-item>
         </el-descriptions>
-        <el-divider />
-        <h4>详细信息</h4>
-        <div class="log-detail-content">{{ selectedLog.userAgent }}</div>
       </div>
     </el-dialog>
   </div>
@@ -182,14 +125,6 @@ const pageSize = ref(10)
 const showLogDetail = ref(false)
 const selectedLog = ref(null)
 
-// 统计信息
-const stats = ref({
-  loginCount: 0,
-  cardKeyCount: 0,
-  productSpecCount: 0,
-  totalCount: 0
-})
-
 // 筛选条件
 const filter = reactive({
   dateRange: []
@@ -199,11 +134,14 @@ const filter = reactive({
 const getLevelType = (operationType) => {
   switch (operationType) {
     case 'LOGIN': return 'success'
-    case 'UPLOAD_FILE': return 'primary'
-    case 'DOWNLOAD_FILE': return 'info'
-    case 'DELETE_FILE': return 'warning'
-    case 'UPDATE_USER_STATUS': return 'danger'
-    case 'CLEAR_LOGS': return 'danger'
+    case 'CARD_KEY_GENERATE': return 'primary'
+    case 'CARD_KEY_VERIFY': return 'info'
+    case 'CARD_KEY_EDIT': return 'warning'
+    case 'CARD_KEY_DELETE': return 'danger'
+    case 'PRODUCT_MANAGE': return 'primary'
+    case 'SPEC_MANAGE': return 'info'
+    case 'USER_MANAGE': return 'warning'
+    case 'SYSTEM_CONFIG': return 'danger'
     default: return ''
   }
 }
@@ -212,13 +150,14 @@ const getLevelType = (operationType) => {
 const getOperationTypeName = (operationType) => {
   switch (operationType) {
     case 'LOGIN': return '登录'
-    case 'UPLOAD_FILE': return '上传文件'
-    case 'DOWNLOAD_FILE': return '下载文件'
-    case 'DELETE_FILE': return '删除文件'
-    case 'CREATE_SHARE': return '创建分享'
-    case 'DELETE_SHARE': return '删除分享'
-    case 'UPDATE_USER_STATUS': return '更新用户状态'
-    case 'CLEAR_LOGS': return '清空日志'
+    case 'CARD_KEY_GENERATE': return '创建卡密'
+    case 'CARD_KEY_VERIFY': return '验证卡密'
+    case 'CARD_KEY_EDIT': return '编辑卡密'
+    case 'CARD_KEY_DELETE': return '删除卡密'
+    case 'PRODUCT_MANAGE': return '产品管理'
+    case 'SPEC_MANAGE': return '规格管理'
+    case 'USER_MANAGE': return '用户管理'
+    case 'SYSTEM_CONFIG': return '系统配置'
     default: return operationType
   }
 }
@@ -228,42 +167,6 @@ const resetFilter = () => {
   filter.dateRange = []
   currentPage.value = 1
   loadLogs()
-}
-
-// 更新统计数据
-const updateStats = () => {
-  const statsData = calculateStats(logs.value)
-  stats.value = statsData
-}
-
-// 计算统计信息
-const calculateStats = (logs) => {
-  const stats = {
-    loginCount: 0,
-    cardKeyCount: 0,
-    productSpecCount: 0,
-    totalCount: logs.length
-  }
-  
-  logs.forEach(log => {
-    switch (log.operationType) {
-      case 'LOGIN':
-        stats.loginCount++
-        break
-      case 'CARD_KEY_GENERATE':
-      case 'CARD_KEY_VERIFY':
-      case 'CARD_KEY_EDIT':
-      case 'CARD_KEY_DELETE':
-        stats.cardKeyCount++
-        break
-      case 'PRODUCT_MANAGE':
-      case 'SPEC_MANAGE':
-        stats.productSpecCount++
-        break
-    }
-  })
-  
-  return stats
 }
 
 // 加载日志数据
@@ -299,8 +202,6 @@ const loadLogs = async () => {
         totalLogs.value = 0
       }
     }
-    
-    updateStats()
   } catch (error) {
     console.error('加载日志数据失败:', error)
     ElMessage.error('加载日志数据失败')
@@ -458,73 +359,11 @@ onMounted(() => {
   gap: 12px;
 }
 
-.stats-section {
-  margin-bottom: 20px;
-  padding: 20px;
-  border: 1px solid #e6e8eb;
-  background-color: #fafafa;
-  border-radius: 6px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.stat-item {
-  text-align: center;
-  padding: 8px;
-}
-
-.stat-label {
-  font-size: 14px;
-  color: #606266;
-  display: block;
-  margin-bottom: 4px;
-}
-
-.stat-value {
-  font-size: 20px;
-  font-weight: bold;
-  display: block;
-}
-
-.stat-value.success {
-  color: #67c23a;
-}
-
-.stat-value.primary {
-  color: #409eff;
-}
-
-.stat-value.info {
-  color: #909399;
-}
-
-.stat-value.warning {
-  color: #e6a23c;
-}
-
-.stat-value.danger {
-  color: #f56c6c;
-}
-
-.stat-value.total {
-  color: #303133;
-}
-
 .pagination-container {
   margin-top: 20px;
   text-align: right;
   padding: 16px 0 0;
   border-top: 1px solid #e6e8eb;
-}
-
-.log-detail-content {
-  background-color: #f5f7fa;
-  padding: 15px;
-  white-space: pre-wrap;
-  font-family: monospace;
-  max-height: 300px;
-  overflow-y: auto;
-  border-radius: 4px;
-  border: 1px solid #e6e8eb;
 }
 
 /* 表格样式优化 */
@@ -576,11 +415,6 @@ onMounted(() => {
     margin-bottom: 16px;
   }
   
-  .stats-section {
-    padding: 16px;
-    margin-bottom: 16px;
-  }
-  
   .action-buttons {
     flex-direction: column;
     gap: 8px;
@@ -589,18 +423,6 @@ onMounted(() => {
   .header-actions {
     flex-direction: column;
     gap: 5px;
-  }
-  
-  .stat-item {
-    margin-bottom: 8px;
-  }
-  
-  .stat-label {
-    font-size: 12px;
-  }
-  
-  .stat-value {
-    font-size: 16px;
   }
 }
 </style>

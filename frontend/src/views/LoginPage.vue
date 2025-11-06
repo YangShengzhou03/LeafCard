@@ -433,15 +433,17 @@ const showUserAgreement = () => {
 
 // 显示隐私政策
 const showPrivacyPolicy = () => {
-  ElMessageBox.alert(
-    '隐私政策内容...',
-    '隐私政策',
-    {
-      confirmButtonText: '我已阅读',
-      type: 'info'
-    }
-  )
+  router.push('/privacy-policy')
 }
+
+// ElMessageBox.alert(
+//   '隐私政策内容...',
+//   '隐私政策',
+//   {
+//     confirmButtonText: '我已阅读',
+//     type: 'info'
+//   }
+// )
 
 // 处理登录
 const handleLogin = async () => {

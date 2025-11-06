@@ -1,16 +1,15 @@
 -- 数据库初始化脚本
--- 如果数据库存在则删除，然后重新创建
 DROP DATABASE IF EXISTS leaf_card;
 CREATE DATABASE leaf_card CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE leaf_card;
 
--- 管理员表（简化版，只有管理员）
+-- 管理员表
 CREATE TABLE admins (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()) COMMENT '管理员唯一标识符',
     username VARCHAR(50) NOT NULL DEFAULT 'leafAdmin' COMMENT '用户名',
     email VARCHAR(100) UNIQUE NOT NULL COMMENT '邮箱',
     password_hash VARCHAR(255) NOT NULL COMMENT '密码哈希值',
-    status ENUM('active', 'inactive') DEFAULT 'active' NOT NULL COMMENT '状态：active-活跃，inactive-非活跃',
+    status ENUM('active', 'inactive') DEFAULT 'active' NOT NULL COMMENT '状态',
     last_login_time DATETIME COMMENT '最后登录时间',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT '创建时间',
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL COMMENT '最后更新时间',
@@ -33,7 +32,7 @@ CREATE TABLE products (
     INDEX idx_status (status)
 ) ENGINE=InnoDB COMMENT='产品表';
 
--- 规格表（修复字段缺失问题）
+-- 规格表
 CREATE TABLE specifications (
     id INT PRIMARY KEY AUTO_INCREMENT COMMENT '规格唯一标识符',
     product_id INT NOT NULL COMMENT '产品ID',
@@ -51,14 +50,14 @@ CREATE TABLE specifications (
     INDEX idx_status (status)
 ) ENGINE=InnoDB COMMENT='规格表';
 
--- 卡密表（修复字段缺失和冗余问题）
+-- 卡密表
 CREATE TABLE card_keys (
     id INT PRIMARY KEY AUTO_INCREMENT COMMENT '卡密唯一标识符',
     card_key VARCHAR(100) UNIQUE NOT NULL COMMENT '卡密',
     specification_id INT NOT NULL COMMENT '规格ID',
     status ENUM('未使用', '已使用', '已禁用') DEFAULT '未使用' NOT NULL COMMENT '状态',
-    user_email VARCHAR(100) COMMENT '用户邮箱（激活时填写）',
-    user_id VARCHAR(100) COMMENT '用户ID（激活时填写）',
+    user_email VARCHAR(100) COMMENT '用户邮箱',
+    user_id VARCHAR(100) COMMENT '用户ID',
     activate_time DATETIME COMMENT '激活时间',
     expire_time DATETIME COMMENT '过期时间',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT '创建时间',
@@ -89,27 +88,9 @@ CREATE TABLE operation_logs (
     INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB COMMENT='操作日志表';
 
--- 只初始化一个管理员账号
+-- 初始化管理员账号
 INSERT INTO admins (username, email, password_hash, status) VALUES
 ('admin', 'admin@qq.com', '123456', 'active');
-
--- 简化产品数据，只保留核心产品
-INSERT INTO products (name, description, category, status) VALUES
-('VIP会员', 'VIP会员专属权益，享受高级服务', 'vip', 'active'),
-('普通会员', '普通会员基础权益，满足日常需求', 'normal', 'active');
-
--- 简化规格数据，每个产品保留1-2个规格
-INSERT INTO specifications (product_id, name, description, duration_days, price, stock_quantity, status) VALUES
-((SELECT id FROM products WHERE name = 'VIP会员'), '月卡', 'VIP会员专属月卡，享受专属权益', 30, 29.90, 100, 'active'),
-((SELECT id FROM products WHERE name = 'VIP会员'), '年卡', 'VIP会员专属年卡，享受专属权益', 365, 299.00, 50, 'active'),
-((SELECT id FROM products WHERE name = '普通会员'), '月卡', '普通会员月卡，基础权益', 30, 19.90, 200, 'active');
-
--- 简化卡密数据，只保留少量测试卡密
-INSERT INTO card_keys (card_key, specification_id, status, user_email, activate_time, expire_time) VALUES
-('LEAF-TEST-001', (SELECT id FROM specifications WHERE name = '月卡' AND product_id = (SELECT id FROM products WHERE name = 'VIP会员')), '未使用', NULL, NULL, NULL),
-('LEAF-TEST-002', (SELECT id FROM specifications WHERE name = '年卡' AND product_id = (SELECT id FROM products WHERE name = 'VIP会员')), '未使用', NULL, NULL, NULL),
-('LEAF-TEST-003', (SELECT id FROM specifications WHERE name = '月卡' AND product_id = (SELECT id FROM products WHERE name = '普通会员')), '未使用', NULL, NULL, NULL);
-
 
 CREATE VIEW card_key_detail_view AS
 SELECT 
@@ -148,5 +129,4 @@ BEGIN
 END //
 DELIMITER ;
 
--- 提交视图和存储过程创建操作
 COMMIT;
