@@ -56,7 +56,13 @@ Server.interceptors.response.use(
         ElMessage.error('权限不足，无法访问该资源')
         break
       case 404:
-        // 不显示错误消息，由具体业务逻辑处理
+        // 对于404错误，提供更具体的错误信息
+        const url = error.config?.url || ''
+        if (url.includes('/api/card-keys/')) {
+          ElMessage.error('卡密不存在或参数错误')
+        } else {
+          // 其他404错误不显示消息，由具体业务逻辑处理
+        }
         break
       case 500:
         ElMessage.error('服务器内部错误，请联系管理员')

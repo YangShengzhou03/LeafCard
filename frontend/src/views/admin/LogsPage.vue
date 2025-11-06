@@ -68,17 +68,16 @@
             <el-empty description="暂无日志数据" />
           </div>
         </template>
-        <el-table-column prop="id" label="日志ID" width="120" align="center" />
-        <el-table-column prop="operationType" label="操作" width="100" align="center">
+        <el-table-column prop="operationType" label="操作" width="150" align="center">
           <template #default="{ row }">
             <el-tag :type="getLevelType(row.operationType)" size="small">
               {{ getOperationTypeName(row.operationType) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="description" label="操作内容" min-width="150" show-overflow-tooltip />
-        <el-table-column prop="ipAddress" label="IP地址" width="160" align="center" />
-        <el-table-column prop="createdAt" label="操作时间" width="200" align="center" />
+        <el-table-column prop="description" label="操作内容" min-width="120" show-overflow-tooltip />
+        <el-table-column prop="ipAddress" label="IP地址" width="140" align="center" />
+        <el-table-column prop="createdAt" label="操作时间" width="180" align="center" />
       </el-table>
       
       <!-- 分页 -->
@@ -133,7 +132,8 @@ const selectedLog = ref(null)
 
 // 筛选条件
 const filter = reactive({
-  dateRange: []
+  dateRange: [],
+  operationType: ''
 })
 
 // 获取操作类型对应的标签类型
@@ -171,6 +171,7 @@ const getOperationTypeName = (operationType) => {
 // 重置筛选条件
 const resetFilter = () => {
   filter.dateRange = []
+  filter.operationType = ''
   currentPage.value = 1
   loadLogs()
 }
@@ -188,6 +189,11 @@ const loadLogs = async () => {
     if (filter.dateRange && filter.dateRange.length === 2) {
       params.startDate = filter.dateRange[0]
       params.endDate = filter.dateRange[1]
+    }
+    
+    // 添加操作类型筛选参数
+    if (filter.operationType) {
+      params.operationType = filter.operationType
     }
     
     // 调用API获取日志列表

@@ -47,16 +47,16 @@ const AdminService = {
     return Server.post('/api/card-keys', data)
   },
 
-  toggleCardKeyStatus(id, status) {
-    return Server.post(`/api/card-keys/${id}/status`, { status })
+  toggleCardKeyStatus(cardKey, status) {
+    return Server.post(`/api/card-keys/${cardKey}/status`, { status })
   },
 
-  disableCardKey(id) {
-    return Server.post(`/api/card-keys/${id}/disable`)
+  disableCardKey(cardKey) {
+    return Server.post(`/api/card-keys/disable`, { cardKey })
   },
 
-  deleteCardKey(id) {
-    return Server.delete(`/api/card-keys/${id}`)
+  deleteCardKey(cardKey) {
+    return Server.delete(`/api/card-keys/${cardKey}`)
   },
 
   getProductList(params) {

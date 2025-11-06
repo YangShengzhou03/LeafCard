@@ -142,11 +142,11 @@ public class CardKeyController {
             return Result.error("卡密不存在");
         }
         
-        if ("active".equals(cardKeyEntity.getStatus())) {
+        if ("已使用".equals(cardKeyEntity.getStatus())) {
             return Result.error("卡密已经是激活状态");
         }
         
-        cardKeyEntity.setStatus("active");
+        cardKeyEntity.setStatus("已使用");
         boolean updated = cardKeyService.updateById(cardKeyEntity);
         
         if (updated) {
@@ -175,11 +175,11 @@ public class CardKeyController {
             return Result.error("卡密不存在");
         }
         
-        if ("disabled".equals(cardKeyEntity.getStatus())) {
+        if ("已禁用".equals(cardKeyEntity.getStatus())) {
             return Result.error("卡密已经是禁用状态");
         }
         
-        cardKeyEntity.setStatus("disabled");
+        cardKeyEntity.setStatus("已禁用");
         boolean updated = cardKeyService.updateById(cardKeyEntity);
         
         if (updated) {
