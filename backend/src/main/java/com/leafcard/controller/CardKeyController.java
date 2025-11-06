@@ -110,7 +110,7 @@ public class CardKeyController {
         if (success) {
             return Result.success("卡密禁用成功", true);
         } else {
-            return Result.error("卡密禁用失败");
+            return Result.error(500, "卡密禁用失败");
         }
     }
 

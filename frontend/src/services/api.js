@@ -10,7 +10,7 @@ const AdminService = {
   },
 
   getDashboardStats() {
-    return Server.get('/api/admin/dashboard')
+    return Server.get('/api/admin/stats')
   },
 
   getUserList(params) {

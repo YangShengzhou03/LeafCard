@@ -322,7 +322,8 @@ const handleToggleCardKey = async (row) => {
       response = await api.admin.toggleCardKeyStatus(row.cardKey, '未使用')
     }
     
-    if (response && response.data && response.data.success) {
+    // 修复响应格式检查：后端返回的是Result对象，包含code、message、data字段
+    if (response && response.code === 200) {
       ElMessage.success(`${actionText}成功`)
       loadCardKeys() // 重新加载数据
     } else {
@@ -352,7 +353,8 @@ const handleDeleteCardKey = async (row) => {
     // 调用真实API删除卡密
     const response = await api.admin.deleteCardKey(row.cardKey)
     
-    if (response && response.data && response.data.success) {
+    // 修复响应格式检查：后端返回的是Result对象，包含code、message、data字段
+    if (response && response.code === 200) {
       ElMessage.success('删除成功')
       loadCardKeys()
     } else {
