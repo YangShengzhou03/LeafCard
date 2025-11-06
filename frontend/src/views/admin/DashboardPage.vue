@@ -89,47 +89,20 @@
 
         <!-- 图表数据 -->
         <el-row :gutter="20" class="charts-row">
-          <!-- 销售趋势图 -->
-          <el-col :span="12">
+          <!-- 未使用不同规格卡密占比 -->
+          <el-col :span="24">
             <el-card class="chart-card">
               <template #header>
                 <div class="chart-header">
-                  <span>近7日销售趋势</span>
+                  <span>未使用不同规格卡密占比</span>
                 </div>
               </template>
               <div class="chart-container">
-                <!-- 图表内容已清空 -->
-              </div>
-            </el-card>
-          </el-col>
-          
-          <!-- 销量前五商品数量 -->
-          <el-col :span="12">
-            <el-card class="chart-card">
-              <template #header>
-                <div class="chart-header">
-                  <span>销量前五商品数量</span>
+                <div v-if="specDistribution.length === 0" class="no-data">
+                  <el-empty description="暂无数据" :image-size="80" />
                 </div>
-              </template>
-              <div class="chart-container">
-                <div class="product-bar-chart">
-                  <div 
-                    v-for="(item, index) in topProducts" 
-                    :key="index"
-                    class="bar-item"
-                  >
-                    <div class="bar-info-left">
-                      <span class="product-name">{{ item.name }}</span>
-                      <span class="product-spec">{{ item.spec }}</span>
-                    </div>
-                    <div class="bar-container">
-                      <div 
-                        class="bar-fill" 
-                        :style="{ width: (item.sales / maxProductSales) * 100 + '%', background: getProductColor(index) }"
-                      ></div>
-                    </div>
-                    <span class="sales-count">{{ item.sales }}</span>
-                  </div>
+                <div v-else class="chart-content">
+                  <v-chart :option="pieChartOption" style="height: 300px;" />
                 </div>
               </div>
             </el-card>
@@ -143,10 +116,27 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
+import { use } from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
+import { PieChart } from 'echarts/charts'
+import {
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent
+} from 'echarts/components'
+import VChart from 'vue-echarts'
 import { 
   Refresh, Key, Money, Goods, Coin
 } from '@element-plus/icons-vue'
 import api from '../../services/api'
+
+use([
+  CanvasRenderer,
+  PieChart,
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent
+])
 
 // 统计数据
 const stats = ref({
@@ -162,22 +152,65 @@ const stats = ref({
 
 const loading = ref(false)
 
-// 销量前五的商品数据
-const topProducts = ref([])
+// 未使用卡密规格分布数据
+const specDistribution = ref([])
 
-// 计算最大商品销售量用于横向数据条
-const maxProductSales = computed(() => {
-  if (topProducts.value.length === 0) return 1
-  return Math.max(...topProducts.value.map(item => item.sales))
+// 饼图配置
+const pieChartOption = computed(() => {
+  return {
+    tooltip: {
+      trigger: 'item',
+      formatter: '{a} <br/>{b}: {c}张 ({d}%)'
+    },
+    legend: {
+      show: false
+    },
+    series: [
+      {
+        name: '卡密规格',
+        type: 'pie',
+        radius: ['50%', '80%'],
+        avoidLabelOverlap: false,
+        itemStyle: {
+          borderRadius: 10,
+          borderColor: '#fff',
+          borderWidth: 2
+        },
+        label: {
+          show: true,
+          formatter: '{b}\n{c}张 ({d}%)',
+          fontSize: 10,
+          fontWeight: 'bold'
+        },
+        emphasis: {
+          label: {
+            show: true,
+            fontSize: 12,
+            fontWeight: 'bold'
+          }
+        },
+        labelLine: {
+          show: true,
+          length: 10,
+          length2: 5
+        },
+        data: specDistribution.value.map((item, index) => ({
+          value: item.count,
+          name: item.name,
+          itemStyle: {
+            color: getSpecColor(index)
+          }
+        }))
+      }
+    ]
+  }
 })
 
-// 获取商品颜色
-const getProductColor = (index) => {
-  const colors = ['#409eff', '#67c23a', '#e6a23c', '#f56c6c', '#909399']
-  return colors[index] || '#909399'
+// 获取规格颜色
+const getSpecColor = (index) => {
+  const colors = ['#409eff', '#67c23a', '#e6a23c', '#f56c6c', '#909399', '#b37feb', '#ff85c0']
+  return colors[index % colors.length]
 }
-
-
 
 // 刷新数据
 const refreshData = async () => {
@@ -207,8 +240,16 @@ const loadDashboardData = async () => {
         dailyGrowth: data.dailyRevenueChange || 0
       }
       
-      // 获取销量前五的商品数据（后端暂无此数据，使用空数组）
-      topProducts.value = []
+      // 模拟未使用卡密规格分布数据（实际应该从后端获取）
+      specDistribution.value = [
+        { name: '基础版', count: 45, percentage: 30 },
+        { name: '专业版', count: 30, percentage: 20 },
+        { name: '企业版', count: 25, percentage: 17 },
+        { name: '旗舰版', count: 20, percentage: 13 },
+        { name: '定制版', count: 15, percentage: 10 },
+        { name: '其他', count: 15, percentage: 10 }
+      ]
+      
     } else {
       // API返回空数据时，使用空数据
       stats.value = {
@@ -222,7 +263,7 @@ const loadDashboardData = async () => {
         dailyGrowth: 0
       }
       
-      topProducts.value = []
+      specDistribution.value = []
       
       // 空数据时给出提示
       ElMessage.warning('仪表盘数据为空，请检查数据配置')
@@ -252,7 +293,7 @@ const loadDashboardData = async () => {
       dailyGrowth: 0
     }
     
-    topProducts.value = []
+    specDistribution.value = []
   } finally {
     loading.value = false
   }
@@ -381,7 +422,7 @@ onMounted(() => {
   margin-top: 16px;
   border-radius: 4px;
   border: 1px solid #ebeef5;
-  height: 360px;
+  min-height: 350px;
   display: flex;
   flex-direction: column;
 }
@@ -405,208 +446,28 @@ onMounted(() => {
   justify-content: center;
 }
 
-/* 柱形图样式 */
- .bar-chart {
-   position: relative;
-   height: 160px;
-   width: 100%;
- }
- 
- .chart-grid {
-   position: absolute;
-   top: 0;
-   left: 0;
-   right: 0;
-   bottom: 40px;
-   display: flex;
-   flex-direction: column;
-   justify-content: space-between;
- }
- 
- .grid-line {
-   height: 1px;
-   background: #f0f0f0;
-   width: 100%;
- }
- 
- .bars-container {
-   position: absolute;
-   top: 0;
-   left: 16px;
-   right: 16px;
-   bottom: 40px;
-   display: flex;
-   align-items: flex-end;
-   justify-content: space-between;
- }
- 
- .bar-item-container {
-   display: flex;
-   flex-direction: column;
-   align-items: center;
-   height: 100%;
-   flex: 1;
-   margin: 0 4px;
- }
- 
- .bar-wrapper {
-   flex: 1;
-   width: 24px;
-   background: #f5f7fa;
-   display: flex;
-   align-items: flex-end;
-   position: relative;
- }
- 
- .bar-fill {
-   width: 100%;
-   background: #409eff;
-   min-height: 4px;
- }
- 
- .bar-item-container:hover .bar-fill {
-   background: #337ecc;
- }
- 
- .bar-info {
-   display: flex;
-   flex-direction: column;
-   align-items: center;
-   margin-top: 8px;
- }
- 
- .bar-label {
-   font-size: 12px;
-   color: #303133;
-   font-weight: 600;
-   margin-bottom: 2px;
- }
- 
- .date-label {
-   font-size: 11px;
-   color: #909399;
- }
+.chart-content {
+  width: 100%;
+  height: 100%;
+}
 
-
-
-/* 商品销售占比样式 - 横向数据条布局 */
-.product-bar-chart {
+.no-data {
   width: 100%;
   height: 100%;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 0 16px;
 }
 
-.bar-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  height: 32px;
+/* 响应式布局 */
+.stats-row {
+  margin-bottom: 0;
 }
 
-.bar-info-left {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 180px;
-  min-width: 180px;
+.charts-row {
+  margin-top: 16px;
 }
 
-.product-name {
-  font-size: 14px;
-  color: #606266;
-  font-weight: 500;
-  margin-bottom: 2px;
-}
-
-.product-spec {
-  font-size: 12px;
-  color: #909399;
-}
-
-.sales-count {
-  font-size: 16px;
-  color: #409eff;
-  font-weight: 600;
-}
-
-.bar-container {
-   flex: 1;
-   height: 16px;
-   background: #f5f7fa;
-   overflow: hidden;
-   position: relative;
-   border: 1px solid #e4e7ed;
-   margin-right: 8px;
- }
- 
- .bar-fill {
-   height: 100%;
-   position: relative;
- }
- 
- .bar-item:hover .bar-fill {
-   opacity: 0.9;
- }
- 
- .bar-item:hover .bar-container {
-   border-color: #c6e2ff;
- }
-
-
-
-/* 系统状态样式 */
-.system-status {
-  padding: 16px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.status-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-}
-
-.status-label {
-  font-size: 14px;
-  color: #606266;
-}
-
-.status-value {
-  font-size: 14px;
-  color: #303133;
-  font-weight: 500;
-}
-
-.status-good {
-  color: #67c23a;
-}
-
-/* 快速操作样式 */
-.actions-card {
-  margin-top: 20px;
-  border-radius: 4px;
-}
-
-.actions-header {
-  font-weight: 600;
-  font-size: 16px;
-  color: #303133;
-}
-
-.quick-actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-/* 响应式设计 */
 @media (max-width: 1200px) {
   .stats-row .el-col {
     margin-bottom: 16px;
@@ -617,160 +478,17 @@ onMounted(() => {
   }
 }
 
-@media (max-width: 1024px) {
-  .stat-item {
-    padding: 16px;
-  }
-  
-  .stat-icon {
-    width: 40px;
-    height: 40px;
-  }
-  
-  .stat-value {
-    font-size: 20px;
+@media (max-width: 768px) {
+  .stats-row .el-col {
+    width: 100%;
   }
   
   .charts-row .el-col {
     width: 100%;
   }
   
-  .trend-chart {
-    height: 140px;
-  }
-  
-  .trend-bar-container {
-    height: 80px;
-  }
-}
-
-@media (max-width: 768px) {
-  .stat-item {
-    flex-direction: column;
-    text-align: center;
-    padding: 16px;
-  }
-  
-  .stat-icon {
-    margin-right: 0;
-    margin-bottom: 12px;
-  }
-  
-  .stat-value {
-    font-size: 20px;
-  }
-  
-  .trend-chart {
-    height: 120px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  
-  .trend-item {
-    flex: 0 0 14%;
-    margin-bottom: 16px;
-  }
-  
-  .trend-bar-container {
-    height: 60px;
-  }
-  
-  .distribution-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-  
-  .distribution-details {
-    width: 100%;
-    justify-content: space-between;
-  }
-  
-  .pie-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-  
-  .pie-slice {
-    width: 100% !important;
-  }
-  
-  .pie-info {
-    width: 100%;
-  }
-  
-  .monthly-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-  
-  .monthly-value {
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 480px) {
-  .stat-item {
-    padding: 12px;
-  }
-  
-  .stat-icon {
-    width: 36px;
-    height: 36px;
-  }
-  
-  .stat-icon .el-icon {
-    font-size: 18px;
-  }
-  
-  .stat-value {
-    font-size: 18px;
-  }
-  
-  .stat-title {
-    font-size: 13px;
-  }
-  
-  .trend-chart {
-    height: 100px;
-  }
-  
-  .trend-item {
-    flex: 0 0 12%;
-  }
-  
-  .trend-bar-container {
-    height: 50px;
-  }
-  
-  .trend-label {
-    font-size: 10px;
-  }
-  
-  .trend-value {
-    font-size: 12px;
-  }
-  
-  .chart-container {
-    padding: 8px 0;
-  }
-  
-  .product-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    text-align: left;
-  }
-  
-  .product-rank {
-    margin-right: 0;
-    margin-bottom: 8px;
-  }
-  
-  .product-sales {
-    align-self: flex-end;
+  .pie-chart-container {
+    height: 250px;
   }
 }
 </style>

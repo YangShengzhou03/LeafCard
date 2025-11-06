@@ -208,7 +208,7 @@ export function checkNetworkStatus() {
     const img = new Image()
     img.onload = () => resolve(true)
     img.onerror = () => resolve(false)
-    img.src = 'https://www.google.com/favicon.ico?t=' + Date.now()
+    img.src = 'https://www.baidu.com/favicon.ico?t=' + Date.now()
     
     // 设置超时
     setTimeout(() => resolve(false), 3000)
