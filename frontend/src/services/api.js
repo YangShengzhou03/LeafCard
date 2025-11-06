@@ -99,11 +99,11 @@ const AdminService = {
   },
 
   toggleCardKeyStatus(id, status) {
-    return Server.put(`/api/card-keys/${id}/status`, { status })
+    return Server.post(`/api/card-keys/${id}/status`, { status })
   },
 
   disableCardKey(id) {
-    return Server.put(`/api/card-keys/${id}/disable`)
+    return Server.post(`/api/card-keys/${id}/disable`)
   },
 
   clearUsedCardKeys() {
