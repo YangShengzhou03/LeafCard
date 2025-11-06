@@ -60,7 +60,7 @@ export default {
 }
 
 .page-header {
-  background: #2c5aa0;
+  background: #2d3748;
   color: white;
   padding: 40px 0;
   text-align: center;
@@ -95,7 +95,7 @@ export default {
 }
 
 .section-header {
-  background: #2c5aa0;
+  background: #2d3748;
   padding: 20px 24px;
   color: white;
 }
@@ -135,16 +135,16 @@ export default {
 
 .contact-link {
   display: inline-block;
-  color: #2c5aa0;
+  color: #2d3748;
   font-weight: 500;
   text-decoration: none;
   padding: 6px 12px;
-  border: 1px solid #2c5aa0;
+  border: 1px solid #2d3748;
   border-radius: 2px;
 }
 
 .contact-link:hover {
-  background: #2c5aa0;
+  background: #2d3748;
   color: white;
 }
 

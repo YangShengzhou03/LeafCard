@@ -185,7 +185,7 @@ export default {
 .avatar-circle {
   width: 120px;
   height: 120px;
-  background-color: #667eea;
+  background-color: #2d3748;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -227,7 +227,7 @@ export default {
 
 .profile-title {
   font-size: 18px;
-  color: #667eea;
+  color: #2d3748;
   margin-bottom: 20px;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -252,13 +252,13 @@ export default {
 }
 
 .tag {
-  background-color: #e6f7ff;
-  color: #1890ff;
+  background-color: #f7fafc;
+  color: #2d3748;
   padding: 8px 16px;
   border-radius: 4px;
   font-size: 14px;
   font-weight: 600;
-  border: 1px solid #91d5ff;
+  border: 1px solid #cbd5e0;
 }
 
 .timeline {
@@ -287,7 +287,7 @@ export default {
   top: 8px;
   width: 12px;
   height: 12px;
-  background-color: #3182ce;
+  background-color: #2d3748;
   border-radius: 50%;
   border: 2px solid white;
 }

@@ -1,12 +1,16 @@
 <template>
   <div class="privacy-policy-page">
-    <div class="container">
-      <div class="page-header">
+    <!-- 简洁的头部区域 -->
+    <header class="page-header">
+      <div class="container">
         <h1>隐私政策</h1>
         <p>LeafCard枫叶卡管系统隐私政策</p>
       </div>
-      
-      <div class="privacy-content">
+    </header>
+
+    <main class="page-content">
+      <div class="container">
+        <div class="privacy-content">
         <h3>引言与适用范围</h3>
         <p>本隐私政策适用于LeafCard枫叶卡管平台（以下简称"我们"或"平台"）提供的所有产品和服务。我们深知个人信息对您的重要性，并会尽力保护您的个人信息安全可靠。我们致力于维持您对我们的信任，恪守以下原则，保护您的个人信息：权责一致原则、目的明确原则、选择同意原则、最少够用原则、确保安全原则、主体参与原则、公开透明原则等。</p>
 
@@ -77,8 +81,9 @@
         <p>如果您对我们的回复不满意，或者认为我们的个人信息处理行为违反了适用法律，您有权向相关监管机构投诉。</p>
 
         <div class="policy-date">最后更新日期：2025年10月</div>
+        </div>
       </div>
-    </div>
+    </main>
   </div>
 </template>
 

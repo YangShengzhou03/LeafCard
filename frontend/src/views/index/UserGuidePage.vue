@@ -85,7 +85,7 @@ export default {
 }
 
 .page-header {
-  background: #2c5aa0;
+  background: #2d3748;
   color: white;
   padding: 40px 0;
   text-align: center;
@@ -120,7 +120,7 @@ export default {
 }
 
 .section-header {
-  background: #2c5aa0;
+  background: #2d3748;
   padding: 20px 24px;
   color: white;
 }
