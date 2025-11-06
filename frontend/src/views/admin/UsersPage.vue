@@ -174,21 +174,9 @@ const userRules = {
   ]
 }
 
+// 直接使用后端返回的当前页数据，不再进行前端筛选
 const filteredUsers = computed(() => {
-  let result = users.value
-  
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    result = result.filter(user => 
-      user.email.toLowerCase().includes(query)
-    )
-  }
-  
-  if (statusFilter.value) {
-    result = result.filter(user => user.status === statusFilter.value)
-  }
-  
-  return result
+  return users.value
 })
 
 const loadUsers = async () => {

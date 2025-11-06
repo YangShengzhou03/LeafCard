@@ -187,12 +187,14 @@ public class AdminController {
     @GetMapping
     public Result<Object> getAdmins(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String status) {
         
         com.baomidou.mybatisplus.extension.plugins.pagination.Page<Admin> pageInfo = 
             new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(page, size);
         
-        com.baomidou.mybatisplus.extension.plugins.pagination.Page<Admin> result = adminService.page(pageInfo);
+        com.baomidou.mybatisplus.extension.plugins.pagination.Page<Admin> result = adminService.page(pageInfo, keyword, status);
         
         return Result.success("管理员列表查询成功", Map.of(
             "page", result.getCurrent(),
