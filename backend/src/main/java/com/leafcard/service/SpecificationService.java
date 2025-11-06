@@ -44,4 +44,11 @@ public interface SpecificationService extends IService<Specification> {
      * @return 规格DTO列表
      */
     List<SpecificationDTO> getSpecificationDTOs();
+    
+    /**
+     * 根据名称查找规格
+     * @param name 规格名称
+     * @return 规格对象
+     */
+    Specification findByName(String name);
 }

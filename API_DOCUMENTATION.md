@@ -1351,16 +1351,17 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 **请求头**:
 ```
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-Content-Type: application/x-www-form-urlencoded
+Content-Type: application/json
 ```
 
 **请求参数**:
-- `adminId` (必填): 管理员ID
-- `operationType` (必填): 操作类型
-- `targetType` (必填): 目标类型
-- `targetId` (必填): 目标ID
-- `description` (必填): 操作描述
-- `ipAddress` (必填): IP地址
+```json
+{
+    "operationType": "操作类型",
+    "description": "操作描述",
+    "ipAddress": "IP地址"
+}
+```
 
 **响应示例**:
 ```json

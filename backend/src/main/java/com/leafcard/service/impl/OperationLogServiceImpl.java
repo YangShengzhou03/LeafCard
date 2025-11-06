@@ -24,26 +24,9 @@ import java.util.Map;
 public class OperationLogServiceImpl extends ServiceImpl<OperationLogMapper, OperationLog> implements OperationLogService {
 
     @Override
-    public List<OperationLog> findByAdminId(String adminId) {
-        QueryWrapper<OperationLog> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("admin_id", adminId);
-        queryWrapper.orderByDesc("created_at");
-        return this.list(queryWrapper);
-    }
-
-    @Override
     public List<OperationLog> findByOperationType(String operationType) {
         QueryWrapper<OperationLog> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("operation_type", operationType);
-        queryWrapper.orderByDesc("created_at");
-        return this.list(queryWrapper);
-    }
-
-    @Override
-    public List<OperationLog> findByTarget(String targetType, Integer targetId) {
-        QueryWrapper<OperationLog> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("target_type", targetType);
-        queryWrapper.eq("target_id", targetId);
         queryWrapper.orderByDesc("created_at");
         return this.list(queryWrapper);
     }
@@ -72,13 +55,6 @@ public class OperationLogServiceImpl extends ServiceImpl<OperationLogMapper, Ope
         }
         stats.put("typeStats", typeStats);
         
-        // 按管理员统计
-        Map<String, Integer> adminStats = new HashMap<>();
-        for (OperationLog log : logs) {
-            adminStats.put(log.getAdminId(), adminStats.getOrDefault(log.getAdminId(), 0) + 1);
-        }
-        stats.put("adminStats", adminStats);
-        
         return stats;
     }
 
@@ -104,15 +80,12 @@ public class OperationLogServiceImpl extends ServiceImpl<OperationLogMapper, Ope
         
         // 写入CSV数据
         PrintWriter writer = response.getWriter();
-        writer.write("ID,管理员ID,操作类型,目标类型,目标ID,描述,IP地址,创建时间\n");
+        writer.write("ID,操作类型,描述,IP地址,创建时间\n");
         
         for (OperationLog log : logs) {
-            writer.write(String.format("%d,%s,%s,%s,%d,%s,%s,%s\n",
+            writer.write(String.format("%d,%s,%s,%s,%s\n",
                 log.getId(),
-                log.getAdminId(),
                 log.getOperationType(),
-                log.getTargetType(),
-                log.getTargetId(),
                 escapeCsv(log.getDescription()),
                 log.getIpAddress(),
                 log.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
@@ -134,55 +107,11 @@ public class OperationLogServiceImpl extends ServiceImpl<OperationLogMapper, Ope
     }
 
     @Override
-    public void logOperation(String adminId, String operationType, String targetType, String targetId, String description, String ipAddress) {
+    public void logOperation(String operationType, String description, String ipAddress) {
         OperationLog operationLog = new OperationLog();
-        operationLog.setAdminId(adminId);
         operationLog.setOperationType(operationType);
-        operationLog.setTargetType(targetType);
-        
-        // 安全处理targetId转换，避免NumberFormatException
-        try {
-            if (targetId != null && !targetId.isEmpty()) {
-                operationLog.setTargetId(Integer.parseInt(targetId));
-            } else {
-                operationLog.setTargetId(0); // 默认值
-            }
-        } catch (NumberFormatException e) {
-            // 如果targetId不是数字，使用默认值
-            operationLog.setTargetId(0);
-        }
-        
         operationLog.setDescription(description);
         operationLog.setIpAddress(ipAddress);
-        operationLog.setCreatedAt(LocalDateTime.now());
-        
-        this.save(operationLog);
-    }
-    
-    /**
-     * 记录详细操作日志
-     */
-    public void logDetailedOperation(String adminId, String adminName, String operationType, 
-                                   String targetType, Integer targetId, String targetName,
-                                   String description, String ipAddress, String userAgent,
-                                   String requestMethod, String requestUrl, String requestParams,
-                                   Integer responseStatus, Long executionTime, String errorMessage) {
-        OperationLog operationLog = new OperationLog();
-        operationLog.setAdminId(adminId);
-        operationLog.setAdminName(adminName);
-        operationLog.setOperationType(operationType);
-        operationLog.setTargetType(targetType);
-        operationLog.setTargetId(targetId);
-        operationLog.setTargetName(targetName);
-        operationLog.setDescription(description);
-        operationLog.setIpAddress(ipAddress);
-        operationLog.setUserAgent(userAgent);
-        operationLog.setRequestMethod(requestMethod);
-        operationLog.setRequestUrl(requestUrl);
-        operationLog.setRequestParams(requestParams);
-        operationLog.setResponseStatus(responseStatus);
-        operationLog.setExecutionTime(executionTime);
-        operationLog.setErrorMessage(errorMessage);
         operationLog.setCreatedAt(LocalDateTime.now());
         
         this.save(operationLog);

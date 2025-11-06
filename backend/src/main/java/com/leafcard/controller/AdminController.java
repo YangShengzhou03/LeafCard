@@ -5,9 +5,11 @@ import com.leafcard.dto.LoginResponse;
 import com.leafcard.entity.Admin;
 import com.leafcard.service.AdminService;
 import com.leafcard.utils.JwtUtil;
+import com.leafcard.utils.LogUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
@@ -22,12 +24,15 @@ public class AdminController {
     
     @Autowired
     private JwtUtil jwtUtil;
+    
+    @Autowired
+    private LogUtil logUtil;
 
     /**
      * 管理员登录（使用邮箱登录）
      */
     @PostMapping("/login")
-    public Result<LoginResponse> login(@RequestBody Map<String, String> loginRequest) {
+    public Result<LoginResponse> login(@RequestBody Map<String, String> loginRequest, HttpServletRequest request) {
         String email = loginRequest.get("email");
         String password = loginRequest.get("password");
         
@@ -41,10 +46,16 @@ public class AdminController {
             // 生成JWT token
             String token = jwtUtil.generateToken(admin.getId(), admin.getUsername());
             
+            // 记录登录成功日志
+            logUtil.logLogin(true, "管理员登录成功 - 邮箱: " + email, request);
+            
             // 创建登录响应
             LoginResponse loginResponse = new LoginResponse(token, admin);
             return Result.success("登录成功", loginResponse);
         } else {
+            // 记录登录失败日志
+            logUtil.logLogin(false, "管理员登录失败 - 邮箱: " + email + " (密码错误或用户不存在)", request);
+            
             return Result.error("邮箱或密码错误");
         }
     }
@@ -67,7 +78,7 @@ public class AdminController {
      * 创建管理员
      */
     @PostMapping
-    public Result<Boolean> createAdmin(@RequestBody Admin admin) {
+    public Result<Boolean> createAdmin(@RequestBody Admin admin, HttpServletRequest request) {
         // 检查邮箱是否已存在
         if (adminService.findByEmail(admin.getEmail()) != null) {
             return Result.error("邮箱已存在");
@@ -90,9 +101,78 @@ public class AdminController {
         
         boolean saved = adminService.save(admin);
         if (saved) {
+            // 记录创建管理员日志
+            logUtil.logUserOperation("admin_create", "创建管理员 - 邮箱: " + admin.getEmail(), request);
+            
             return Result.success("管理员创建成功", true);
         } else {
             return Result.error("管理员创建失败");
+        }
+    }
+
+    /**
+     * 重置管理员密码（需要验证码）
+     */
+    @PostMapping("/reset-password")
+    public Result<Boolean> resetPassword(@RequestBody Map<String, String> resetRequest, HttpServletRequest request) {
+        String email = resetRequest.get("email");
+        String verificationCode = resetRequest.get("verificationCode");
+        String newPassword = resetRequest.get("newPassword");
+        
+        // 验证码验证逻辑：只要输入"123456"就视为正确
+        if (verificationCode == null || verificationCode.trim().isEmpty()) {
+            return Result.error("请输入验证码");
+        }
+        
+        if (!"123456".equals(verificationCode.trim())) {
+            return Result.error("验证码错误，请输入123456");
+        }
+        
+        // 根据邮箱查找管理员
+        Admin admin = adminService.findByEmail(email);
+        if (admin == null) {
+            return Result.error("该邮箱对应的管理员不存在");
+        }
+        
+        // 更新密码
+        admin.setPasswordHash(newPassword);
+        boolean updated = adminService.updateById(admin);
+        
+        if (updated) {
+            // 记录重置密码日志
+            logUtil.logUserOperation("password_reset", "重置管理员密码 - 邮箱: " + email, request);
+            
+            return Result.success("密码重置成功", true);
+        } else {
+            return Result.error("密码重置失败");
+        }
+    }
+
+    /**
+     * 管理员直接重置用户密码（无需验证码）
+     */
+    @PostMapping("/admin-reset-password")
+    public Result<Boolean> adminResetPassword(@RequestBody Map<String, String> resetRequest, HttpServletRequest request) {
+        String email = resetRequest.get("email");
+        String newPassword = resetRequest.get("newPassword");
+        
+        // 根据邮箱查找管理员
+        Admin admin = adminService.findByEmail(email);
+        if (admin == null) {
+            return Result.error("该邮箱对应的管理员不存在");
+        }
+        
+        // 更新密码
+        admin.setPasswordHash(newPassword);
+        boolean updated = adminService.updateById(admin);
+        
+        if (updated) {
+            // 记录管理员重置密码日志
+            logUtil.logUserOperation("admin_password_reset", "管理员直接重置密码 - 邮箱: " + email, request);
+            
+            return Result.success("密码重置成功", true);
+        } else {
+            return Result.error("密码重置失败");
         }
     }
 
@@ -118,65 +198,9 @@ public class AdminController {
         return Result.success("验证码已发送，请输入123456", true);
     }
 
-    /**
-     * 重置管理员密码（需要验证码）
-     */
-    @PostMapping("/reset-password")
-    public Result<Boolean> resetPassword(@RequestBody Map<String, String> resetRequest) {
-        String email = resetRequest.get("email");
-        String verificationCode = resetRequest.get("verificationCode");
-        String newPassword = resetRequest.get("newPassword");
-        
-        // 验证码验证逻辑：只要输入"123456"就视为正确
-        if (verificationCode == null || verificationCode.trim().isEmpty()) {
-            return Result.error("请输入验证码");
-        }
-        
-        if (!"123456".equals(verificationCode.trim())) {
-            return Result.error("验证码错误，请输入123456");
-        }
-        
-        // 根据邮箱查找管理员
-        Admin admin = adminService.findByEmail(email);
-        if (admin == null) {
-            return Result.error("该邮箱对应的管理员不存在");
-        }
-        
-        // 更新密码
-        admin.setPasswordHash(newPassword);
-        boolean updated = adminService.updateById(admin);
-        
-        if (updated) {
-            return Result.success("密码重置成功", true);
-        } else {
-            return Result.error("密码重置失败");
-        }
-    }
 
-    /**
-     * 管理员直接重置用户密码（无需验证码）
-     */
-    @PostMapping("/admin-reset-password")
-    public Result<Boolean> adminResetPassword(@RequestBody Map<String, String> resetRequest) {
-        String email = resetRequest.get("email");
-        String newPassword = resetRequest.get("newPassword");
-        
-        // 根据邮箱查找管理员
-        Admin admin = adminService.findByEmail(email);
-        if (admin == null) {
-            return Result.error("该邮箱对应的管理员不存在");
-        }
-        
-        // 更新密码
-        admin.setPasswordHash(newPassword);
-        boolean updated = adminService.updateById(admin);
-        
-        if (updated) {
-            return Result.success("密码重置成功", true);
-        } else {
-            return Result.error("密码重置失败");
-        }
-    }
+
+
 
     /**
      * 分页查询管理员列表

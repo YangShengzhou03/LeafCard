@@ -116,4 +116,11 @@ public class SpecificationServiceImpl extends ServiceImpl<SpecificationMapper, S
             return dto;
         }).collect(Collectors.toList());
     }
+    
+    @Override
+    public Specification findByName(String name) {
+        QueryWrapper<Specification> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("name", name);
+        return baseMapper.selectOne(queryWrapper);
+    }
 }

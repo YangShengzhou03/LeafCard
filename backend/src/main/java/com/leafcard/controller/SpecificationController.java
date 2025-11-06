@@ -1,12 +1,13 @@
 package com.leafcard.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.leafcard.common.Result;
 import com.leafcard.dto.SpecificationDTO;
 import com.leafcard.entity.Specification;
 import com.leafcard.service.SpecificationService;
+import com.leafcard.utils.LogUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +22,9 @@ public class SpecificationController {
 
     @Autowired
     private SpecificationService specificationService;
+
+    @Autowired
+    private LogUtil logUtil;
 
     /**
      * 分页查询规格列表
@@ -68,40 +72,78 @@ public class SpecificationController {
      * 创建规格
      */
     @PostMapping
-    public Result<Boolean> createSpecification(@RequestBody Specification specification) {
-        boolean result = specificationService.save(specification);
-        return result ? Result.success("规格创建成功", true) : Result.error("规格创建失败");
+    public Result<Boolean> createSpecification(@RequestBody Specification specification, HttpServletRequest request) {
+        // 检查规格名称是否已存在
+        if (specificationService.findByName(specification.getName()) != null) {
+            return Result.error("规格名称已存在");
+        }
+        
+        // 设置默认状态
+        if (specification.getStatus() == null || specification.getStatus().trim().isEmpty()) {
+            specification.setStatus("active");
+        }
+        
+        boolean saved = specificationService.save(specification);
+        
+        if (saved) {
+            // 记录创建规格日志
+            logUtil.logSpecificationOperation("specification_create", "创建规格: " + specification.getName(), request);
+            
+            return Result.success("规格创建成功", true);
+        } else {
+            return Result.error("规格创建失败");
+        }
     }
 
     /**
      * 更新规格
      */
     @PutMapping("/{id}")
-    public Result<Boolean> updateSpecification(@PathVariable String id, @RequestBody Specification specification) {
-        specification.setId(Integer.parseInt(id));
-        
-        // 处理状态字段转换：前端可能发送数字状态值，需要转换为数据库ENUM值
-        if (specification.getStatus() != null) {
-            String status = specification.getStatus();
-            if ("1".equals(status) || "active".equals(status)) {
-                specification.setStatus("active");
-            } else if ("0".equals(status) || "inactive".equals(status)) {
-                specification.setStatus("inactive");
-            }
-            // 其他情况保持原值
+    public Result<Boolean> updateSpecification(@PathVariable String id, @RequestBody Specification specification, HttpServletRequest request) {
+        Specification existingSpecification = specificationService.getById(Integer.parseInt(id));
+        if (existingSpecification == null) {
+            return Result.error("规格不存在");
         }
         
-        boolean result = specificationService.updateById(specification);
-        return result ? Result.success("规格更新成功", true) : Result.error("规格更新失败");
+        // 检查规格名称是否与其他规格冲突
+        Specification specWithSameName = specificationService.findByName(specification.getName());
+        if (specWithSameName != null && !specWithSameName.getId().equals(Integer.parseInt(id))) {
+            return Result.error("规格名称已存在");
+        }
+        
+        specification.setId(Integer.parseInt(id));
+        boolean updated = specificationService.updateById(specification);
+        
+        if (updated) {
+            // 记录更新规格日志
+            logUtil.logSpecificationOperation("specification_update", "更新规格: " + specification.getName(), request);
+            
+            return Result.success("规格更新成功", true);
+        } else {
+            return Result.error("规格更新失败");
+        }
     }
 
     /**
      * 删除规格
      */
     @DeleteMapping("/{id}")
-    public Result<Boolean> deleteSpecification(@PathVariable String id) {
-        boolean result = specificationService.removeById(Integer.parseInt(id));
-        return result ? Result.success("规格删除成功", true) : Result.error("规格删除失败");
+    public Result<Boolean> deleteSpecification(@PathVariable String id, HttpServletRequest request) {
+        Specification specification = specificationService.getById(Integer.parseInt(id));
+        if (specification == null) {
+            return Result.error("规格不存在");
+        }
+        
+        boolean deleted = specificationService.removeById(Integer.parseInt(id));
+        
+        if (deleted) {
+            // 记录删除规格日志
+            logUtil.logSpecificationOperation("specification_delete", "删除规格: " + specification.getName(), request);
+            
+            return Result.success("规格删除成功", true);
+        } else {
+            return Result.error("规格删除失败");
+        }
     }
 
     /**

@@ -117,6 +117,11 @@ public class AuthController {
      */
     @PostMapping("/register")
     public Result<Boolean> register(@RequestBody Admin admin) {
+        // 检查邮箱是否已存在
+        if (adminService.findByEmail(admin.getEmail()) != null) {
+            return Result.error("邮箱已存在");
+        }
+        
         // 设置默认值
         if (admin.getUsername() == null || admin.getUsername().trim().isEmpty()) {
             // 使用邮箱前缀作为默认用户名

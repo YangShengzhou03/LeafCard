@@ -40,4 +40,9 @@ public interface CardKeyService extends IService<CardKey> {
      * 获取卡密统计信息
      */
     Object getCardStatistics();
+    
+    /**
+     * 批量生成卡密
+     */
+    boolean batchGenerateCardKeys(String productId, Integer quantity, String prefix);
 }

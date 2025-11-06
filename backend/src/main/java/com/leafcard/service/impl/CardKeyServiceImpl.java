@@ -125,4 +125,61 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
         
         return statistics;
     }
+    
+    @Override
+    public boolean batchGenerateCardKeys(String productId, Integer quantity, String prefix) {
+        if (quantity == null || quantity <= 0 || quantity > 1000) {
+            return false;
+        }
+        
+        try {
+            // 生成指定数量的卡密
+            for (int i = 0; i < quantity; i++) {
+                CardKey cardKey = new CardKey();
+                
+                // 生成卡密字符串（前缀 + 随机字符）
+                String cardKeyStr = generateCardKeyString(prefix);
+                
+                cardKey.setCardKey(cardKeyStr);
+                cardKey.setSpecificationId(null); // 暂时不关联规格
+                cardKey.setStatus("未使用");
+                cardKey.setUserId(null);
+                cardKey.setUserEmail(null);
+                cardKey.setActivateTime(null);
+                cardKey.setExpireTime(null);
+                cardKey.setCreatedAt(LocalDateTime.now());
+                cardKey.setUpdatedAt(LocalDateTime.now());
+                
+                // 保存卡密
+                baseMapper.insert(cardKey);
+            }
+            
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * 生成卡密字符串
+     */
+    private String generateCardKeyString(String prefix) {
+        StringBuilder sb = new StringBuilder();
+        
+        if (prefix != null && !prefix.trim().isEmpty()) {
+            sb.append(prefix);
+        }
+        
+        // 生成随机字符（数字+大写字母，共16位）
+        String chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        int length = 16 - sb.length();
+        
+        for (int i = 0; i < length; i++) {
+            int index = (int) (Math.random() * chars.length());
+            sb.append(chars.charAt(index));
+        }
+        
+        return sb.toString();
+    }
 }

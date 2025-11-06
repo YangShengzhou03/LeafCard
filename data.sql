@@ -75,15 +75,10 @@ CREATE TABLE card_keys (
 -- 操作日志表
 CREATE TABLE operation_logs (
     id INT PRIMARY KEY AUTO_INCREMENT COMMENT '日志唯一标识符',
-    admin_id CHAR(36) COMMENT '管理员ID',
     operation_type ENUM('card_create', 'card_activate', 'card_disable', 'product_create', 'product_update', 'admin_login') NOT NULL COMMENT '操作类型',
-    target_id INT COMMENT '目标ID',
-    target_type ENUM('card_key', 'product') COMMENT '目标类型',
     description TEXT COMMENT '描述',
     ip_address VARCHAR(50) COMMENT 'IP地址',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT '创建时间',
-    FOREIGN KEY (admin_id) REFERENCES admins(id) ON DELETE SET NULL,
-    INDEX idx_admin_id (admin_id),
     INDEX idx_operation_type (operation_type),
     INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB COMMENT='操作日志表';

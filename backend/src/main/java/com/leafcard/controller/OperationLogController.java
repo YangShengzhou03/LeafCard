@@ -36,8 +36,7 @@ public class OperationLogController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
-            @RequestParam(required = false) String operationType,
-            @RequestParam(required = false) String adminId) {
+            @RequestParam(required = false) String operationType) {
         Page<OperationLog> pageInfo = new Page<>(page, size);
         QueryWrapper<OperationLog> queryWrapper = new QueryWrapper<>();
         
@@ -52,11 +51,6 @@ public class OperationLogController {
         // 操作类型筛选
         if (operationType != null && !operationType.isEmpty()) {
             queryWrapper.eq("operation_type", operationType);
-        }
-        
-        // 管理员筛选
-        if (adminId != null && !adminId.isEmpty()) {
-            queryWrapper.eq("admin_id", adminId);
         }
         
         queryWrapper.orderByDesc("created_at");
@@ -76,31 +70,11 @@ public class OperationLogController {
     }
 
     /**
-     * 根据管理员ID查询操作日志
-     */
-    @GetMapping("/admin/{adminId}")
-    public Result<List<OperationLog>> getOperationLogsByAdmin(@PathVariable String adminId) {
-        List<OperationLog> logs = operationLogService.findByAdminId(adminId);
-        return Result.success(logs);
-    }
-
-    /**
      * 根据操作类型查询操作日志
      */
     @GetMapping("/type/{operationType}")
     public Result<List<OperationLog>> getOperationLogsByType(@PathVariable String operationType) {
         List<OperationLog> logs = operationLogService.findByOperationType(operationType);
-        return Result.success(logs);
-    }
-
-    /**
-     * 根据目标查询操作日志
-     */
-    @GetMapping("/target")
-    public Result<List<OperationLog>> getOperationLogsByTarget(
-            @RequestParam String targetType,
-            @RequestParam String targetId) {
-        List<OperationLog> logs = operationLogService.findByTarget(targetType, Integer.parseInt(targetId));
         return Result.success(logs);
     }
 
@@ -129,13 +103,10 @@ public class OperationLogController {
      */
     @PostMapping
     public Result<Boolean> logOperation(
-            @RequestParam String adminId,
             @RequestParam String operationType,
-            @RequestParam String targetType,
-            @RequestParam String targetId,
             @RequestParam String description,
             @RequestParam String ipAddress) {
-        operationLogService.logOperation(adminId, operationType, targetType, targetId, description, ipAddress);
+        operationLogService.logOperation(operationType, description, ipAddress);
         return Result.success("操作日志记录成功", true);
     }
 }

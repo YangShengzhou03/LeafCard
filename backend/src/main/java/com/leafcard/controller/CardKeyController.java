@@ -11,9 +11,11 @@ import com.leafcard.entity.Product;
 import com.leafcard.service.CardKeyService;
 import com.leafcard.service.SpecificationService;
 import com.leafcard.service.ProductService;
+import com.leafcard.utils.LogUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +35,9 @@ public class CardKeyController {
     
     @Autowired
     private ProductService productService;
+    
+    @Autowired
+    private LogUtil logUtil;
 
     /**
      * 获取卡密列表（分页）
@@ -124,34 +129,121 @@ public class CardKeyController {
     /**
      * 激活卡密
      */
-    @PostMapping("/{cardKey}/activate")
-    public Result<Boolean> activateCard(
-            @PathVariable String cardKey,
-            @RequestBody Map<String, String> request) {
+    @PostMapping("/activate")
+    public Result<Boolean> activateCardKey(@RequestBody Map<String, String> requestBody, HttpServletRequest request) {
+        String cardKey = requestBody.get("cardKey");
         
-        String userId = request.get("userId");
-        String userEmail = request.get("userEmail");
+        if (cardKey == null || cardKey.trim().isEmpty()) {
+            return Result.error("卡密不能为空");
+        }
         
-        boolean success = cardKeyService.activateCard(cardKey, userId, userEmail);
+        CardKey cardKeyEntity = cardKeyService.findByCardKey(cardKey);
+        if (cardKeyEntity == null) {
+            return Result.error("卡密不存在");
+        }
         
-        if (success) {
+        if ("active".equals(cardKeyEntity.getStatus())) {
+            return Result.error("卡密已经是激活状态");
+        }
+        
+        cardKeyEntity.setStatus("active");
+        boolean updated = cardKeyService.updateById(cardKeyEntity);
+        
+        if (updated) {
+            // 记录激活卡密日志
+            logUtil.logCardKeyOperation("card_activate", "激活卡密 - 规格ID: " + cardKeyEntity.getSpecificationId(), request);
+            
             return Result.success("卡密激活成功", true);
         } else {
-            return Result.error("卡密激活失败，请检查卡密状态");
+            return Result.error("卡密激活失败");
         }
     }
 
     /**
      * 禁用卡密
      */
-    @PostMapping("/{cardKey}/disable")
-    public Result<Boolean> disableCard(@PathVariable String cardKey) {
-        boolean success = cardKeyService.disableCard(cardKey);
+    @PostMapping("/disable")
+    public Result<Boolean> disableCardKey(@RequestBody Map<String, String> requestBody, HttpServletRequest request) {
+        String cardKey = requestBody.get("cardKey");
         
-        if (success) {
+        if (cardKey == null || cardKey.trim().isEmpty()) {
+            return Result.error("卡密不能为空");
+        }
+        
+        CardKey cardKeyEntity = cardKeyService.findByCardKey(cardKey);
+        if (cardKeyEntity == null) {
+            return Result.error("卡密不存在");
+        }
+        
+        if ("disabled".equals(cardKeyEntity.getStatus())) {
+            return Result.error("卡密已经是禁用状态");
+        }
+        
+        cardKeyEntity.setStatus("disabled");
+        boolean updated = cardKeyService.updateById(cardKeyEntity);
+        
+        if (updated) {
+            // 记录禁用卡密日志
+            logUtil.logCardKeyOperation("card_disable", "禁用卡密 - 规格ID: " + cardKeyEntity.getSpecificationId(), request);
+            
             return Result.success("卡密禁用成功", true);
         } else {
-            return Result.error(500, "卡密禁用失败");
+            return Result.error("卡密禁用失败");
+        }
+    }
+
+    /**
+     * 删除卡密
+     */
+    @DeleteMapping("/{id}")
+    public Result<Boolean> deleteCardKey(@PathVariable String id, HttpServletRequest request) {
+        CardKey cardKey = cardKeyService.getById(Integer.parseInt(id));
+        if (cardKey == null) {
+            return Result.error("卡密不存在");
+        }
+        
+        boolean deleted = cardKeyService.removeById(Integer.parseInt(id));
+        
+        if (deleted) {
+            // 记录删除卡密日志
+            logUtil.logCardKeyOperation("card_delete", "删除卡密 - 规格ID: " + cardKey.getSpecificationId(), request);
+            
+            return Result.success("卡密删除成功", true);
+        } else {
+            return Result.error("卡密删除失败");
+        }
+    }
+
+    /**
+     * 批量生成卡密
+     */
+    @PostMapping("/batch-generate")
+    public Result<Boolean> batchGenerateCardKeys(@RequestBody Map<String, Object> requestBody, HttpServletRequest request) {
+        String productId = (String) requestBody.get("productId");
+        Integer quantity = (Integer) requestBody.get("quantity");
+        String prefix = (String) requestBody.get("prefix");
+        
+        if (productId == null || productId.trim().isEmpty()) {
+            return Result.error("产品ID不能为空");
+        }
+        
+        if (quantity == null || quantity <= 0) {
+            return Result.error("生成数量必须大于0");
+        }
+        
+        if (quantity > 1000) {
+            return Result.error("单次生成数量不能超过1000");
+        }
+        
+        boolean success = cardKeyService.batchGenerateCardKeys(productId, quantity, prefix);
+        
+        if (success) {
+            // 记录批量生成卡密日志
+            logUtil.logCardKeyOperation("card_batch_generate", "批量生成卡密 - 产品ID: " + productId + ", 数量: " + quantity, request);
+            
+            return Result.success("批量生成卡密成功", true);
+        } else {
+            return Result.error("批量生成卡密失败");
         }
     }
 

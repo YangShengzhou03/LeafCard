@@ -56,14 +56,20 @@
       </div>
       
       <!-- 日志列表 -->
-      <el-table v-loading="loading" :data="logs" style="width: 100%" stripe>
+      <el-table 
+        v-loading="loading" 
+        :data="logs" 
+        style="width: 100%" 
+        stripe
+        @row-click="viewLogDetail"
+      >
         <template #empty>
           <div style="padding: 40px 0;">
             <el-empty description="暂无日志数据" />
           </div>
         </template>
-        <el-table-column prop="id" label="日志ID" width="100" show-overflow-tooltip />
-        <el-table-column prop="operationType" label="操作" width="120">
+        <el-table-column prop="id" label="日志ID" width="120" align="center" />
+        <el-table-column prop="operationType" label="操作" width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="getLevelType(row.operationType)" size="small">
               {{ getOperationTypeName(row.operationType) }}
@@ -71,8 +77,8 @@
           </template>
         </el-table-column>
         <el-table-column prop="description" label="操作内容" min-width="150" show-overflow-tooltip />
-        <el-table-column prop="ipAddress" label="IP地址" width="120" />
-        <el-table-column prop="createdAt" label="操作时间" width="160" />
+        <el-table-column prop="ipAddress" label="IP地址" width="160" align="center" />
+        <el-table-column prop="createdAt" label="操作时间" width="200" align="center" />
       </el-table>
       
       <!-- 分页 -->
@@ -318,7 +324,7 @@ onMounted(() => {
 }
 
 .logs-card :deep(.el-card__body) {
-  padding: 20px;
+  padding: 16px;
 }
 
 .logs-card :deep(.el-card__header) {
@@ -342,8 +348,8 @@ onMounted(() => {
 }
 
 .filter-section {
-  margin-bottom: 20px;
-  padding: 20px;
+  margin-bottom: 16px;
+  padding: 16px;
   background-color: #f8f9fa;
   border-radius: 6px;
   border: 1px solid #e6e8eb;
@@ -360,7 +366,7 @@ onMounted(() => {
 }
 
 .pagination-container {
-  margin-top: 20px;
+  margin-top: 16px;
   text-align: right;
   padding: 16px 0 0;
   border-top: 1px solid #e6e8eb;
@@ -380,15 +386,29 @@ onMounted(() => {
   background-color: #f5f7fa;
   color: #606266;
   font-weight: 600;
+  padding: 12px 8px;
+}
+
+.logs-card :deep(.el-table td) {
+  padding: 12px 8px;
 }
 
 .logs-card :deep(.el-table--striped .el-table__body tr.el-table__row--striped td) {
   background-color: #fafafa;
 }
 
+.logs-card :deep(.el-table .el-table__row) {
+  cursor: pointer;
+}
+
+.logs-card :deep(.el-table .el-table__row:hover td) {
+  background-color: #f5f7fa;
+}
+
 /* 按钮样式优化 */
 .logs-card :deep(.el-button) {
   border-radius: 4px;
+  padding: 8px 16px;
 }
 
 .logs-card :deep(.el-button--primary) {
@@ -407,12 +427,12 @@ onMounted(() => {
   }
   
   .logs-card :deep(.el-card__body) {
-    padding: 16px;
+    padding: 12px;
   }
   
   .filter-section {
-    padding: 16px;
-    margin-bottom: 16px;
+    padding: 12px;
+    margin-bottom: 12px;
   }
   
   .action-buttons {
