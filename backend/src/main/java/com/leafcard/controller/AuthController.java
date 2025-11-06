@@ -117,6 +117,20 @@ public class AuthController {
      */
     @PostMapping("/register")
     public Result<Boolean> register(@RequestBody Admin admin) {
+        // 设置默认值
+        if (admin.getUsername() == null || admin.getUsername().trim().isEmpty()) {
+            // 使用邮箱前缀作为默认用户名
+            String emailPrefix = admin.getEmail().split("@")[0];
+            admin.setUsername(emailPrefix);
+        }
+        
+        if (admin.getStatus() == null || admin.getStatus().trim().isEmpty()) {
+            admin.setStatus("active");
+        }
+        
+        admin.setCreatedAt(LocalDateTime.now());
+        admin.setUpdatedAt(LocalDateTime.now());
+        
         boolean saved = adminService.save(admin);
         
         if (saved) {

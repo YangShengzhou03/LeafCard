@@ -449,7 +449,7 @@ const handleLogin = async () => {
     const response = await store.login(loginForm);
     if (response.success) {
       ElMessage.success('登录成功');
-      router.replace('/admin/dashboard');
+      router.replace('/admin');
     } else {
       ElMessage.error(response.message || '登录失败');
     }
@@ -461,10 +461,16 @@ const handleLogin = async () => {
 // 处理注册
 const handleRegister = async () => {
   try {
-    const response = await store.register(registerForm);
+    // 将前端字段名映射到后端实体类的属性名
+    const registerData = {
+      email: registerForm.email,
+      passwordHash: registerForm.password // 使用passwordHash来匹配实体类的属性名
+    };
+    
+    const response = await store.register(registerData);
     if (response.success) {
       ElMessage.success('注册成功');
-      router.replace('/admin/dashboard');
+      router.replace('/admin');
     } else {
       ElMessage.error(response.message || '注册失败');
     }
