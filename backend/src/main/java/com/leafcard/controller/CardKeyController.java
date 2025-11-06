@@ -6,10 +6,15 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.leafcard.common.Result;
 import com.leafcard.dto.CardKeyDTO;
 import com.leafcard.entity.CardKey;
+import com.leafcard.entity.Specification;
+import com.leafcard.entity.Product;
 import com.leafcard.service.CardKeyService;
+import com.leafcard.service.SpecificationService;
+import com.leafcard.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +27,12 @@ public class CardKeyController {
 
     @Autowired
     private CardKeyService cardKeyService;
+    
+    @Autowired
+    private SpecificationService specificationService;
+    
+    @Autowired
+    private ProductService productService;
 
     /**
      * 获取卡密列表（分页）
@@ -70,11 +81,41 @@ public class CardKeyController {
      * 验证卡密
      */
     @GetMapping("/verify/{cardKey}")
-    public Result<CardKey> verifyCardKey(@PathVariable String cardKey) {
+    public Result<Map<String, Object>> verifyCardKey(@PathVariable String cardKey) {
         CardKey card = cardKeyService.findByCardKey(cardKey);
         
         if (card != null) {
-            return Result.success(card);
+            // 创建包含卡密和规格信息的完整响应
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", card.getId());
+            response.put("cardKey", card.getCardKey());
+            response.put("specificationId", card.getSpecificationId());
+            response.put("status", card.getStatus());
+            response.put("userEmail", card.getUserEmail());
+            response.put("userId", card.getUserId());
+            response.put("activateTime", card.getActivateTime());
+            response.put("expireTime", card.getExpireTime());
+            response.put("createdAt", card.getCreatedAt());
+            response.put("updatedAt", card.getUpdatedAt());
+            
+            // 获取规格信息（包括价格）
+            if (card.getSpecificationId() != null) {
+                Specification spec = specificationService.getById(card.getSpecificationId());
+                if (spec != null) {
+                    response.put("specificationName", spec.getName());
+                    response.put("price", spec.getPrice());
+                    response.put("durationDays", spec.getDurationDays());
+                    
+                    // 获取产品信息
+                    Product product = productService.getById(spec.getProductId());
+                    if (product != null) {
+                        response.put("productName", product.getName());
+                        response.put("productSpec", product.getName() + "-" + spec.getName());
+                    }
+                }
+            }
+            
+            return Result.success(response);
         } else {
             return Result.notFound();
         }

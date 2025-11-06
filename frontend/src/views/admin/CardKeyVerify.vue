@@ -62,7 +62,6 @@ import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { CircleCheck, CircleClose, Warning } from '@element-plus/icons-vue'
 import Server from '@/utils/Server.js'
-import api from '@/services/api.js'
 
 // 卡密输入
 const cardKeyInput = ref('')
@@ -160,41 +159,21 @@ const handleVerify = async () => {
     console.log('响应键名:', Object.keys(response || {}))
     
     // 根据后端实际返回的数据结构处理
-    if (response && response.code === 200) {
-      // 如果响应包含code=200，说明卡密存在
-      if (response.data) {
-        // 使用data字段中的卡密信息
-        cardKeyInfo.value = response.data
-        
-        // 如果有规格ID，获取规格详细信息
-        if (response.data.specificationId) {
-          try {
-            const specResponse = await api.admin.getSpecificationById(response.data.specificationId)
-            if (specResponse && specResponse.code === 200 && specResponse.data) {
-              // 将规格信息合并到卡密信息中
-              cardKeyInfo.value.specificationName = specResponse.data.name
-              cardKeyInfo.value.productId = specResponse.data.productId
-              
-              // 如果有产品ID，可以进一步获取产品名称
-              if (specResponse.data.productId) {
-                // 这里可以调用产品API获取产品名称
-                // 暂时先显示规格名称
-                cardKeyInfo.value.productSpec = specResponse.data.name
-              }
-            }
-          } catch (error) {
-            console.warn('获取规格信息失败:', error)
-            // 如果获取规格信息失败，使用默认显示
-            cardKeyInfo.value.productSpec = `规格ID: ${response.data.specificationId}`
+      if (response && response.code === 200) {
+        // 如果响应包含code=200，说明卡密存在
+        if (response.data) {
+          // 使用data字段中的卡密信息
+          cardKeyInfo.value = response.data
+          
+          // 后端已经返回了完整的规格和产品信息，直接使用
+          if (!cardKeyInfo.value.productSpec && cardKeyInfo.value.specificationName) {
+            // 如果没有productSpec字段，但有名称为，使用规格名称
+            cardKeyInfo.value.productSpec = cardKeyInfo.value.specificationName
           }
-        } else {
-          // 没有规格ID，显示默认信息
-          cardKeyInfo.value.productSpec = '未设置'
-        }
-        
-        showResult.value = true
-        console.log('卡密信息设置成功:', cardKeyInfo.value)
-        ElMessage.success('卡密验证成功')
+          
+          showResult.value = true
+          console.log('卡密信息设置成功:', cardKeyInfo.value)
+          ElMessage.success('卡密验证成功')
       } else {
         // 虽然code=200但没有data字段，视为验证失败
         cardKeyInfo.value = {
