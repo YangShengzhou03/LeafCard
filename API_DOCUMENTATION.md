@@ -1043,6 +1043,110 @@ Content-Type: application/json
 }
 ```
 
+## 公共卡密验证激活 API
+
+### 验证并激活安装密钥
+
+**接口地址**: `GET /api/public/card-keys/verify/{cardKey}`
+
+**请求头**: 无需认证
+
+**说明**: 验证安装密钥，验证成功时会自动使用该密钥（将未使用状态变为已使用）
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "验证成功",
+    "data": "VIP会员-月卡"
+}
+```
+
+**错误响应示例**:
+```json
+{
+    "code": 400,
+    "message": "该密钥已被使用"
+}
+```
+        "usedCards": 3,
+        "disabledCards": 1
+    }
+}
+```
+
+### 8. 创建卡密
+
+**接口地址**: `POST /api/card-keys`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+```
+
+**请求参数**:
+```json
+{
+    "cardKey": "LEAF-2024-002-ABCD-EFGH",
+    "specificationId": 1,
+    "status": "未使用"
+}
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "卡密创建成功",
+    "data": true
+}
+```
+
+### 9. 删除卡密
+
+**接口地址**: `DELETE /api/card-keys/{cardKey}`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "卡密删除成功",
+    "data": true
+}
+```
+
+### 10. 切换卡密状态
+
+**接口地址**: `POST /api/card-keys/{cardKey}/status`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+```
+
+**请求参数**:
+```json
+{
+    "status": "已使用"
+}
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "卡密状态更新成功",
+    "data": true
+}
+```
+
 ## 操作日志 API
 
 ### 1. 分页查询操作日志列表（支持时间范围筛选）

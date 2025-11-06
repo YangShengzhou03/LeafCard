@@ -1,5 +1,5 @@
 import { reactive } from 'vue'
-import Server from './Server.js'
+// 移除未使用的Server导入
 import * as utils from './utils.js'
 import api from '@/services/api.js'
 
@@ -84,12 +84,9 @@ const store = {
 
   // 管理员注册
   async adminRegister(registerData) {
-    try {
-      const response = await adminApi.register(registerData);
-      return { success: true, message: response.message };
-    } catch (error) {
-      throw error;
-    }
+    // 移除不必要的try/catch包装，直接使用api
+    const response = await api.admin.register(registerData);
+    return { success: true, message: response.message };
   },
 
   // 登录
