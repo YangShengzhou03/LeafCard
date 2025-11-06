@@ -37,7 +37,7 @@ LeafCard is a modern card verification backend management system built with a fr
 
 #### Backend Technology Stack
 - **Spring Boot 3.1.0** - Java enterprise development framework
-- **Spring Data JPA** - Data persistence layer framework
+- **MyBatis Plus 3.5.4.1** - Data persistence layer framework
 - **MySQL 8.0.33** - Relational database
 - **Maven** - Project build tool
 - **Java 17** - Development language
