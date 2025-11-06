@@ -43,6 +43,7 @@ Server.interceptors.response.use(
     }
     
     const status = error.response.status
+    const url = error.config?.url || ''
     
     switch (status) {
       case 401:
@@ -57,7 +58,6 @@ Server.interceptors.response.use(
         break
       case 404:
         // 对于404错误，提供更具体的错误信息
-        const url = error.config?.url || ''
         if (url.includes('/api/card-keys/')) {
           ElMessage.error('卡密不存在或参数错误')
         } else {

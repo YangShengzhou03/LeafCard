@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.leafcard.common.Result;
 import com.leafcard.dto.SpecificationDTO;
 import com.leafcard.entity.Specification;
+import com.leafcard.entity.Product;
 import com.leafcard.service.SpecificationService;
+import com.leafcard.service.ProductService;
 import com.leafcard.utils.LogUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,9 @@ public class SpecificationController {
 
     @Autowired
     private SpecificationService specificationService;
+
+    @Autowired
+    private ProductService productService;
 
     @Autowired
     private LogUtil logUtil;
@@ -86,8 +91,17 @@ public class SpecificationController {
         boolean saved = specificationService.save(specification);
         
         if (saved) {
+            // 获取商品名称
+            String productName = "未知商品";
+            if (specification.getProductId() != null) {
+                Product product = productService.getById(specification.getProductId());
+                if (product != null) {
+                    productName = product.getName();
+                }
+            }
+            
             // 记录创建规格日志
-            logUtil.logSpecificationOperation("SPECIFICATION", "管理员创建了规格: " + specification.getName() + " (ID: " + specification.getId() + ", 产品ID: " + specification.getProductId() + ")", request);
+            logUtil.logSpecificationOperation("SPECIFICATION", "创建规格: " + productName + "-" + specification.getName(), request);
             
             return Result.success("规格创建成功", true);
         } else {
@@ -115,8 +129,17 @@ public class SpecificationController {
         boolean updated = specificationService.updateById(specification);
         
         if (updated) {
+            // 获取商品名称
+            String productName = "未知商品";
+            if (specification.getProductId() != null) {
+                Product product = productService.getById(specification.getProductId());
+                if (product != null) {
+                    productName = product.getName();
+                }
+            }
+            
             // 记录更新规格日志
-            logUtil.logSpecificationOperation("SPECIFICATION", "管理员更新了规格: " + specification.getName() + " (ID: " + specification.getId() + ", 产品ID: " + specification.getProductId() + ")", request);
+            logUtil.logSpecificationOperation("SPECIFICATION", "更新规格: " + productName + "-" + specification.getName(), request);
             
             return Result.success("规格更新成功", true);
         } else {
@@ -137,8 +160,17 @@ public class SpecificationController {
         boolean deleted = specificationService.removeById(Integer.parseInt(id));
         
         if (deleted) {
+            // 获取商品名称
+            String productName = "未知商品";
+            if (specification.getProductId() != null) {
+                Product product = productService.getById(specification.getProductId());
+                if (product != null) {
+                    productName = product.getName();
+                }
+            }
+            
             // 记录删除规格日志
-            logUtil.logSpecificationOperation("SPECIFICATION", "管理员删除了规格: " + specification.getName() + " (ID: " + specification.getId() + ", 产品ID: " + specification.getProductId() + ")", request);
+            logUtil.logSpecificationOperation("SPECIFICATION", "删除规格: " + productName + "-" + specification.getName(), request);
             
             return Result.success("规格删除成功", true);
         } else {

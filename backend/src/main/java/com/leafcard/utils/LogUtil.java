@@ -1,6 +1,8 @@
 package com.leafcard.utils;
 
 import com.leafcard.service.OperationLogService;
+import com.leafcard.service.AdminService;
+import com.leafcard.entity.Admin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,19 +17,35 @@ public class LogUtil {
     @Autowired
     private OperationLogService operationLogService;
     
+    @Autowired
+    private AdminService adminService;
+    
+    @Autowired
+    private JwtUtil jwtUtil;
+    
     /**
      * 记录操作日志
      */
     public void logOperation(String operationType, String description, HttpServletRequest request) {
         String ipAddress = getClientIpAddress(request);
-        operationLogService.logOperation(operationType, description, ipAddress);
+        
+        // 获取当前管理员信息
+        String adminInfo = getCurrentAdminInfo(request);
+        
+        // 如果描述中不包含管理员信息，则添加
+        String finalDescription = description;
+        if (!description.contains("管理员") && adminInfo != null) {
+            finalDescription = adminInfo + " - " + description;
+        }
+        
+        operationLogService.logOperation(operationType, finalDescription, ipAddress);
     }
     
     /**
      * 记录登录日志
      */
     public void logLogin(boolean success, String description, HttpServletRequest request) {
-        String detailedDescription = success ? "管理员登录成功 - " + description : "管理员登录失败 - " + description;
+        String detailedDescription = success ? "登录成功 - " + description : "登录失败 - " + description;
         logOperation("LOGIN", detailedDescription, request);
     }
     
@@ -64,6 +82,32 @@ public class LogUtil {
      */
     public void logSystemConfigOperation(String operationType, String description, HttpServletRequest request) {
         logOperation(operationType, description, request);
+    }
+    
+    /**
+     * 获取当前管理员信息
+     */
+    private String getCurrentAdminInfo(HttpServletRequest request) {
+        try {
+            String authorization = request.getHeader("Authorization");
+            if (authorization == null || !authorization.startsWith("Bearer ")) {
+                return null;
+            }
+            
+            String token = authorization.substring(7);
+            String adminId = jwtUtil.getUserIdFromToken(token);
+            
+            if (adminId != null) {
+                Admin admin = adminService.getById(adminId);
+                if (admin != null) {
+                    return admin.getUsername() + " (" + admin.getEmail() + ")";
+                }
+            }
+        } catch (Exception e) {
+            // 如果获取管理员信息失败，返回null
+        }
+        
+        return null;
     }
     
     /**

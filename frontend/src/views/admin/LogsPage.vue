@@ -24,14 +24,11 @@
           <el-col :span="4">
             <el-select v-model="filter.operationType" placeholder="操作类型" clearable style="width: 100%">
               <el-option label="登录" value="LOGIN" />
-              <el-option label="创建卡密" value="CARD_KEY_GENERATE" />
-              <el-option label="验证卡密" value="CARD_KEY_VERIFY" />
-              <el-option label="编辑卡密" value="CARD_KEY_EDIT" />
-              <el-option label="删除卡密" value="CARD_KEY_DELETE" />
-              <el-option label="产品管理" value="PRODUCT_MANAGE" />
-              <el-option label="规格管理" value="SPEC_MANAGE" />
-              <el-option label="用户管理" value="USER_MANAGE" />
-              <el-option label="系统配置" value="SYSTEM_CONFIG" />
+              <el-option label="卡密操作" value="CARD_KEY" />
+              <el-option label="产品操作" value="PRODUCT" />
+              <el-option label="规格操作" value="SPECIFICATION" />
+              <el-option label="用户操作" value="USER" />
+              <el-option label="系统操作" value="SYSTEM" />
             </el-select>
           </el-col>
           <el-col :span="4">
@@ -140,14 +137,11 @@ const filter = reactive({
 const getLevelType = (operationType) => {
   switch (operationType) {
     case 'LOGIN': return 'success'
-    case 'CARD_KEY_GENERATE': return 'primary'
-    case 'CARD_KEY_VERIFY': return 'info'
-    case 'CARD_KEY_EDIT': return 'warning'
-    case 'CARD_KEY_DELETE': return 'danger'
-    case 'PRODUCT_MANAGE': return 'primary'
-    case 'SPEC_MANAGE': return 'info'
-    case 'USER_MANAGE': return 'warning'
-    case 'SYSTEM_CONFIG': return 'danger'
+    case 'CARD_KEY': return 'primary'
+    case 'PRODUCT': return 'info'
+    case 'SPECIFICATION': return 'warning'
+    case 'USER': return 'danger'
+    case 'SYSTEM': return ''
     default: return ''
   }
 }
@@ -156,14 +150,11 @@ const getLevelType = (operationType) => {
 const getOperationTypeName = (operationType) => {
   switch (operationType) {
     case 'LOGIN': return '登录'
-    case 'CARD_KEY_GENERATE': return '创建卡密'
-    case 'CARD_KEY_VERIFY': return '验证卡密'
-    case 'CARD_KEY_EDIT': return '编辑卡密'
-    case 'CARD_KEY_DELETE': return '删除卡密'
-    case 'PRODUCT_MANAGE': return '产品管理'
-    case 'SPEC_MANAGE': return '规格管理'
-    case 'USER_MANAGE': return '用户管理'
-    case 'SYSTEM_CONFIG': return '系统配置'
+    case 'CARD_KEY': return '卡密操作'
+    case 'PRODUCT': return '产品操作'
+    case 'SPECIFICATION': return '规格操作'
+    case 'USER': return '用户操作'
+    case 'SYSTEM': return '系统操作'
     default: return operationType
   }
 }

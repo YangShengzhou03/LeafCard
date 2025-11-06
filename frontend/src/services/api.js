@@ -56,7 +56,7 @@ const AdminService = {
   },
 
   deleteCardKey(cardKey) {
-    return Server.delete(`/api/card-keys/${cardKey}`)
+    return Server.delete(`/api/card-keys/by-card-key/${cardKey}`)
   },
 
   getProductList(params) {

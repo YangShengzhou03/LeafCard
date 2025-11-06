@@ -162,10 +162,10 @@ const pagedCardKeys = computed(() => {
 const getStatusTagType = (status) => {
   const typeMap = {
     '未使用': 'success',
-    '已使用': 'info',
+    '已使用': 'primary',
     '已禁用': 'danger'
   }
-  return typeMap[status] || 'warning'
+  return typeMap[status] || 'primary'
 }
 
 // 状态文本映射

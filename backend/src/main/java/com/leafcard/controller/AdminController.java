@@ -102,7 +102,7 @@ public class AdminController {
         boolean saved = adminService.save(admin);
         if (saved) {
             // 记录创建管理员日志
-            logUtil.logUserOperation("USER", "管理员创建了新的管理员账户 - 邮箱: " + admin.getEmail() + " (ID: " + admin.getId() + ")", request);
+            logUtil.logUserOperation("USER", "创建管理员账户 - 邮箱: " + admin.getEmail(), request);
             
             return Result.success("管理员创建成功", true);
         } else {
@@ -140,7 +140,7 @@ public class AdminController {
         
         if (updated) {
             // 记录重置密码日志
-            logUtil.logUserOperation("USER", "管理员通过邮箱验证重置了密码 - 邮箱: " + email, request);
+            logUtil.logUserOperation("USER", "通过邮箱验证重置密码 - 邮箱: " + email, request);
             
             return Result.success("密码重置成功", true);
         } else {
@@ -168,7 +168,7 @@ public class AdminController {
         
         if (updated) {
             // 记录管理员重置密码日志
-            logUtil.logUserOperation("USER", "管理员直接重置了其他管理员密码 - 邮箱: " + email, request);
+            logUtil.logUserOperation("USER", "直接重置其他管理员密码 - 邮箱: " + email, request);
             
             return Result.success("密码重置成功", true);
         } else {
@@ -347,7 +347,7 @@ public class AdminController {
      */
     @PutMapping("/info")
     public Result<Boolean> updateCurrentUserInfo(@RequestHeader("Authorization") String authorization, 
-                                                 @RequestBody Admin admin) {
+                                                 @RequestBody Map<String, Object> updateData) {
         if (authorization == null || !authorization.startsWith("Bearer ")) {
             return Result.error("未授权访问");
         }
@@ -355,8 +355,23 @@ public class AdminController {
         String token = authorization.substring(7);
         try {
             String userId = jwtUtil.getUserIdFromToken(token);
-            admin.setId(userId);
-            boolean updated = adminService.updateById(admin);
+            Admin existingAdmin = adminService.getById(userId);
+            if (existingAdmin == null) {
+                return Result.error("用户不存在");
+            }
+            
+            // 更新字段
+            if (updateData.containsKey("username")) {
+                existingAdmin.setUsername((String) updateData.get("username"));
+            }
+            if (updateData.containsKey("email")) {
+                existingAdmin.setEmail((String) updateData.get("email"));
+            }
+            if (updateData.containsKey("password")) {
+                existingAdmin.setPasswordHash((String) updateData.get("password"));
+            }
+            
+            boolean updated = adminService.updateById(existingAdmin);
             
             if (updated) {
                 return Result.success("用户信息更新成功", true);

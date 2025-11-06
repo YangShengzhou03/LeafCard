@@ -203,7 +203,7 @@ const saveProfile = async () => {
     
     // 准备提交的数据
     const submitData = {
-      nickname: profileForm.nickname,
+      username: profileForm.nickname,
       email: profileForm.email
     }
     

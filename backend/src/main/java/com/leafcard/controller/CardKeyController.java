@@ -150,8 +150,24 @@ public class CardKeyController {
         boolean updated = cardKeyService.updateById(cardKeyEntity);
         
         if (updated) {
+            // 获取商品名-规格名
+            String productSpecName = "未知商品-未知规格";
+            if (cardKeyEntity.getSpecificationId() != null) {
+                Specification spec = specificationService.getById(cardKeyEntity.getSpecificationId());
+                if (spec != null) {
+                    String productName = "未知商品";
+                    if (spec.getProductId() != null) {
+                        Product product = productService.getById(spec.getProductId());
+                        if (product != null) {
+                            productName = product.getName();
+                        }
+                    }
+                    productSpecName = productName + "-" + spec.getName();
+                }
+            }
+            
             // 记录激活卡密日志
-            logUtil.logCardKeyOperation("CARD_KEY", "管理员激活了卡密: " + cardKeyEntity.getCardKey() + " - 规格ID: " + cardKeyEntity.getSpecificationId(), request);
+            logUtil.logCardKeyOperation("CARD_KEY", "激活卡密: " + cardKeyEntity.getCardKey() + " - " + productSpecName, request);
             
             return Result.success("卡密激活成功", true);
         } else {
@@ -183,8 +199,24 @@ public class CardKeyController {
         boolean updated = cardKeyService.updateById(cardKeyEntity);
         
         if (updated) {
+            // 获取商品名-规格名
+            String productSpecName = "未知商品-未知规格";
+            if (cardKeyEntity.getSpecificationId() != null) {
+                Specification spec = specificationService.getById(cardKeyEntity.getSpecificationId());
+                if (spec != null) {
+                    String productName = "未知商品";
+                    if (spec.getProductId() != null) {
+                        Product product = productService.getById(spec.getProductId());
+                        if (product != null) {
+                            productName = product.getName();
+                        }
+                    }
+                    productSpecName = productName + "-" + spec.getName();
+                }
+            }
+            
             // 记录禁用卡密日志
-            logUtil.logCardKeyOperation("CARD_KEY", "管理员禁用了卡密: " + cardKeyEntity.getCardKey() + " - 规格ID: " + cardKeyEntity.getSpecificationId(), request);
+            logUtil.logCardKeyOperation("CARD_KEY", "禁用卡密: " + cardKeyEntity.getCardKey() + " - " + productSpecName, request);
             
             return Result.success("卡密禁用成功", true);
         } else {
@@ -193,10 +225,10 @@ public class CardKeyController {
     }
 
     /**
-     * 删除卡密
+     * 删除卡密（通过ID）
      */
     @DeleteMapping("/{id}")
-    public Result<Boolean> deleteCardKey(@PathVariable String id, HttpServletRequest request) {
+    public Result<Boolean> deleteCardKeyById(@PathVariable String id, HttpServletRequest request) {
         CardKey cardKey = cardKeyService.getById(Integer.parseInt(id));
         if (cardKey == null) {
             return Result.error("卡密不存在");
@@ -205,8 +237,62 @@ public class CardKeyController {
         boolean deleted = cardKeyService.removeById(Integer.parseInt(id));
         
         if (deleted) {
+            // 获取商品名-规格名
+            String productSpecName = "未知商品-未知规格";
+            if (cardKey.getSpecificationId() != null) {
+                Specification spec = specificationService.getById(cardKey.getSpecificationId());
+                if (spec != null) {
+                    String productName = "未知商品";
+                    if (spec.getProductId() != null) {
+                        Product product = productService.getById(spec.getProductId());
+                        if (product != null) {
+                            productName = product.getName();
+                        }
+                    }
+                    productSpecName = productName + "-" + spec.getName();
+                }
+            }
+            
             // 记录删除卡密日志
-            logUtil.logCardKeyOperation("CARD_KEY", "管理员删除了卡密: " + cardKey.getCardKey() + " - 规格ID: " + cardKey.getSpecificationId(), request);
+            logUtil.logCardKeyOperation("CARD_KEY", "删除卡密: " + cardKey.getCardKey() + " - " + productSpecName, request);
+            
+            return Result.success("卡密删除成功", true);
+        } else {
+            return Result.error("卡密删除失败");
+        }
+    }
+
+    /**
+     * 删除卡密（通过卡密字符串）
+     */
+    @DeleteMapping("/by-card-key/{cardKey}")
+    public Result<Boolean> deleteCardKey(@PathVariable String cardKey, HttpServletRequest request) {
+        CardKey cardKeyEntity = cardKeyService.findByCardKey(cardKey);
+        if (cardKeyEntity == null) {
+            return Result.error("卡密不存在");
+        }
+        
+        boolean deleted = cardKeyService.removeById(cardKeyEntity.getId());
+        
+        if (deleted) {
+            // 获取商品名-规格名
+            String productSpecName = "未知商品-未知规格";
+            if (cardKeyEntity.getSpecificationId() != null) {
+                Specification spec = specificationService.getById(cardKeyEntity.getSpecificationId());
+                if (spec != null) {
+                    String productName = "未知商品";
+                    if (spec.getProductId() != null) {
+                        Product product = productService.getById(spec.getProductId());
+                        if (product != null) {
+                            productName = product.getName();
+                        }
+                    }
+                    productSpecName = productName + "-" + spec.getName();
+                }
+            }
+            
+            // 记录删除卡密日志
+            logUtil.logCardKeyOperation("CARD_KEY", "删除卡密: " + cardKeyEntity.getCardKey() + " - " + productSpecName, request);
             
             return Result.success("卡密删除成功", true);
         } else {
@@ -238,8 +324,17 @@ public class CardKeyController {
         boolean success = cardKeyService.batchGenerateCardKeys(productId, quantity, prefix);
         
         if (success) {
+            // 获取商品名
+            String productName = "未知商品";
+            if (productId != null) {
+                Product product = productService.getById(productId);
+                if (product != null) {
+                    productName = product.getName();
+                }
+            }
+            
             // 记录批量生成卡密日志
-            logUtil.logCardKeyOperation("CARD_KEY", "管理员为产品ID: " + productId + " 批量生成了 " + quantity + " 张卡密", request);
+            logUtil.logCardKeyOperation("CARD_KEY", "批量生成卡密 - 商品: " + productName + " 数量: " + quantity, request);
             
             return Result.success("批量生成卡密成功", true);
         } else {
@@ -270,24 +365,7 @@ public class CardKeyController {
         }
     }
 
-    /**
-     * 删除卡密
-     */
-    @DeleteMapping("/{cardKey}")
-    public Result<Boolean> deleteCardKey(@PathVariable String cardKey) {
-        CardKey card = cardKeyService.findByCardKey(cardKey);
-        
-        if (card != null) {
-            boolean deleted = cardKeyService.removeById(card.getId());
-            if (deleted) {
-                return Result.success("卡密删除成功", true);
-            } else {
-                return Result.error("卡密删除失败");
-            }
-        } else {
-            return Result.notFound();
-        }
-    }
+
 
     /**
      * 切换卡密状态
@@ -295,7 +373,8 @@ public class CardKeyController {
     @PostMapping("/{cardKey}/status")
     public Result<Boolean> toggleCardKeyStatus(
             @PathVariable String cardKey,
-            @RequestBody Map<String, String> request) {
+            @RequestBody Map<String, String> request,
+            HttpServletRequest httpRequest) {
         
         String status = request.get("status");
         CardKey card = cardKeyService.findByCardKey(cardKey);
@@ -305,6 +384,31 @@ public class CardKeyController {
             boolean updated = cardKeyService.updateById(card);
             
             if (updated) {
+                // 获取商品名-规格名
+                String productSpecName = "未知商品-未知规格";
+                if (card.getSpecificationId() != null) {
+                    Specification spec = specificationService.getById(card.getSpecificationId());
+                    if (spec != null) {
+                        String productName = "未知商品";
+                        if (spec.getProductId() != null) {
+                            Product product = productService.getById(spec.getProductId());
+                            if (product != null) {
+                                productName = product.getName();
+                            }
+                        }
+                        productSpecName = productName + "-" + spec.getName();
+                    }
+                }
+                
+                // 记录切换卡密状态日志
+                String action = "启用";
+                if ("已禁用".equals(status)) {
+                    action = "禁用";
+                } else if ("已使用".equals(status)) {
+                    action = "激活";
+                }
+                logUtil.logCardKeyOperation("CARD_KEY", action + "卡密: " + card.getCardKey() + " - " + productSpecName, httpRequest);
+                
                 return Result.success("卡密状态更新成功", true);
             } else {
                 return Result.error("卡密状态更新失败");
