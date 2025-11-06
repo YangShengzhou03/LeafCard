@@ -89,12 +89,12 @@
 
         <!-- 图表数据 -->
         <el-row :gutter="20" class="charts-row">
-          <!-- 未使用不同规格卡密占比 -->
+          <!-- 未使用卡密占比 -->
           <el-col :span="24">
             <el-card class="chart-card">
               <template #header>
                 <div class="chart-header">
-                  <span>未使用不同规格卡密占比</span>
+                  <span>未使用卡密占比</span>
                 </div>
               </template>
               <div class="chart-container">
@@ -240,15 +240,8 @@ const loadDashboardData = async () => {
         dailyGrowth: data.dailyRevenueChange || 0
       }
       
-      // 模拟未使用卡密规格分布数据（实际应该从后端获取）
-      specDistribution.value = [
-        { name: '基础版', count: 45, percentage: 30 },
-        { name: '专业版', count: 30, percentage: 20 },
-        { name: '企业版', count: 25, percentage: 17 },
-        { name: '旗舰版', count: 20, percentage: 13 },
-        { name: '定制版', count: 15, percentage: 10 },
-        { name: '其他', count: 15, percentage: 10 }
-      ]
+      // 从后端获取未使用卡密规格分布数据
+      await loadSpecDistribution()
       
     } else {
       // API返回空数据时，使用空数据
@@ -296,6 +289,54 @@ const loadDashboardData = async () => {
     specDistribution.value = []
   } finally {
     loading.value = false
+  }
+}
+
+// 从后端加载规格分布数据
+const loadSpecDistribution = async () => {
+  try {
+    console.log('开始加载规格分布数据...')
+    // 使用API获取规格DTO列表（包含卡密统计信息）
+    const response = await api.admin.getSpecificationDTOs()
+    console.log('API响应:', response)
+    
+    // 根据Server.js的拦截器逻辑，如果code=200，response.data就是实际的业务数据
+    if (response && response.code === 200 && response.data) {
+      const specifications = response.data
+      console.log('规格数据:', specifications)
+      
+      // 计算未使用卡密总数（注意字段名是unusedKeys而不是unusedCards）
+      const totalUnusedCards = specifications.reduce((total, spec) => total + (spec.unusedKeys || 0), 0)
+      console.log('未使用卡密总数:', totalUnusedCards)
+      
+      // 过滤出有未使用卡密的规格，并按未使用卡密数量排序
+      const distributionData = specifications
+        .filter(spec => spec.unusedKeys > 0) // 只显示有未使用卡密的规格
+        .map(spec => ({
+          name: spec.name,
+          count: spec.unusedKeys || 0,
+          percentage: totalUnusedCards > 0 
+            ? Math.round((spec.unusedKeys / totalUnusedCards) * 100) 
+            : 0
+        }))
+        .sort((a, b) => b.count - a.count) // 按未使用卡密数量降序排列
+      
+      console.log('处理后的分布数据:', distributionData)
+      specDistribution.value = distributionData
+      
+      if (distributionData.length === 0) {
+        console.log('没有找到未使用卡密数据')
+        ElMessage.info('暂无未使用卡密数据')
+      }
+    } else {
+      console.log('API响应格式不正确:', response)
+      specDistribution.value = []
+      ElMessage.warning('规格分布数据为空')
+    }
+  } catch (error) {
+    console.error('加载规格分布数据失败:', error)
+    specDistribution.value = []
+    ElMessage.error('加载规格分布数据失败')
   }
 }
 

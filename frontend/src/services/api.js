@@ -87,6 +87,10 @@ const AdminService = {
     })
   },
 
+  getSpecificationDTOs() {
+    return Server.get('/api/specifications/dto')
+  },
+
   createSpec(data) {
     return Server.post('/api/specifications', data)
   },
