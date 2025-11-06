@@ -7,9 +7,10 @@ Leaf Card 是一个卡密管理系统，提供用户管理、产品管理、规�
 ## 基础信息
 
 - **基础URL**: `http://localhost:8080/api`
-- **认证方式**: 目前为简单认证，后续可集成JWT
+- **认证方式**: JWT Bearer Token
 - **数据格式**: JSON
 - **字符编码**: UTF-8
+- **开发环境**: 本地开发环境端口 8080
 
 ## 通用响应格式
 
@@ -31,11 +32,28 @@ Leaf Card 是一个卡密管理系统，提供用户管理、产品管理、规�
 }
 ```
 
-## 用户管理 API
+### 分页响应格式
+```json
+{
+    "code": 200,
+    "message": "success",
+    "data": {
+        "records": [],
+        "total": 0,
+        "size": 10,
+        "current": 1,
+        "pages": 1
+    }
+}
+```
+
+## 认证管理 API
 
 ### 1. 用户登录
 
 **接口地址**: `POST /api/auth/login`
+
+**请求头**: 无需认证
 
 **请求参数**:
 ```json
@@ -51,21 +69,29 @@ Leaf Card 是一个卡密管理系统，提供用户管理、产品管理、规�
     "code": 200,
     "message": "登录成功",
     "data": {
-        "token": "jwt-token-string",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
         "user": {
-            "id": "uuid-string",
+            "id": 1,
             "username": "admin",
             "email": "admin@leafcard.com",
+            "passwordHash": "123456",
             "status": "active",
-            "lastLoginTime": "2024-01-15T14:30:00"
+            "lastLoginTime": "2024-01-15T14:30:00",
+            "createdAt": "2024-01-01T00:00:00",
+            "updatedAt": "2024-01-15T14:30:00"
         }
     }
 }
 ```
 
-### 2. 获取用户信息
+### 2. 获取当前用户信息
 
-**接口地址**: `GET /users/{id}`
+**接口地址**: `GET /api/auth/me`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
 
 **响应示例**:
 ```json
@@ -73,12 +99,10 @@ Leaf Card 是一个卡密管理系统，提供用户管理、产品管理、规�
     "code": 200,
     "message": "success",
     "data": {
-        "id": "uuid-string",
-        "username": "user1",
-        "email": "user1@leafcard.com",
-        "nickname": "普通用户",
-        "avatar": null,
-        "role": "user",
+        "id": 1,
+        "username": "admin",
+        "email": "admin@leafcard.com",
+        "passwordHash": "123456",
         "status": "active",
         "lastLoginTime": "2024-01-15T14:30:00",
         "createdAt": "2024-01-01T00:00:00",
@@ -87,26 +111,91 @@ Leaf Card 是一个卡密管理系统，提供用户管理、产品管理、规�
 }
 ```
 
-### 3. 创建用户
+### 3. 更新当前用户信息
 
-**接口地址**: `POST /users`
+**接口地址**: `PUT /api/auth/me`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+```
+
+**请求参数**:
+```json
+{
+    "username": "updated_admin",
+    "email": "updated_admin@leafcard.com",
+    "passwordHash": "new_password"
+}
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "用户信息更新成功",
+    "data": true
+}
+```
+
+### 4. 用户注册
+
+**接口地址**: `POST /api/auth/register`
+
+**请求头**: 无需认证
 
 **请求参数**:
 ```json
 {
     "username": "newuser",
     "email": "newuser@leafcard.com",
-    "passwordHash": "encrypted_password",
-    "nickname": "新用户",
-    "role": "user"
+    "passwordHash": "123456",
+    "status": "active"
 }
 ```
 
-## 产品管理 API
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "注册成功",
+    "data": true
+}
+```
 
-### 1. 分页查询产品列表
+### 5. 用户登出
 
-**接口地址**: `GET /products?page=1&size=10`
+**接口地址**: `POST /api/auth/logout`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "登出成功",
+    "data": true
+}
+```
+
+## 管理员管理 API
+
+### 1. 获取管理员列表
+
+**接口地址**: `GET /api/admins`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**查询参数**:
+- `page` (可选): 页码，默认1
+- `size` (可选): 页大小，默认10
 
 **响应示例**:
 ```json
@@ -116,7 +205,124 @@ Leaf Card 是一个卡密管理系统，提供用户管理、产品管理、规�
     "data": {
         "records": [
             {
-                "id": "uuid-string",
+                "id": 1,
+                "username": "admin",
+                "email": "admin@leafcard.com",
+                "status": "active",
+                "lastLoginTime": "2024-01-15T14:30:00",
+                "createdAt": "2024-01-01T00:00:00",
+                "updatedAt": "2024-01-15T14:30:00"
+            }
+        ],
+        "total": 1,
+        "size": 10,
+        "current": 1,
+        "pages": 1
+    }
+}
+```
+
+### 2. 创建管理员
+
+**接口地址**: `POST /api/admins`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+```
+
+**请求参数**:
+```json
+{
+    "username": "newadmin",
+    "email": "newadmin@leafcard.com",
+    "passwordHash": "123456",
+    "status": "active"
+}
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "管理员创建成功",
+    "data": true
+}
+```
+
+### 3. 更新管理员
+
+**接口地址**: `PUT /api/admins/{id}`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+```
+
+**请求参数**:
+```json
+{
+    "username": "updated_admin",
+    "email": "updated_admin@leafcard.com",
+    "passwordHash": "new_password"
+}
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "管理员更新成功",
+    "data": true
+}
+```
+
+### 4. 删除管理员
+
+**接口地址**: `DELETE /api/admins/{id}`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "管理员删除成功",
+    "data": true
+}
+```
+
+## 产品管理 API
+
+### 1. 分页查询产品列表
+
+**接口地址**: `GET /api/products`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**查询参数**:
+- `page` (可选): 页码，默认1
+- `size` (可选): 页大小，默认10
+- `category` (可选): 产品分类
+- `status` (可选): 产品状态
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "success",
+    "data": {
+        "records": [
+            {
+                "id": 1,
                 "name": "VIP会员",
                 "description": "VIP会员专属权益，享受高级服务",
                 "category": "virtual",
@@ -135,7 +341,12 @@ Leaf Card 是一个卡密管理系统，提供用户管理、产品管理、规�
 
 ### 2. 根据ID查询产品
 
-**接口地址**: `GET /products/{id}`
+**接口地址**: `GET /api/products/{id}`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
 
 **响应示例**:
 ```json
@@ -143,7 +354,7 @@ Leaf Card 是一个卡密管理系统，提供用户管理、产品管理、规�
     "code": 200,
     "message": "success",
     "data": {
-        "id": "uuid-string",
+        "id": 1,
         "name": "VIP会员",
         "description": "VIP会员专属权益，享受高级服务",
         "category": "virtual",
@@ -156,7 +367,13 @@ Leaf Card 是一个卡密管理系统，提供用户管理、产品管理、规�
 
 ### 3. 创建产品
 
-**接口地址**: `POST /products`
+**接口地址**: `POST /api/products`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+```
 
 **请求参数**:
 ```json
@@ -168,9 +385,24 @@ Leaf Card 是一个卡密管理系统，提供用户管理、产品管理、规�
 }
 ```
 
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "产品创建成功",
+    "data": true
+}
+```
+
 ### 4. 更新产品
 
-**接口地址**: `PUT /products/{id}`
+**接口地址**: `PUT /api/products/{id}`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+```
 
 **请求参数**:
 ```json
@@ -182,15 +414,99 @@ Leaf Card 是一个卡密管理系统，提供用户管理、产品管理、规�
 }
 ```
 
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "产品更新成功",
+    "data": true
+}
+```
+
 ### 5. 删除产品
 
-**接口地址**: `DELETE /products/{id}`
+**接口地址**: `DELETE /api/products/{id}`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "产品删除成功",
+    "data": true
+}
+```
+
+### 6. 获取产品统计信息
+
+**接口地址**: `GET /api/products/statistics`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "success",
+    "data": {
+        "totalProducts": 10,
+        "activeProducts": 8,
+        "inactiveProducts": 2,
+        "virtualProducts": 6,
+        "physicalProducts": 4
+    }
+}
+```
+
+### 7. 根据分类获取产品
+
+**接口地址**: `GET /api/products/category/{category}`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "success",
+    "data": [
+        {
+            "id": 1,
+            "name": "VIP会员",
+            "description": "VIP会员专属权益，享受高级服务",
+            "category": "virtual",
+            "status": "active",
+            "createdAt": "2024-01-01T00:00:00",
+            "updatedAt": "2024-01-01T00:00:00"
+        }
+    ]
+}
+```
 
 ## 规格管理 API
 
 ### 1. 分页查询规格列表
 
-**接口地址**: `GET /specifications?page=1&size=10`
+**接口地址**: `GET /api/specifications`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**查询参数**:
+- `page` (可选): 页码，默认1
+- `size` (可选): 页大小，默认10
 
 **响应示例**:
 ```json
@@ -200,8 +516,8 @@ Leaf Card 是一个卡密管理系统，提供用户管理、产品管理、规�
     "data": {
         "records": [
             {
-                "id": "uuid-string",
-                "productId": "product-uuid",
+                "id": 1,
+                "productId": 1,
                 "name": "月卡",
                 "description": "VIP会员专属月卡，享受专属权益",
                 "durationDays": 30,
@@ -220,15 +536,250 @@ Leaf Card 是一个卡密管理系统，提供用户管理、产品管理、规�
 }
 ```
 
-### 2. 根据产品ID查询规格
+### 2. 根据ID查询规格
 
-**接口地址**: `GET /specifications/product/{productId}`
+**接口地址**: `GET /api/specifications/{id}`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "success",
+    "data": {
+        "id": 1,
+        "productId": 1,
+        "name": "月卡",
+        "description": "VIP会员专属月卡，享受专属权益",
+        "durationDays": 30,
+        "price": 29.9,
+        "stockQuantity": 1000,
+        "status": "active",
+        "createdAt": "2024-01-01T00:00:00",
+        "updatedAt": "2024-01-01T00:00:00"
+    }
+}
+```
+
+### 3. 根据产品ID查询规格列表
+
+**接口地址**: `GET /api/specifications/product/{productId}`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "success",
+    "data": [
+        {
+            "id": 1,
+            "productId": 1,
+            "name": "月卡",
+            "description": "VIP会员专属月卡，享受专属权益",
+            "durationDays": 30,
+            "price": 29.9,
+            "stockQuantity": 1000,
+            "status": "active",
+            "createdAt": "2024-01-01T00:00:00",
+            "updatedAt": "2024-01-01T00:00:00"
+        }
+    ]
+}
+```
+
+### 4. 根据状态查询规格列表
+
+**接口地址**: `GET /api/specifications/status/{status}`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "success",
+    "data": [
+        {
+            "id": 1,
+            "productId": 1,
+            "name": "月卡",
+            "description": "VIP会员专属月卡，享受专属权益",
+            "durationDays": 30,
+            "price": 29.9,
+            "stockQuantity": 1000,
+            "status": "active",
+            "createdAt": "2024-01-01T00:00:00",
+            "updatedAt": "2024-01-01T00:00:00"
+        }
+    ]
+}
+```
+
+### 5. 创建规格
+
+**接口地址**: `POST /api/specifications`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+```
+
+**请求参数**:
+```json
+{
+    "productId": 1,
+    "name": "季卡",
+    "description": "VIP会员专属季卡，享受专属权益",
+    "durationDays": 90,
+    "price": 79.9,
+    "stockQuantity": 500,
+    "status": "active"
+}
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "规格创建成功",
+    "data": true
+}
+```
+
+### 6. 更新规格
+
+**接口地址**: `PUT /api/specifications/{id}`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+```
+
+**请求参数**:
+```json
+{
+    "name": "更新后的规格名",
+    "description": "更新后的描述",
+    "durationDays": 60,
+    "price": 49.9,
+    "stockQuantity": 800,
+    "status": "active"
+}
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "规格更新成功",
+    "data": true
+}
+```
+
+### 7. 删除规格
+
+**接口地址**: `DELETE /api/specifications/{id}`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "规格删除成功",
+    "data": true
+}
+```
+
+### 8. 获取规格统计信息
+
+**接口地址**: `GET /api/specifications/statistics`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "success",
+    "data": {
+        "totalSpecifications": 15,
+        "activeSpecifications": 12,
+        "inactiveSpecifications": 3,
+        "totalStock": 15000
+    }
+}
+```
+
+### 9. 获取规格DTO列表（包含卡密统计信息）
+
+**接口地址**: `GET /api/specifications/dto`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "success",
+    "data": [
+        {
+            "id": 1,
+            "productId": 1,
+            "name": "月卡",
+            "description": "VIP会员专属月卡，享受专属权益",
+            "durationDays": 30,
+            "price": 29.9,
+            "stockQuantity": 1000,
+            "status": "active",
+            "createdAt": "2024-01-01T00:00:00",
+            "updatedAt": "2024-01-01T00:00:00",
+            "totalCards": 500,
+            "usedCards": 200,
+            "unusedCards": 300
+        }
+    ]
+}
+```
 
 ## 卡密管理 API
 
 ### 1. 分页查询卡密列表
 
-**接口地址**: `GET /card-keys?page=1&size=10`
+**接口地址**: `GET /api/card-keys`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**查询参数**:
+- `page` (可选): 页码，默认1
+- `size` (可选): 页大小，默认10
+- `status` (可选): 卡密状态
 
 **响应示例**:
 ```json
@@ -238,9 +789,9 @@ Leaf Card 是一个卡密管理系统，提供用户管理、产品管理、规�
     "data": {
         "records": [
             {
-                "id": "uuid-string",
+                "id": 1,
                 "cardKey": "LEAF-2024-001-ABCD-EFGH",
-                "specificationId": "spec-uuid",
+                "specificationId": 1,
                 "status": "未使用",
                 "userId": null,
                 "userEmail": null,
@@ -258,13 +809,109 @@ Leaf Card 是一个卡密管理系统，提供用户管理、产品管理、规�
 }
 ```
 
-### 2. 搜索卡密
+### 2. 获取包含商品和规格名称的卡密列表
 
-**接口地址**: `GET /card-keys/search?cardKey=LEAF-2024-001`
+**接口地址**: `GET /api/card-keys/with-details`
 
-### 3. 激活卡密
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
 
-**接口地址**: `POST /card-keys/{id}/activate`
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "success",
+    "data": [
+        {
+            "id": 1,
+            "cardKey": "LEAF-2024-001-ABCD-EFGH",
+            "specificationId": 1,
+            "specificationName": "月卡",
+            "productName": "VIP会员",
+            "status": "未使用",
+            "userId": null,
+            "userEmail": null,
+            "activateTime": null,
+            "expireTime": null,
+            "createdAt": "2024-01-01T00:00:00",
+            "updatedAt": "2024-01-01T00:00:00"
+        }
+    ]
+}
+```
+
+### 3. 搜索卡密
+
+**接口地址**: `GET /api/card-keys/search`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**查询参数**:
+- `cardKey` (必填): 卡密关键字
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "success",
+    "data": {
+        "id": 1,
+        "cardKey": "LEAF-2024-001-ABCD-EFGH",
+        "specificationId": 1,
+        "status": "未使用",
+        "userId": null,
+        "userEmail": null,
+        "activateTime": null,
+        "expireTime": null,
+        "createdAt": "2024-01-01T00:00:00",
+        "updatedAt": "2024-01-01T00:00:00"
+    }
+}
+```
+
+### 4. 验证卡密
+
+**接口地址**: `GET /api/card-keys/verify/{cardKey}`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "success",
+    "data": {
+        "id": 1,
+        "cardKey": "LEAF-2024-001-ABCD-EFGH",
+        "specificationId": 1,
+        "status": "未使用",
+        "userId": null,
+        "userEmail": null,
+        "activateTime": null,
+        "expireTime": null,
+        "createdAt": "2024-01-01T00:00:00",
+        "updatedAt": "2024-01-01T00:00:00"
+    }
+}
+```
+
+### 5. 激活卡密
+
+**接口地址**: `POST /api/card-keys/{cardKey}/activate`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+```
 
 **请求参数**:
 ```json
@@ -274,13 +921,41 @@ Leaf Card 是一个卡密管理系统，提供用户管理、产品管理、规�
 }
 ```
 
-### 4. 禁用卡密
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "卡密激活成功",
+    "data": true
+}
+```
 
-**接口地址**: `POST /card-keys/{id}/disable`
+### 6. 禁用卡密
 
-### 5. 获取卡密统计
+**接口地址**: `POST /api/card-keys/{cardKey}/disable`
 
-**接口地址**: `GET /card-keys/statistics`
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "卡密禁用成功",
+    "data": true
+}
+```
+
+### 7. 获取卡密统计信息
+
+**接口地址**: `GET /api/card-keys/statistics`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
 
 **响应示例**:
 ```json
@@ -296,11 +971,96 @@ Leaf Card 是一个卡密管理系统，提供用户管理、产品管理、规�
 }
 ```
 
+### 8. 创建卡密
+
+**接口地址**: `POST /api/card-keys`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+```
+
+**请求参数**:
+```json
+{
+    "cardKey": "LEAF-2024-002-ABCD-EFGH",
+    "specificationId": 1,
+    "status": "未使用"
+}
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "卡密创建成功",
+    "data": true
+}
+```
+
+### 9. 删除卡密
+
+**接口地址**: `DELETE /api/card-keys/{cardKey}`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "卡密删除成功",
+    "data": true
+}
+```
+
+### 10. 切换卡密状态
+
+**接口地址**: `POST /api/card-keys/{cardKey}/status`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+```
+
+**请求参数**:
+```json
+{
+    "status": "已使用"
+}
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "卡密状态更新成功",
+    "data": true
+}
+```
+
 ## 操作日志 API
 
-### 1. 分页查询操作日志
+### 1. 分页查询操作日志列表（支持时间范围筛选）
 
-**接口地址**: `GET /operation-logs?page=1&size=10`
+**接口地址**: `GET /api/operation-logs`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**查询参数**:
+- `page` (可选): 页码，默认1
+- `size` (可选): 页大小，默认10
+- `startDate` (可选): 开始日期，格式：yyyy-MM-dd
+- `endDate` (可选): 结束日期，格式：yyyy-MM-dd
+- `operationType` (可选): 操作类型
+- `adminId` (可选): 管理员ID
 
 **响应示例**:
 ```json
@@ -310,136 +1070,419 @@ Leaf Card 是一个卡密管理系统，提供用户管理、产品管理、规�
     "data": {
         "records": [
             {
-                "id": "uuid-string",
-                "userId": "user-uuid",
-                "operationType": "user_login",
-                "targetId": null,
-                "targetType": null,
-                "description": "用户登录系统",
-                "ipAddress": "192.168.1.1",
-                "createdAt": "2024-01-15T14:30:00"
+                "id": 1,
+                "adminId": "admin-uuid",
+                "operationType": "CREATE",
+                "targetType": "PRODUCT",
+                "targetId": 1,
+                "description": "创建新产品",
+                "ipAddress": "192.168.1.100",
+                "createdAt": "2024-01-01T00:00:00"
             }
         ],
-        "total": 100,
+        "total": 10,
         "size": 10,
         "current": 1,
-        "pages": 10
+        "pages": 1
     }
+}
+```
+
+### 2. 获取日志统计信息
+
+**接口地址**: `GET /api/operation-logs/stats`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**查询参数**:
+- `startDate` (可选): 开始日期，格式：yyyy-MM-dd
+- `endDate` (可选): 结束日期，格式：yyyy-MM-dd
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "success",
+    "data": {
+        "totalLogs": 100,
+        "todayLogs": 5,
+        "yesterdayLogs": 8,
+        "thisWeekLogs": 25,
+        "thisMonthLogs": 80
+    }
+}
+```
+
+### 3. 根据管理员ID查询操作日志
+
+**接口地址**: `GET /api/operation-logs/admin/{adminId}`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "success",
+    "data": [
+        {
+            "id": 1,
+            "adminId": "admin-uuid",
+            "operationType": "CREATE",
+            "targetType": "PRODUCT",
+            "targetId": 1,
+            "description": "创建新产品",
+            "ipAddress": "192.168.1.100",
+            "createdAt": "2024-01-01T00:00:00"
+        }
+    ]
+}
+```
+
+### 4. 根据操作类型查询操作日志
+
+**接口地址**: `GET /api/operation-logs/type/{operationType}`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "success",
+    "data": [
+        {
+            "id": 1,
+            "adminId": "admin-uuid",
+            "operationType": "CREATE",
+            "targetType": "PRODUCT",
+            "targetId": 1,
+            "description": "创建新产品",
+            "ipAddress": "192.168.1.100",
+            "createdAt": "2024-01-01T00:00:00"
+        }
+    ]
+}
+```
+
+### 5. 根据目标查询操作日志
+
+**接口地址**: `GET /api/operation-logs/target`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**查询参数**:
+- `targetType` (必填): 目标类型
+- `targetId` (必填): 目标ID
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "success",
+    "data": [
+        {
+            "id": 1,
+            "adminId": "admin-uuid",
+            "operationType": "CREATE",
+            "targetType": "PRODUCT",
+            "targetId": 1,
+            "description": "创建新产品",
+            "ipAddress": "192.168.1.100",
+            "createdAt": "2024-01-01T00:00:00"
+        }
+    ]
+}
+```
+
+### 6. 导出操作日志
+
+**接口地址**: `GET /api/operation-logs/export`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**查询参数**:
+- `startDate` (可选): 开始日期，格式：yyyy-MM-dd
+- `endDate` (可选): 结束日期，格式：yyyy-MM-dd
+
+**响应**: 返回Excel文件下载
+
+### 7. 清空操作日志
+
+**接口地址**: `DELETE /api/operation-logs`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "日志清空成功",
+    "data": true
+}
+```
+
+### 8. 记录操作日志
+
+**接口地址**: `POST /api/operation-logs`
+
+**请求头**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/x-www-form-urlencoded
+```
+
+**请求参数**:
+- `adminId` (必填): 管理员ID
+- `operationType` (必填): 操作类型
+- `targetType` (必填): 目标类型
+- `targetId` (必填): 目标ID
+- `description` (必填): 操作描述
+- `ipAddress` (必填): IP地址
+
+**响应示例**:
+```json
+{
+    "code": 200,
+    "message": "操作日志记录成功",
+    "data": true
 }
 ```
 
 ## 前端请求示例
 
-### Vue.js 请求示例
+### Vue.js + Axios 示例
 
 ```javascript
-// 用户登录
-async login(username, password) {
-    try {
-        const response = await this.$http.post('/api/users/login', {
-            username: username,
-            password: password
-        });
-        
-        if (response.data.code === 200) {
-            // 登录成功，保存用户信息
-            localStorage.setItem('user', JSON.stringify(response.data.data));
-            return response.data.data;
-        } else {
-            throw new Error(response.data.message);
-        }
-    } catch (error) {
-        console.error('登录失败:', error);
-        throw error;
-    }
+import Server from '../utils/Server'
+
+// 管理员服务示例
+const AdminService = {
+  // 管理员登录
+  login(data) {
+    return Server.post('/api/admins/login', data)
+  },
+
+  // 管理员注册
+  register(data) {
+    return Server.post('/api/admins', data)
+  },
+
+  // 获取仪表盘统计数据
+  getDashboardStats() {
+    return Server.get('/api/admin/stats')
+  },
+
+  // 获取管理员列表
+  getUserList(params) {
+    return Server.get('/api/admins', { 
+      page: params.page || 1, 
+      size: params.size || 10 
+    })
+  },
+
+  // 获取操作日志列表
+  getLogList(params) {
+    return Server.get('/api/operation-logs', {
+      page: params.page || 1,
+      size: params.size || 10,
+      startDate: params.startDate,
+      endDate: params.endDate,
+      operationType: params.operationType,
+      adminId: params.adminId
+    })
+  },
+
+  // 导出操作日志
+  exportLogs(params) {
+    return Server.get('/api/operation-logs/export', {
+      startDate: params.startDate,
+      endDate: params.endDate
+    }, { responseType: 'blob' })
+  },
+
+  // 获取包含商品和规格名称的卡密列表
+  getCardKeyListWithDetails() {
+    return Server.get('/api/card-keys/with-details')
+  },
+
+  // 生成卡密
+  generateCardKey(data) {
+    return Server.post('/api/card-keys', data)
+  },
+
+  // 切换卡密状态
+  toggleCardKeyStatus(id, status) {
+    return Server.post(`/api/card-keys/${id}/status`, { status })
+  },
+
+  // 禁用卡密
+  disableCardKey(id) {
+    return Server.post(`/api/card-keys/${id}/disable`)
+  },
+
+  // 删除卡密
+  deleteCardKey(id) {
+    return Server.delete(`/api/card-keys/${id}`)
+  },
+
+  // 获取产品列表
+  getProductList(params) {
+    return Server.get('/api/products', {
+      page: params.page || 1,
+      size: params.size || 10,
+      category: params.category,
+      status: params.status
+    })
+  },
+
+  // 创建产品
+  createProduct(data) {
+    return Server.post('/api/products', data)
+  },
+
+  // 编辑产品
+  editProduct(id, data) {
+    return Server.put(`/api/products/${id}`, data)
+  },
+
+  // 删除产品
+  deleteProduct(id) {
+    return Server.delete(`/api/products/${id}`)
+  },
+
+  // 获取规格列表
+  getSpecList(params) {
+    return Server.get('/api/specifications', {
+      page: params.page || 1,
+      size: params.size || 10
+    })
+  },
+
+  // 创建规格
+  createSpec(data) {
+    return Server.post('/api/specifications', data)
+  },
+
+  // 编辑规格
+  editSpec(id, data) {
+    return Server.put(`/api/specifications/${id}`, data)
+  },
+
+  // 删除规格
+  deleteSpec(id) {
+    return Server.delete(`/api/specifications/${id}`)
+  },
+
+  // 根据ID获取规格
+  getSpecificationById(id) {
+    return Server.get(`/api/specifications/${id}`)
+  }
 }
 
-// 获取产品列表
-async getProducts(page = 1, size = 10) {
-    try {
-        const response = await this.$http.get(`/api/products?page=${page}&size=${size}`);
-        return response.data.data;
-    } catch (error) {
-        console.error('获取产品列表失败:', error);
-        throw error;
-    }
+// 用户服务示例
+const UserService = {
+  // 用户登录
+  login(data) {
+    return Server.post('/api/auth/login', data)
+  },
+
+  // 用户登出
+  logout() {
+    return Server.post('/api/auth/logout')
+  },
+
+  // 用户注册
+  register(data) {
+    return Server.post('/api/auth/register', data)
+  },
+
+  // 获取当前用户信息
+  getCurrentUser() {
+    return Server.get('/api/auth/me')
+  },
+
+  // 获取存储信息
+  getStorageInfo() {
+    return Server.get('/api/user/storage')
+  }
 }
 
-// 激活卡密
-async activateCard(cardId, userId, userEmail) {
-    try {
-        const response = await this.$http.post(`/api/card-keys/${cardId}/activate`, {
-            userId: userId,
-            userEmail: userEmail
-        });
-        
-        if (response.data.code === 200) {
-            return response.data.data;
-        } else {
-            throw new Error(response.data.message);
-        }
-    } catch (error) {
-        console.error('激活卡密失败:', error);
-        throw error;
-    }
+// 使用示例
+async function exampleUsage() {
+  try {
+    // 管理员登录
+    const loginResponse = await AdminService.login({
+      email: 'admin@example.com',
+      password: 'password123'
+    })
+    console.log('登录成功:', loginResponse.data)
+
+    // 获取产品列表
+    const productsResponse = await AdminService.getProductList({
+      page: 1,
+      size: 10
+    })
+    console.log('产品列表:', productsResponse.data)
+
+    // 获取卡密列表
+    const cardKeysResponse = await AdminService.getCardKeyListWithDetails()
+    console.log('卡密列表:', cardKeysResponse.data)
+
+  } catch (error) {
+    console.error('API调用失败:', error)
+  }
 }
-```
 
-### Axios 配置示例
-
-```javascript
-import axios from 'axios';
-
-const http = axios.create({
-    baseURL: 'http://localhost:8080/api',
-    timeout: 10000,
-    headers: {
-        'Content-Type': 'application/json'
-    }
-});
-
-// 请求拦截器
-http.interceptors.request.use(
-    config => {
-        // 添加认证token
-        const token = localStorage.getItem('token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    error => {
-        return Promise.reject(error);
-    }
-);
-
-// 响应拦截器
-http.interceptors.response.use(
-    response => {
-        return response;
-    },
-    error => {
-        if (error.response && error.response.status === 401) {
-            // 未授权，跳转到登录页
-            window.location.href = '/login';
-        }
-        return Promise.reject(error);
-    }
-);
-
-export default http;
+export default {
+  admin: AdminService,
+  user: UserService
+}
 ```
 
 ## 错误码说明
 
-| 错误码 | 说明 | 处理建议 |
-|-------|------|----------|
-| 200 | 成功 | 正常处理 |
-| 400 | 请求参数错误 | 检查请求参数格式 |
-| 401 | 未授权 | 重新登录获取token |
-| 403 | 权限不足 | 检查用户权限 |
-| 404 | 资源不存在 | 检查请求路径 |
-| 500 | 服务器内部错误 | 联系系统管理员 |
+| 错误码 | 说明 | 描述 |
+|--------|------|------|
+| 200 | 成功 | 请求成功 |
+| 400 | 请求错误 | 请求参数错误或格式不正确 |
+| 401 | 未授权访问 | 用户未登录或token过期 |
+| 403 | 权限不足 | 用户权限不足 |
+| 404 | 资源不存在 | 请求的资源不存在 |
+| 500 | 服务器内部错误 | 服务器内部处理错误 |
+
+### 常见错误场景
+
+**认证相关错误**:
+- 401: 未授权访问 - 用户未登录或token过期
+- 403: 权限不足 - 用户权限不足
+
+**资源相关错误**:
+- 404: 资源不存在 - 请求的产品、规格、卡密等资源不存在
+
+**业务逻辑错误**:
+- 400: 请求错误 - 卡密已使用、卡密已禁用、产品已禁用等业务逻辑错误
+
+**系统错误**:
+- 500: 服务器内部错误 - 数据库连接失败、系统异常等
 
 ## 部署说明
 

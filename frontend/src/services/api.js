@@ -28,13 +28,6 @@ const AdminService = {
     })
   },
 
-  getLogStats(params) {
-    return Server.get('/api/operation-logs/stats', {
-      startDate: params.startDate,
-      endDate: params.endDate
-    })
-  },
-
   exportLogs(params) {
     return Server.get('/api/operation-logs/export', {
       startDate: params.startDate,
@@ -46,56 +39,12 @@ const AdminService = {
     return Server.delete('/api/operation-logs/clear')
   },
 
-  getLogsByAdmin(adminId) {
-    return Server.get(`/api/operation-logs/admin/${adminId}`)
-  },
-
-  getLogsByType(operationType) {
-    return Server.get(`/api/operation-logs/type/${operationType}`)
-  },
-
-  getLogsByTarget(targetType, targetId) {
-    return Server.get(`/api/operation-logs/target/${targetType}/${targetId}`)
-  },
-
-  logOperation(data) {
-    return Server.post('/api/operation-logs', data)
-  },
-
-  logDetailedOperation(data) {
-    return Server.post('/api/operation-logs/detailed', data)
-  },
-
-  getSystemConfig() {
-    return Server.get('/api/admin/config')
-  },
-
-  updateSystemConfig(data) {
-    return Server.put('/api/admin/config', data)
-  },
-
-  getCardKeyList(params) {
-    return Server.get('/api/card-keys', {
-      page: params.page || 1,
-      size: params.size || 10,
-      status: params.status
-    })
-  },
-
   getCardKeyListWithDetails() {
     return Server.get('/api/card-keys/with-details')
   },
 
   generateCardKey(data) {
     return Server.post('/api/card-keys', data)
-  },
-
-  editCardKey(id, data) {
-    return Server.put(`/api/card-keys/${id}`, data)
-  },
-
-  deleteCardKey(id) {
-    return Server.delete(`/api/card-keys/${id}`)
   },
 
   toggleCardKeyStatus(id, status) {
@@ -106,12 +55,8 @@ const AdminService = {
     return Server.post(`/api/card-keys/${id}/disable`)
   },
 
-  clearUsedCardKeys() {
-    return Server.delete('/api/card-keys/clear-used')
-  },
-
-  exportCardKeys(params) {
-    return Server.get('/api/admin/card-keys/export', params, { responseType: 'blob' })
+  deleteCardKey(id) {
+    return Server.delete(`/api/card-keys/${id}`)
   },
 
   getProductList(params) {
@@ -184,10 +129,6 @@ const UserService = {
     return Server.put(`/api/admins/${id}`, data)
   },
 
-  resetPassword(data) {
-    return Server.post('/api/admins/reset-password', data)
-  },
-
   adminResetPassword(data) {
     return Server.post('/api/admins/admin-reset-password', data)
   },
@@ -198,10 +139,6 @@ const UserService = {
 
   getUserInfo() {
     return Server.get('/api/admins/info')
-  },
-
-  getCaptcha() {
-    return Server.get('/api/auth/captcha')
   },
 
   getCurrentUser() {
@@ -222,38 +159,6 @@ const UserService = {
 
   sendVerificationCode(data) {
     return Server.post('/api/verification/send', data)
-  },
-
-  getFileList(params) {
-    return Server.get('/api/user/files', params)
-  },
-
-  uploadFile(data) {
-    return Server.upload('/api/user/files/upload', data)
-  },
-
-  downloadFile(id) {
-    return Server.get(`/api/user/files/${id}/download`, {}, { responseType: 'blob' })
-  },
-
-  deleteFile(id) {
-    return Server.delete(`/api/user/files/${id}`)
-  },
-
-  getShareList(params) {
-    return Server.get('/api/user/shares', params)
-  },
-
-  createShare(data) {
-    return Server.post('/api/user/shares', data)
-  },
-
-  deleteShare(id) {
-    return Server.delete(`/api/user/shares/${id}`)
-  },
-
-  verifyCardKey(data) {
-    return Server.post('/api/user/card-keys/verify', data)
   }
 }
 
