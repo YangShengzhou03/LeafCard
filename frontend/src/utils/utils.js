@@ -1,26 +1,19 @@
-// 工具函数集合
-
-// 检查用户是否已登录
 export function isLoggedIn() {
   return !!localStorage.getItem('token')
 }
 
-// 保存token到localStorage
 export function saveToken(token) {
   localStorage.setItem('token', token)
 }
 
-// 从localStorage移除token
 export function removeToken() {
   localStorage.removeItem('token')
 }
 
-// 获取token
 export function getToken() {
   return localStorage.getItem('token')
 }
 
-// 格式化文件大小
 export function formatFileSize(bytes) {
   if (bytes === null || bytes === undefined || bytes === 0) return '0 Bytes'
   
@@ -31,10 +24,8 @@ export function formatFileSize(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
-// 解析JWT token
 export function parseJWT(token) {
   try {
-    // 检查token格式
     if (!token || typeof token !== 'string' || token.split('.').length !== 3) {
       return {};
     }
@@ -42,7 +33,6 @@ export function parseJWT(token) {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     
-    // 处理base64解码
     const jsonPayload = decodeURIComponent(
       atob(base64)
         .split('')
@@ -54,20 +44,18 @@ export function parseJWT(token) {
     
     const payload = JSON.parse(jsonPayload);
     
-    // 检查token是否过期 - 使用UTC时间进行比较，避免时区差异
     if (payload.exp && payload.exp * 1000 < Date.now()) {
-      removeToken(); // 自动清除过期token
+      removeToken();
       return {};
     }
     
     return payload;
   } catch (error) {
-    removeToken(); // 解析失败时清除无效token
+    removeToken();
     return {};
   }
 }
 
-// 保存登录凭据到localStorage
 export function saveCredentials(username, password) {
   const credentials = {
     username: username,
@@ -77,28 +65,23 @@ export function saveCredentials(username, password) {
   localStorage.setItem('rememberedCredentials', JSON.stringify(credentials))
 }
 
-// 获取保存的登录凭据
 export function getCredentials() {
   const saved = localStorage.getItem('rememberedCredentials')
   if (saved) {
     const credentials = JSON.parse(saved)
-    // 检查凭据是否在7天内保存的
     if (Date.now() - credentials.timestamp < 7 * 24 * 60 * 60 * 1000) {
       return credentials
     } else {
-      // 超过7天，清除凭据
       removeCredentials()
     }
   }
   return null
 }
 
-// 清除保存的登录凭据
 export function removeCredentials() {
   localStorage.removeItem('rememberedCredentials')
 }
 
-// 防抖函数
 export function debounce(func, wait, immediate) {
   let timeout
   return function executedFunction(...args) {
@@ -113,7 +96,6 @@ export function debounce(func, wait, immediate) {
   }
 }
 
-// 节流函数
 export function throttle(func, limit) {
   let inThrottle
   return function(...args) {
@@ -125,7 +107,6 @@ export function throttle(func, limit) {
   }
 }
 
-// 深拷贝函数
 export function deepClone(obj) {
   if (obj === null || typeof obj !== 'object') return obj
   if (obj instanceof Date) return new Date(obj.getTime())
@@ -141,19 +122,16 @@ export function deepClone(obj) {
   }
 }
 
-// 验证邮箱格式
 export function isValidEmail(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   return emailRegex.test(email)
 }
 
-// 验证手机号格式
 export function isValidPhone(phone) {
   const phoneRegex = /^1[3-9]\d{9}$/
   return phoneRegex.test(phone)
 }
 
-// 生成随机字符串
 export function generateRandomString(length = 8) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
   let result = ''
@@ -163,7 +141,6 @@ export function generateRandomString(length = 8) {
   return result
 }
 
-// 格式化日期
 export function formatDate(date, format = 'YYYY-MM-DD') {
   const d = new Date(date)
   const year = d.getFullYear()
@@ -182,7 +159,6 @@ export function formatDate(date, format = 'YYYY-MM-DD') {
     .replace('ss', seconds)
 }
 
-// 计算相对时间
 export function getRelativeTime(date) {
   const now = new Date()
   const diff = now.getTime() - new Date(date).getTime()
@@ -196,7 +172,6 @@ export function getRelativeTime(date) {
   return '刚刚'
 }
 
-// 检查网络连接状态
 export function checkNetworkStatus() {
   return new Promise((resolve) => {
     if (navigator.onLine === false) {

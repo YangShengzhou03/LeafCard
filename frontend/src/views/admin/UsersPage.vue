@@ -143,10 +143,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import api from '../../services/api'
 
-// 数据状态
 const loading = ref(false)
 const users = ref([])
-// 搜索条件
 const searchQuery = ref('')
 const statusFilter = ref('')
 const currentPage = ref(1)
@@ -156,14 +154,12 @@ const showAddUserDialog = ref(false)
 const editingUser = ref(null)
 const userFormRef = ref(null)
 
-// 用户表单数据
 const userForm = reactive({
   email: '',
   password: '',
   status: 'active'
 })
 
-// 表单验证规则
 const userRules = {
   email: [
     { required: true, message: '请输入邮箱地址', trigger: 'blur' },
@@ -178,7 +174,6 @@ const userRules = {
   ]
 }
 
-// 过滤后的用户列表
 const filteredUsers = computed(() => {
   let result = users.value
   
@@ -196,7 +191,6 @@ const filteredUsers = computed(() => {
   return result
 })
 
-// 加载用户数据
 const loadUsers = async () => {
   loading.value = true
   try {
@@ -220,13 +214,11 @@ const loadUsers = async () => {
   }
 }
 
-// 搜索处理
 const handleSearch = () => {
   currentPage.value = 1
   loadUsers()
 }
 
-// 重置密码
 const resetPassword = async (user) => {
   try {
     await ElMessageBox.confirm(
@@ -239,7 +231,6 @@ const resetPassword = async (user) => {
       }
     )
     
-    // 使用管理员重置密码API - 无需验证码
     await api.user.adminResetPassword({ 
       email: user.email, 
       newPassword: '123456' 
@@ -252,7 +243,6 @@ const resetPassword = async (user) => {
   }
 }
 
-// 分页处理
 const handleSizeChange = (size) => {
   pageSize.value = size
   loadUsers()
@@ -263,39 +253,32 @@ const handleCurrentChange = (page) => {
   loadUsers()
 }
 
-// 编辑用户
 const editUser = (user) => {
   editingUser.value = user
   userForm.email = user.email
-  // 直接使用后端返回的状态值（active/inactive）
   userForm.status = user.status
-  userForm.password = '' // 编辑时不显示密码
+  userForm.password = ''
   showAddUserDialog.value = true
 }
 
-// 保存用户
 const saveUser = async () => {
   if (!userFormRef.value) return
   
   try {
     await userFormRef.value.validate()
     
-    // 调用后端API保存用户数据
     const userData = {
       email: userForm.email,
       status: userForm.status === 'active' ? 1 : 0
     }
     
-    // 如果是添加用户且有密码，添加密码字段
     if (!editingUser.value && userForm.password) {
       userData.password = userForm.password
     }
     
     if (editingUser.value) {
-      // 更新用户 - 使用统一的api服务
       await api.user.updateUser(editingUser.value.id, userData)
     } else {
-      // 添加用户 - 使用统一的api服务
       await api.user.createUser(userData)
     }
     
@@ -305,26 +288,23 @@ const saveUser = async () => {
     resetUserForm()
     loadUsers()
   } catch (error) {
-    if (error !== false) { // 不是表单验证错误
+    if (error !== false) {
       ElMessage.error('保存用户失败: ' + (error.response?.data?.message || error.message))
     }
   }
 }
 
-// 添加用户 - 重置编辑状态
 const addUser = () => {
   editingUser.value = null
   resetUserForm()
   showAddUserDialog.value = true
 }
 
-// 切换用户状态
 const toggleUserStatus = async (user) => {
   try {
     const newStatus = user.status === 'active' ? 'inactive' : 'active'
     const enabled = newStatus === 'active'
     
-    // 更新用户状态 - 使用统一的api服务
     await api.user.updateUser(user.id, {
       status: enabled ? 1 : 0
     })
@@ -336,7 +316,6 @@ const toggleUserStatus = async (user) => {
   }
 }
 
-// 删除用户
 const deleteUser = async (user) => {
   try {
     await ElMessageBox.confirm(
@@ -350,7 +329,6 @@ const deleteUser = async (user) => {
       }
     )
     
-    // 调用删除用户API - 使用统一的api服务
     await api.user.deleteUser(user.id)
     ElMessage.success('用户删除成功')
     loadUsers()
@@ -361,7 +339,6 @@ const deleteUser = async (user) => {
   }
 }
 
-// 重置用户表单
 const resetUserForm = () => {
   Object.assign(userForm, {
     email: '',
