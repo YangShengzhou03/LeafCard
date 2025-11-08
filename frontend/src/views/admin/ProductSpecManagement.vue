@@ -325,10 +325,14 @@ const loadSpecs = async () => {
           }
         }
         
+        // 修复卡密统计字段映射：后端返回的是totalCards/usedCards/unusedCards，前端使用totalKeys/usedKeys
         return {
           ...spec,
           productName: productName,
-          createTime: createTime || '未知时间'
+          createTime: createTime || '未知时间',
+          totalKeys: spec.totalCards || spec.totalKeys || 0,  // 兼容两种字段名
+          usedKeys: spec.usedCards || spec.usedKeys || 0,     // 兼容两种字段名
+          unusedKeys: spec.unusedCards || spec.unusedKeys || 0 // 兼容两种字段名
         }
       })
       

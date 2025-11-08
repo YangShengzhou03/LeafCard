@@ -56,7 +56,7 @@ public class DashboardController {
             double dailyRevenueChange = calculatePercentageChange(dailyRevenue, yesterdayRevenue);
             
             stats.put("dailySales", dailySales);
-            stats.put("dailyRevenue", dailyRevenue);
+            stats.put("dailyRevenue", Math.round(dailyRevenue * 100.0) / 100.0);  // 限制为2位小数
             stats.put("dailySalesChange", Math.round(dailySalesChange * 100.0) / 100.0);
             stats.put("dailyRevenueChange", Math.round(dailyRevenueChange * 100.0) / 100.0);
             
@@ -64,9 +64,19 @@ public class DashboardController {
             List<CardKey> allCardKeys = cardKeyService.list();
             List<Specification> allSpecifications = specificationService.list();
             
+            // 计算月收入（本月激活卡密的总收入）
+            double monthlyRevenue = calculateMonthlyRevenue();
+            
+            // 计算上月收入用于比较
+            double lastMonthRevenue = calculateLastMonthRevenue();
+            
+            // 计算月收入变化率
+            double monthlyRevenueChange = calculatePercentageChange(monthlyRevenue, lastMonthRevenue);
+            
             stats.put("totalOrders", allCardKeys.size());  // 卡密总数
-            stats.put("totalRevenue", calculateTotalRevenue(allCardKeys));  // 总收入
-            stats.put("activeUsers", allSpecifications.size());  // 商品总数
+            stats.put("totalRevenue", Math.round(calculateTotalRevenue(allCardKeys) * 100.0) / 100.0);  // 总收入限制为2位小数
+            stats.put("monthlyRevenue", Math.round(monthlyRevenue * 100.0) / 100.0);  // 月收入限制为2位小数
+            stats.put("monthlyRevenueChange", Math.round(monthlyRevenueChange * 100.0) / 100.0);  // 月收入变化率限制为2位小数
             stats.put("conversionRate", 0.0);  // 转化率暂时设为0
             
             return Result.success(stats);
@@ -164,5 +174,65 @@ public class DashboardController {
         }
         
         return totalRevenue;
+    }
+    
+    /**
+     * 计算月收入（本月激活卡密的总收入）
+     */
+    private double calculateMonthlyRevenue() {
+        LocalDate now = LocalDate.now();
+        LocalDateTime startOfMonth = now.withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endOfMonth = now.plusMonths(1).withDayOfMonth(1).atStartOfDay();
+        
+        // 查询本月激活的卡密
+        List<CardKey> allCards = cardKeyService.list();
+        List<CardKey> monthlyActivatedCards = allCards.stream()
+                .filter(card -> card.getActivateTime() != null && 
+                               card.getActivateTime().isAfter(startOfMonth) && 
+                               card.getActivateTime().isBefore(endOfMonth))
+                .collect(java.util.stream.Collectors.toList());
+        
+        // 计算本月收入
+        double monthlyRevenue = 0.0;
+        for (CardKey card : monthlyActivatedCards) {
+            if (card.getSpecificationId() != null) {
+                Specification spec = specificationService.getById(card.getSpecificationId());
+                if (spec != null && spec.getPrice() != null) {
+                    monthlyRevenue += spec.getPrice();
+                }
+            }
+        }
+        
+        return monthlyRevenue;
+    }
+    
+    /**
+     * 计算上月收入
+     */
+    private double calculateLastMonthRevenue() {
+        LocalDate now = LocalDate.now();
+        LocalDateTime startOfLastMonth = now.minusMonths(1).withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endOfLastMonth = now.withDayOfMonth(1).atStartOfDay();
+        
+        // 查询上月激活的卡密
+        List<CardKey> allCards = cardKeyService.list();
+        List<CardKey> lastMonthActivatedCards = allCards.stream()
+                .filter(card -> card.getActivateTime() != null && 
+                               card.getActivateTime().isAfter(startOfLastMonth) && 
+                               card.getActivateTime().isBefore(endOfLastMonth))
+                .collect(java.util.stream.Collectors.toList());
+        
+        // 计算上月收入
+        double lastMonthRevenue = 0.0;
+        for (CardKey card : lastMonthActivatedCards) {
+            if (card.getSpecificationId() != null) {
+                Specification spec = specificationService.getById(card.getSpecificationId());
+                if (spec != null && spec.getPrice() != null) {
+                    lastMonthRevenue += spec.getPrice();
+                }
+            }
+        }
+        
+        return lastMonthRevenue;
     }
 }

@@ -39,11 +39,11 @@
                   <el-icon><Goods /></el-icon>
                 </div>
                 <div class="stat-content">
-                  <div class="stat-title">商品总数</div>
-                  <div class="stat-value">{{ stats.productCount }}</div>
+                  <div class="stat-title">当月收入</div>
+                  <div class="stat-value">¥{{ formatCurrency(stats.monthlyRevenue) }}</div>
                   <div class="stat-trend">
                     <span class="trend-text">较上月</span>
-                    <span class="trend-value positive">+{{ stats.productGrowth }}%</span>
+                    <span class="trend-value positive">+{{ stats.monthlyGrowth }}%</span>
                   </div>
                 </div>
               </div>
@@ -76,7 +76,7 @@
                 </div>
                 <div class="stat-content">
                   <div class="stat-title">日收入</div>
-                  <div class="stat-value">¥{{ stats.dailyRevenue }}</div>
+                  <div class="stat-value">¥{{ formatCurrency(stats.dailyRevenue) }}</div>
                   <div class="stat-trend">
                     <span class="trend-text">较昨日</span>
                     <span class="trend-value positive">+{{ stats.dailyGrowth }}%</span>
@@ -141,11 +141,11 @@ use([
 // 统计数据
 const stats = ref({
   cardKeyCount: 0,
-  productCount: 0,
+  monthlyRevenue: 0,
   dailySales: 0,
   dailyRevenue: 0,
   cardKeyGrowth: 0,
-  productGrowth: 0,
+  monthlyGrowth: 0,
   dailySalesGrowth: 0,
   dailyGrowth: 0
 })
@@ -217,6 +217,12 @@ const refreshData = async () => {
   await loadDashboardData()
 }
 
+// 格式化货币金额，限制小数位为2位
+const formatCurrency = (value) => {
+  if (value === null || value === undefined) return '0.00'
+  return parseFloat(value).toFixed(2)
+}
+
 // 加载仪表盘数据
 const loadDashboardData = async () => {
   try {
@@ -231,11 +237,11 @@ const loadDashboardData = async () => {
       // 正确映射后端返回的数据到前端期望的结构
       stats.value = {
         cardKeyCount: data.totalOrders || 0, // 使用totalOrders作为卡密总数
-        productCount: data.activeUsers || 0,  // 使用activeUsers作为商品总数
+        monthlyRevenue: data.monthlyRevenue || 0,  // 使用monthlyRevenue作为当月收入
         dailySales: data.dailySales || 0,
         dailyRevenue: data.dailyRevenue || 0,
         cardKeyGrowth: data.conversionRate || 0, // 使用conversionRate作为卡密增长率
-        productGrowth: data.dailyRevenueChange || 0, // 使用dailyRevenueChange作为商品增长率
+        monthlyGrowth: data.monthlyRevenueChange || 0, // 使用monthlyRevenueChange作为月收入增长率
         dailySalesGrowth: data.dailySalesChange || 0,
         dailyGrowth: data.dailyRevenueChange || 0
       }
@@ -247,11 +253,11 @@ const loadDashboardData = async () => {
       // API返回空数据时，使用空数据
       stats.value = {
         cardKeyCount: 0,
-        productCount: 0,
+        monthlyRevenue: 0,
         dailySales: 0,
         dailyRevenue: 0,
         cardKeyGrowth: 0,
-        productGrowth: 0,
+        monthlyGrowth: 0,
         dailySalesGrowth: 0,
         dailyGrowth: 0
       }
@@ -277,11 +283,11 @@ const loadDashboardData = async () => {
     // 出错时使用空数据
     stats.value = {
       cardKeyCount: 0,
-      productCount: 0,
+      monthlyRevenue: 0,
       dailySales: 0,
       dailyRevenue: 0,
       cardKeyGrowth: 0,
-      productGrowth: 0,
+      monthlyGrowth: 0,
       dailySalesGrowth: 0,
       dailyGrowth: 0
     }

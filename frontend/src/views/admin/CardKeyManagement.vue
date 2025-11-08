@@ -140,25 +140,25 @@ const getStatusTagType = (status) => {
 const loadCardKeys = async () => {
   loading.value = true
   try {
-    // 构建查询参数（后端分页）
-    const params = {
-      page: currentPage.value,
-      size: pageSize.value
-    }
-    
-    // 添加筛选条件
-    if (statusFilter.value) {
-      params.status = statusFilter.value
-    }
-    
-    const response = await api.admin.getCardKeyList(params)
+    // 使用包含商品和规格名称的API接口
+    const response = await api.admin.getCardKeyListWithDetails()
     
     if (response && response.data) {
-      // 后端分页返回的数据结构
-      const pageData = response.data
-      const records = pageData.records || pageData.content || []
+      // 前端分页处理
+      const allCardKeys = response.data
       
-      const newCardKeys = records.map(cardKey => ({
+      // 状态筛选
+      let filteredCardKeys = allCardKeys
+      if (statusFilter.value) {
+        filteredCardKeys = allCardKeys.filter(cardKey => cardKey.status === statusFilter.value)
+      }
+      
+      // 前端分页计算
+      const startIndex = (currentPage.value - 1) * pageSize.value
+      const endIndex = startIndex + pageSize.value
+      const pageCardKeys = filteredCardKeys.slice(startIndex, endIndex)
+      
+      const newCardKeys = pageCardKeys.map(cardKey => ({
         id: cardKey.id,
         cardKey: cardKey.cardKey,
         status: cardKey.status,
@@ -173,7 +173,7 @@ const loadCardKeys = async () => {
       }))
       
       cardKeys.value = newCardKeys
-      total.value = pageData.total || pageData.totalElements || 0
+      total.value = filteredCardKeys.length
     } else {
       cardKeys.value = []
       total.value = 0
