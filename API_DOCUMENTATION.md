@@ -23,7 +23,7 @@
 curl -X POST "http://localhost:8080/api/auth/login" \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "admin",
+    "email": "admin@leafcard.com",
     "password": "admin123"
   }'
 ```
@@ -145,7 +145,8 @@ curl -X GET "http://120.55.50.51/api/public/card-keys/verify/vD2Sbh1OXLLKPFBfB49
     "message": "success",
     "data": {
         // 具体数据内容
-    }
+    },
+    "timestamp": 1705315200000
 }
 ```
 
@@ -155,7 +156,8 @@ curl -X GET "http://120.55.50.51/api/public/card-keys/verify/vD2Sbh1OXLLKPFBfB49
 {
     "code": 400,
     "message": "参数错误",
-    "data": null
+    "data": null,
+    "timestamp": 1705315200000
 }
 ```
 
@@ -173,7 +175,8 @@ curl -X GET "http://120.55.50.51/api/public/card-keys/verify/vD2Sbh1OXLLKPFBfB49
         "size": 10,
         "current": 1,
         "pages": 10
-    }
+    },
+    "timestamp": 1705315200000
 }
 ```
 
@@ -188,7 +191,7 @@ curl -X GET "http://120.55.50.51/api/public/card-keys/verify/vD2Sbh1OXLLKPFBfB49
 **请求参数**:
 ```json
 {
-    "username": "admin",
+    "email": "admin@leafcard.com",
     "password": "admin123"
 }
 ```
@@ -201,7 +204,8 @@ curl -X GET "http://120.55.50.51/api/public/card-keys/verify/vD2Sbh1OXLLKPFBfB49
     "data": {
         "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
         "expiresIn": 3600
-    }
+    },
+    "timestamp": 1705315200000
 }
 ```
 
@@ -228,7 +232,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         "lastLoginTime": "2024-01-15T14:30:00",
         "createdAt": "2024-01-01T00:00:00",
         "updatedAt": "2024-01-15T14:30:00"
-    }
+    },
+    "timestamp": 1705315200000
 }
 ```
 
@@ -245,9 +250,14 @@ Content-Type: application/json
 **请求参数**:
 ```json
 {
-    "username": "updated_admin",
+    "id": "1",
     "email": "updated_admin@leafcard.com",
-    "passwordHash": "new_password"
+    "username": "updated_admin",
+    "passwordHash": "new_password",
+    "status": "active",
+    "lastLoginTime": "2024-01-15T14:30:00",
+    "createdAt": "2024-01-01T00:00:00",
+    "updatedAt": "2024-01-15T14:30:00"
 }
 ```
 
@@ -256,7 +266,8 @@ Content-Type: application/json
 {
     "code": 200,
     "message": "用户信息更新成功",
-    "data": true
+    "data": true,
+    "timestamp": 1705315200000
 }
 ```
 
@@ -269,8 +280,10 @@ Content-Type: application/json
 **请求参数**:
 ```json
 {
+    "email": "newuser@leafcard.com",
     "username": "newuser",
-    "password": "123456"
+    "passwordHash": "123456",
+    "status": "active"
 }
 ```
 
@@ -279,7 +292,8 @@ Content-Type: application/json
 {
     "code": 200,
     "message": "注册成功",
-    "data": true
+    "data": true,
+    "timestamp": 1705315200000
 }
 ```
 
@@ -297,7 +311,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 {
     "code": 200,
     "message": "登出成功",
-    "data": true
+    "data": true,
+    "timestamp": 1705315200000
 }
 ```
 
@@ -354,8 +369,10 @@ Content-Type: application/json
 **请求参数**:
 ```json
 {
+    "email": "newadmin@leafcard.com",
     "username": "newadmin",
-    "password": "123456"
+    "passwordHash": "123456",
+    "status": "active"
 }
 ```
 
@@ -364,7 +381,8 @@ Content-Type: application/json
 {
     "code": 200,
     "message": "管理员创建成功",
-    "data": true
+    "data": true,
+    "timestamp": 1705315200000
 }
 ```
 
@@ -381,8 +399,14 @@ Content-Type: application/json
 **请求参数**:
 ```json
 {
+    "id": "1",
+    "email": "updated_admin@leafcard.com",
     "username": "updated_admin",
-    "password": "new_password"
+    "passwordHash": "new_password",
+    "status": "active",
+    "lastLoginTime": "2024-01-15T14:30:00",
+    "createdAt": "2024-01-01T00:00:00",
+    "updatedAt": "2024-01-15T14:30:00"
 }
 ```
 
@@ -391,7 +415,8 @@ Content-Type: application/json
 {
     "code": 200,
     "message": "管理员更新成功",
-    "data": true
+    "data": true,
+    "timestamp": 1705315200000
 }
 ```
 
@@ -409,7 +434,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 {
     "code": 200,
     "message": "管理员删除成功",
-    "data": true
+    "data": true,
+    "timestamp": 1705315200000
 }
 ```
 
@@ -451,7 +477,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         "size": 10,
         "current": 1,
         "pages": 1
-    }
+    },
+    "timestamp": 1705315200000
 }
 ```
 
@@ -477,7 +504,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         "status": "active",
         "createdAt": "2024-01-01T00:00:00",
         "updatedAt": "2024-01-01T00:00:00"
-    }
+    },
+    "timestamp": 1705315200000
 }
 ```
 
@@ -494,10 +522,13 @@ Content-Type: application/json
 **请求参数**:
 ```json
 {
+    "id": null,
     "name": "新产品",
     "description": "新产品描述",
     "category": "virtual",
-    "status": "active"
+    "status": "active",
+    "createdAt": null,
+    "updatedAt": null
 }
 ```
 
@@ -506,7 +537,8 @@ Content-Type: application/json
 {
     "code": 200,
     "message": "产品创建成功",
-    "data": true
+    "data": true,
+    "timestamp": 1705315200000
 }
 ```
 
@@ -523,10 +555,13 @@ Content-Type: application/json
 **请求参数**:
 ```json
 {
+    "id": "1",
     "name": "更新后的产品名",
     "description": "更新后的描述",
     "category": "virtual",
-    "status": "active"
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00",
+    "updatedAt": "2024-01-15T14:30:00"
 }
 ```
 
@@ -535,7 +570,8 @@ Content-Type: application/json
 {
     "code": 200,
     "message": "产品更新成功",
-    "data": true
+    "data": true,
+    "timestamp": 1705315200000
 }
 ```
 
@@ -553,7 +589,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 {
     "code": 200,
     "message": "产品删除成功",
-    "data": true
+    "data": true,
+    "timestamp": 1705315200000
 }
 ```
 
@@ -577,7 +614,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         "inactiveProducts": 2,
         "virtualProducts": 6,
         "physicalProducts": 4
-    }
+    },
+    "timestamp": 1705315200000
 }
 ```
 
@@ -605,7 +643,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
             "createdAt": "2024-01-01T00:00:00",
             "updatedAt": "2024-01-01T00:00:00"
         }
-    ]
+    ],
+    "timestamp": 1705315200000
 }
 ```
 
@@ -648,7 +687,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         "size": 10,
         "current": 1,
         "pages": 1
-    }
+    },
+    "timestamp": 1705315200000
 }
 ```
 
@@ -677,7 +717,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         "status": "active",
         "createdAt": "2024-01-01T00:00:00",
         "updatedAt": "2024-01-01T00:00:00"
-    }
+    },
+    "timestamp": 1705315200000
 }
 ```
 
@@ -708,7 +749,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
             "createdAt": "2024-01-01T00:00:00",
             "updatedAt": "2024-01-01T00:00:00"
         }
-    ]
+    ],
+    "timestamp": 1705315200000
 }
 ```
 
@@ -739,7 +781,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
             "createdAt": "2024-01-01T00:00:00",
             "updatedAt": "2024-01-01T00:00:00"
         }
-    ]
+    ],
+    "timestamp": 1705315200000
 }
 ```
 
@@ -756,13 +799,16 @@ Content-Type: application/json
 **请求参数**:
 ```json
 {
+    "id": null,
     "productId": 1,
     "name": "季卡",
     "description": "VIP会员专属季卡，享受专属权益",
     "durationDays": 90,
     "price": 79.9,
     "stockQuantity": 500,
-    "status": "active"
+    "status": "active",
+    "createdAt": null,
+    "updatedAt": null
 }
 ```
 
@@ -788,12 +834,16 @@ Content-Type: application/json
 **请求参数**:
 ```json
 {
+    "id": "1",
+    "productId": 1,
     "name": "更新后的规格名",
     "description": "更新后的描述",
     "durationDays": 60,
     "price": 49.9,
     "stockQuantity": 800,
-    "status": "active"
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00",
+    "updatedAt": "2024-01-15T14:30:00"
 }
 ```
 
@@ -1003,7 +1053,23 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 {
     "code": 200,
     "message": "验证成功",
-    "data": "VIP会员-月卡"
+    "data": {
+        "id": 1,
+        "cardKey": "LEAF-2024-001-ABCD-EFGH",
+        "specificationId": 1,
+        "status": "未使用",
+        "userEmail": null,
+        "userId": null,
+        "activateTime": null,
+        "expireTime": null,
+        "createdAt": "2024-01-01T00:00:00",
+        "updatedAt": "2024-01-01T00:00:00",
+        "specificationName": "月卡",
+        "price": 29.9,
+        "durationDays": 30,
+        "productName": "VIP会员",
+        "productSpec": "VIP会员-月卡"
+    }
 }
 ```
 
