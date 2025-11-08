@@ -1,12 +1,12 @@
 # LeafCard API 文档
 
-## 📋 文档概述
+## 文档概述
 
 本文档详细描述了 LeafCard 系统的 RESTful API 接口，包括认证管理、产品管理、规格管理、卡密管理、订单管理、支付管理、用户管理、系统管理等功能模块。
 
-## 🚀 快速开始
+## 快速开始
 
-### 📋 环境准备
+### 环境准备
 
 确保您的开发环境满足以下要求：
 
@@ -15,7 +15,7 @@
 - **MySQL**: 8.0+
 - **Redis**: 6.0+
 
-### 🔑 获取访问令牌
+### 获取访问令牌
 
 在调用 API 之前，您需要先获取访问令牌：
 
@@ -40,7 +40,7 @@ curl -X POST "http://localhost:8080/api/auth/login" \
 }
 ```
 
-### 🔧 使用访问令牌
+### 使用访问令牌
 
 在后续的 API 请求中，需要在请求头中添加 Authorization 字段：
 
@@ -48,7 +48,7 @@ curl -X POST "http://localhost:8080/api/auth/login" \
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-### 🔍 卡密验证示例
+### 卡密验证示例
 
 ```bash
 curl -X POST "http://localhost:8080/api/cards/validate" \
@@ -59,23 +59,85 @@ curl -X POST "http://localhost:8080/api/cards/validate" \
   }'
 ```
 
-## 📊 基础信息
+## 公共卡密验证激活 API
 
-### 🌐 环境配置
+### 验证并激活安装卡密
+
+**接口地址**: `GET /api/public/card-keys/verify/{cardKey}`
+
+**请求头**: 无需认证
+
+**说明**: 验证安装卡密，验证成功时会自动使用该卡密（将未使用状态变为已使用）。此接口主要用于外部系统集成验证卡密有效性。
+
+**请求示例**:
+```bash
+# 验证卡密示例
+curl -X GET "http://120.55.50.51/api/public/card-keys/verify/vD2Sbh1OXLLKPFBfB49JnCaV0atSlyQh"
+```
+
+**响应示例** (验证成功):
+```json
+{
+    "code": 200,
+    "message": "验证成功",
+    "data": "VIP会员-月卡"
+}
+```
+
+**响应示例** (验证失败 - 卡密不存在):
+```json
+{
+    "code": 404,
+    "message": "卡密不存在，请检查卡密是否正确或获取有效卡密",
+    "data": null
+}
+```
+
+**响应示例** (验证失败 - 卡密已被使用):
+```json
+{
+    "code": 400,
+    "message": "该卡密已被使用，请确认是否已在其他设备使用",
+    "data": null
+}
+```
+
+**响应示例** (验证失败 - 卡密已禁用):
+```json
+{
+    "code": 400,
+    "message": "该卡密已被禁用，请联系开发者了解原因",
+    "data": null
+}
+```
+
+**使用场景说明**:
+- **核销场景**: 用户在前端输入卡密进行验证和激活
+- **集成场景**: 第三方系统通过API验证卡密有效性
+- **批量验证**: 支持通过脚本批量验证卡密状态
+
+**注意事项**:
+- 验证成功后卡密状态会自动变为"已使用"
+- 每个卡密只能验证激活一次
+- 建议在生产环境使用HTTPS协议确保安全
+
+## 基础信息
+
+### 环境配置
 
 - **开发环境**: http://localhost:8080
 - **测试环境**: http://test.leafcard.com
 - **生产环境**: http://api.leafcard.com
 
-### ⚙️ 通用配置
+### 通用配置
 
 - **字符编码**: UTF-8
 - **时间格式**: yyyy-MM-dd HH:mm:ss
 - **时区**: Asia/Shanghai
 
-## 📋 通用响应格式
+## 通用响应格式
 
-### ✅ 成功响应
+### 成功响应
 
 ```json
 {
@@ -87,7 +149,7 @@ curl -X POST "http://localhost:8080/api/cards/validate" \
 }
 ```
 
-### ❌ 错误响应
+### 错误响应
 
 ```json
 {
@@ -97,7 +159,7 @@ curl -X POST "http://localhost:8080/api/cards/validate" \
 }
 ```
 
-### 📄 分页响应
+### 分页响应
 
 ```json
 {
@@ -126,8 +188,8 @@ curl -X POST "http://localhost:8080/api/cards/validate" \
 **请求参数**:
 ```json
 {
-    "email": "admin@leafcard.com",
-    "password": "123456"
+    "username": "admin",
+    "password": "admin123"
 }
 ```
 
@@ -138,16 +200,7 @@ curl -X POST "http://localhost:8080/api/cards/validate" \
     "message": "登录成功",
     "data": {
         "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-        "user": {
-            "id": 1,
-            "username": "admin",
-            "email": "admin@leafcard.com",
-            "passwordHash": "123456",
-            "status": "active",
-            "lastLoginTime": "2024-01-15T14:30:00",
-            "createdAt": "2024-01-01T00:00:00",
-            "updatedAt": "2024-01-15T14:30:00"
-        }
+        "expiresIn": 3600
     }
 }
 ```
@@ -217,9 +270,7 @@ Content-Type: application/json
 ```json
 {
     "username": "newuser",
-    "email": "newuser@leafcard.com",
-    "passwordHash": "123456",
-    "status": "active"
+    "password": "123456"
 }
 ```
 
@@ -250,9 +301,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-## 👥 管理员管理 API
+## 管理员管理 API
 
-### 📋 获取管理员列表
+### 获取管理员列表
 
 **接口地址**: `GET /api/admins`
 
@@ -290,7 +341,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### ➕ 创建管理员
+### 创建管理员
 
 **接口地址**: `POST /api/admins`
 
@@ -304,9 +355,7 @@ Content-Type: application/json
 ```json
 {
     "username": "newadmin",
-    "email": "newadmin@leafcard.com",
-    "passwordHash": "123456",
-    "status": "active"
+    "password": "123456"
 }
 ```
 
@@ -319,7 +368,7 @@ Content-Type: application/json
 }
 ```
 
-### ✏️ 更新管理员
+### 更新管理员
 
 **接口地址**: `PUT /api/admins/{id}`
 
@@ -333,8 +382,7 @@ Content-Type: application/json
 ```json
 {
     "username": "updated_admin",
-    "email": "updated_admin@leafcard.com",
-    "passwordHash": "new_password"
+    "password": "new_password"
 }
 ```
 
@@ -347,7 +395,7 @@ Content-Type: application/json
 }
 ```
 
-### 🗑️ 删除管理员
+### 删除管理员
 
 **接口地址**: `DELETE /api/admins/{id}`
 
@@ -365,9 +413,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-## 📦 产品管理 API
+## 产品管理 API
 
-### 📋 分页查询产品列表
+### 分页查询产品列表
 
 **接口地址**: `GET /api/products`
 
@@ -407,7 +455,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 🔍 根据ID查询产品
+### 根据ID查询产品
 
 **接口地址**: `GET /api/products/{id}`
 
@@ -433,7 +481,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### ➕ 创建产品
+### 创建产品
 
 **接口地址**: `POST /api/products`
 
@@ -462,7 +510,7 @@ Content-Type: application/json
 }
 ```
 
-### ✏️ 更新产品
+### 更新产品
 
 **接口地址**: `PUT /api/products/{id}`
 
@@ -491,7 +539,7 @@ Content-Type: application/json
 }
 ```
 
-### 🗑️ 删除产品
+### 删除产品
 
 **接口地址**: `DELETE /api/products/{id}`
 
@@ -509,7 +557,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 📊 获取产品统计信息
+### 获取产品统计信息
 
 **接口地址**: `GET /api/products/statistics`
 
@@ -533,7 +581,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 🏷️ 根据分类获取产品
+### 根据分类获取产品
 
 **接口地址**: `GET /api/products/category/{category}`
 
@@ -561,9 +609,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-## 📋 规格管理 API
+## 规格管理 API
 
-### 📋 分页查询规格列表
+### 分页查询规格列表
 
 **接口地址**: `GET /api/specifications`
 
@@ -604,7 +652,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 🔍 根据ID查询规格
+### 根据ID查询规格
 
 **接口地址**: `GET /api/specifications/{id}`
 
@@ -633,7 +681,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 📦 根据产品ID查询规格列表
+### 根据产品ID查询规格列表
 
 **接口地址**: `GET /api/specifications/product/{productId}`
 
@@ -664,7 +712,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 🏷️ 根据状态查询规格列表
+### 根据状态查询规格列表
 
 **接口地址**: `GET /api/specifications/status/{status}`
 
@@ -695,7 +743,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### ➕ 创建规格
+### 创建规格
 
 **接口地址**: `POST /api/specifications`
 
@@ -727,7 +775,7 @@ Content-Type: application/json
 }
 ```
 
-### ✏️ 更新规格
+### 更新规格
 
 **接口地址**: `PUT /api/specifications/{id}`
 
@@ -758,7 +806,7 @@ Content-Type: application/json
 }
 ```
 
-### 🗑️ 删除规格
+### 删除规格
 
 **接口地址**: `DELETE /api/specifications/{id}`
 
@@ -776,7 +824,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 📊 获取规格统计信息
+### 获取规格统计信息
 
 **接口地址**: `GET /api/specifications/statistics`
 
@@ -799,7 +847,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 📈 获取规格DTO列表（包含卡密统计信息）
+### 获取规格DTO列表（包含卡密统计信息）
 
 **接口地址**: `GET /api/specifications/dto`
 
@@ -832,9 +880,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
     ]
 }```
 
-## 🔑 卡密管理 API
+## 卡密管理 API
 
-### 📋 分页查询卡密列表
+### 分页查询卡密列表
 
 **接口地址**: `GET /api/card-keys`
 
@@ -876,7 +924,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 📊 获取包含商品和规格名称的卡密列表
+### 获取包含商品和规格名称的卡密列表
 
 **接口地址**: `GET /api/card-keys/with-details`
 
@@ -909,7 +957,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 🔍 搜索卡密
+### 搜索卡密
 
 **接口地址**: `GET /api/card-keys/search`
 
@@ -941,13 +989,49 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### ✅ 验证卡密
+### 验证卡密
 
 **接口地址**: `GET /api/card-keys/verify/{cardKey}`
 
 **请求头**:
 ```
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**响应示例** (验证成功):
+```json
+{
+    "code": 200,
+    "message": "验证成功",
+    "data": "VIP会员-月卡"
+}
+```
+
+**响应示例** (验证失败 - 卡密不存在):
+```json
+{
+    "code": 404,
+    "message": "卡密不存在，请检查卡密是否正确或获取有效卡密",
+    "data": null
+}
+```
+
+**响应示例** (验证失败 - 卡密已被使用):
+```json
+{
+    "code": 400,
+    "message": "该卡密已被使用，请确认是否已在其他设备使用",
+    "data": null
+}
+```
+
+**响应示例** (验证失败 - 卡密已禁用):
+```json
+{
+    "code": 400,
+    "message": "该卡密已被禁用，请联系开发者了解原因",
+    "data": null
+}
 ```
 
 **响应示例**:
@@ -970,7 +1054,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 🚀 激活卡密
+### 激活卡密
 
 **接口地址**: `POST /api/card-keys/{cardKey}/activate`
 
@@ -997,7 +1081,7 @@ Content-Type: application/json
 }
 ```
 
-### 🚫 禁用卡密
+### 禁用卡密
 
 **接口地址**: `POST /api/card-keys/{cardKey}/disable`
 
@@ -1015,7 +1099,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 📊 获取卡密统计信息
+### 获取卡密统计信息
 
 **接口地址**: `GET /api/card-keys/statistics`
 
@@ -1038,7 +1122,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### ➕ 创建卡密
+### 创建卡密
 
 **接口地址**: `POST /api/card-keys`
 
@@ -1066,7 +1150,7 @@ Content-Type: application/json
 }
 ```
 
-### 🗑️ 删除卡密
+### 删除卡密
 
 **接口地址**: `DELETE /api/card-keys/{cardKey}`
 
@@ -1084,7 +1168,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 🔄 切换卡密状态
+### 切换卡密状态
 
 **接口地址**: `POST /api/card-keys/{cardKey}/status`
 
@@ -1110,76 +1194,7 @@ Content-Type: application/json
 }
 ```
 
-## 🌐 公共卡密验证激活 API
 
-### ✅ 验证并激活安装卡密
-
-**接口地址**: `GET /api/public/card-keys/verify/{cardKey}`
-
-**请求头**: 无需认证
-
-**说明**: 验证安装卡密，验证成功时会自动使用该卡密（将未使用状态变为已使用）。此接口主要用于外部系统集成验证卡密有效性。
-
-**请求示例**:
-```bash
-# 验证卡密示例
-curl -X GET "http://120.55.50.51/api/public/card-keys/verify/vD2Sbh1OXLLKPFBfB49JnCaV0atSlyQh"
-```
-
-**响应示例** (验证成功):
-```json
-{
-    "code": 200,
-    "message": "验证成功",
-    "data": {
-        "productName": "VIP会员",
-        "specificationName": "月卡",
-        "durationDays": 30,
-        "status": "已激活",
-        "activateTime": "2024-01-15T14:30:00",
-        "expireTime": "2024-02-14T14:30:00"
-    }
-}
-```
-
-**响应示例** (验证失败 - 卡密不存在):
-```json
-{
-    "code": 404,
-    "message": "卡密不存在",
-    "data": null
-}
-```
-
-**响应示例** (验证失败 - 卡密已被使用):
-```json
-{
-    "code": 400,
-    "message": "该卡密已被使用",
-    "data": null
-}
-```
-
-**响应示例** (验证失败 - 卡密已禁用):
-```json
-{
-    "code": 403,
-    "message": "卡密已被禁用",
-    "data": null
-}
-```
-
-### 📋 使用场景说明
-
-- **核销场景**: 用户在前端输入卡密进行验证和激活
-- **集成场景**: 第三方系统通过API验证卡密有效性
-- **批量验证**: 支持通过脚本批量验证卡密状态
-
-### ⚠️ 注意事项
-
-- 验证成功后卡密状态会自动变为"已使用"
-- 每个卡密只能验证激活一次
-- 建议在生产环境使用HTTPS协议确保安全
         "usedCards": 3,
         "disabledCards": 1
     }
@@ -1258,9 +1273,9 @@ Content-Type: application/json
 }
 ```
 
-## 📊 操作日志 API
+## 操作日志 API
 
-### 📋 分页查询操作日志列表（支持时间范围筛选）
+### 分页查询操作日志列表（支持时间范围筛选）
 
 **接口地址**: `GET /api/operation-logs`
 
@@ -1303,7 +1318,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 📊 获取日志统计信息
+### 获取日志统计信息
 
 **接口地址**: `GET /api/operation-logs/stats`
 
@@ -1331,7 +1346,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 👤 根据管理员ID查询操作日志
+### 根据管理员ID查询操作日志
 
 **接口地址**: `GET /api/operation-logs/admin/{adminId}`
 
@@ -1360,7 +1375,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 🔧 根据操作类型查询操作日志
+### 根据操作类型查询操作日志
 
 **接口地址**: `GET /api/operation-logs/type/{operationType}`
 
@@ -1389,7 +1404,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 🎯 根据目标查询操作日志
+### 根据目标查询操作日志
 
 **接口地址**: `GET /api/operation-logs/target`
 
@@ -1422,7 +1437,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 📤 导出操作日志
+### 导出操作日志
 
 **接口地址**: `GET /api/operation-logs/export`
 
@@ -1437,7 +1452,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 **响应**: 返回Excel文件下载
 
-### 🗑️ 清空操作日志
+### 清空操作日志
 
 **接口地址**: `DELETE /api/operation-logs`
 
@@ -1455,7 +1470,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 📝 记录操作日志
+### 记录操作日志
 
 **接口地址**: `POST /api/operation-logs`
 
@@ -1494,12 +1509,12 @@ import Server from '../utils/Server'
 const AdminService = {
   // 管理员登录
   login(data) {
-    return Server.post('/api/admins/login', data)
+    return Server.post('/api/auth/login', data)
   },
 
   // 管理员注册
   register(data) {
-    return Server.post('/api/admins', data)
+    return Server.post('/api/auth/register', data)
   },
 
   // 获取仪表盘统计数据
@@ -1674,7 +1689,7 @@ export default {
 }
 ```
 
-## ❗ 错误码说明
+## 错误码说明
 
 ### HTTP 状态码
 
@@ -1702,7 +1717,7 @@ export default {
 | 2002 | 密码错误 | 用户密码错误 |
 | 2003 | 账号已禁用 | 用户账号已被禁用 |
 
-## ❓ 常见问题解答
+## 常见问题解答
 
 ### Q: 如何获取访问令牌？
 A: 使用管理员账号登录获取token：
@@ -1752,7 +1767,7 @@ A: 建议措施：
 3. 使用负载均衡分发请求
 4. 设置合理的超时时间和重试机制
 
-## 🚀 部署说明
+## 部署说明
 
 ### 后端部署
 
@@ -1767,7 +1782,7 @@ A: 建议措施：
 2. 构建项目：`npm run build`
 3. 部署到Web服务器
 
-## ⚠️ 注意事项
+## 注意事项
 
 1. 所有时间字段使用ISO 8601格式
 2. 金额字段使用数字类型，单位为元
