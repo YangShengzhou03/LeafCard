@@ -78,6 +78,10 @@ const AdminService = {
     return Server.delete(`/api/card-keys/by-card-key/${cardKey}`)
   },
 
+  batchDeleteUsedCardKeys() {
+    return Server.delete('/api/card-keys/batch-delete-used')
+  },
+
   getProductList(params) {
     return Server.get('/api/products', {
       page: params.page || 1,

@@ -406,4 +406,24 @@ public class CardKeyController {
             return Result.notFound();
         }
     }
+    
+    /**
+     * 批量删除已使用卡密
+     */
+    @DeleteMapping("/batch-delete-used")
+    public Result<Boolean> batchDeleteUsedCardKeys(HttpServletRequest request) {
+        try {
+            boolean deleted = cardKeyService.batchDeleteUsedCardKeys();
+            
+            if (deleted) {
+                logUtil.logCardKeyOperation("CARD_KEY", "批量删除已使用卡密", request);
+                return Result.success("已使用卡密批量删除成功", true);
+            } else {
+                return Result.error("已使用卡密批量删除失败");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error("批量删除已使用卡密时发生错误");
+        }
+    }
 }

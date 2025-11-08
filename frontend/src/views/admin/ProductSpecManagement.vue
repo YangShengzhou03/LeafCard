@@ -303,7 +303,6 @@ const loadSpecs = async () => {
       totalSpecs.value = 0
     }
   } catch (error) {
-    console.error('加载商品规格失败:', error)
     ElMessage.error('加载商品规格失败，请检查网络连接')
     specs.value = []
     totalSpecs.value = 0

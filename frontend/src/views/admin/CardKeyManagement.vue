@@ -236,7 +236,14 @@ const handleClearUsed = async () => {
       }
     )
     
-    ElMessage.warning('清空已使用卡密功能正在开发中，敬请期待')
+    const response = await api.admin.batchDeleteUsedCardKeys()
+    
+    if (response && response.code === 200) {
+      ElMessage.success('已使用卡密清空成功')
+      loadCardKeys()
+    } else {
+      ElMessage.error('清空已使用卡密失败')
+    }
   } catch (error) {
     if (error !== 'cancel') {
       ElMessage.error('清空已使用卡密失败，请检查网络连接')
@@ -327,7 +334,7 @@ const loadSpecifications = async () => {
       }))
     }
   } catch (error) {
-    console.error('加载规格数据失败:', error)
+    // 规格数据加载失败，静默处理
   }
 }
 

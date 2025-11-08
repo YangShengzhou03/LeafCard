@@ -203,4 +203,28 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
         
         return sb.toString();
     }
+    
+    @Override
+    public boolean batchDeleteUsedCardKeys() {
+        try {
+            QueryWrapper<CardKey> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("status", "已使用");
+            
+            // 查询所有已使用的卡密
+            List<CardKey> usedCardKeys = baseMapper.selectList(queryWrapper);
+            
+            if (usedCardKeys.isEmpty()) {
+                // 没有已使用的卡密，返回成功
+                return true;
+            }
+            
+            // 批量删除已使用的卡密
+            boolean deleted = baseMapper.delete(queryWrapper) > 0;
+            
+            return deleted;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

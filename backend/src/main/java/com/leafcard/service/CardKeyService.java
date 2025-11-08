@@ -50,4 +50,9 @@ public interface CardKeyService extends IService<CardKey> {
      * 批量生成卡密
      */
     boolean batchGenerateCardKeys(String productId, Integer quantity, String prefix);
+    
+    /**
+     * 批量删除已使用卡密
+     */
+    boolean batchDeleteUsedCardKeys();
 }
