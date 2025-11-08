@@ -125,10 +125,9 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 
+// 直接使用后端返回的分页数据，不需要前端再次分页
 const pagedCardKeys = computed(() => {
-  const startIndex = (currentPage.value - 1) * pageSize.value
-  const endIndex = startIndex + pageSize.value
-  return cardKeys.value.slice(startIndex, endIndex)
+  return cardKeys.value
 })
 
 const getStatusTagType = (status) => {
