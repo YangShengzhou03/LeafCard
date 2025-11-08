@@ -28,7 +28,7 @@
           <el-col :span="4">
             <el-select v-model="statusFilter" placeholder="商品状态" clearable @change="handleSearch()">
               <el-option label="全部" value="" />
-              <el-option label="在售" value="active" />
+              <el-option label="上架" value="active" />
               <el-option label="下架" value="inactive" />
             </el-select>
           </el-col>
@@ -156,22 +156,9 @@ const productRules = {
   name: [{ required: true, message: '请输入商品名称', trigger: 'blur' }]
 }
 
-// 计算属性：筛选后的商品列表
+// 计算属性：筛选后的商品列表（用于前端显示，但实际筛选通过后端API实现）
 const filteredProducts = computed(() => {
-  let filtered = products.value
-  
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(product => 
-      product.name.toLowerCase().includes(query)
-    )
-  }
-  
-  if (statusFilter.value) {
-    filtered = filtered.filter(product => product.status === statusFilter.value)
-  }
-  
-  return filtered
+  return products.value
 })
 
 // 分类标签类型映射函数已移除，因为所有商品都是虚拟卡密，不需要分类

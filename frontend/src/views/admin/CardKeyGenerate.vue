@@ -14,49 +14,29 @@
           <el-row :gutter="8">
             <el-col :span="4">
               <el-form-item label="生成数量">
-                <el-input-number 
-                  v-model="generateForm.count" 
-                  :min="1" 
-                  :max="10000" 
-                  controls-position="right"
-                  placeholder="请输入数量"
-                  class="form-input"
-                />
+                <el-input-number v-model="generateForm.count" :min="1" :max="10000" controls-position="right"
+                  placeholder="请输入数量" class="form-input" />
               </el-form-item>
             </el-col>
             <el-col :span="4">
               <el-form-item label="卡密长度">
-                <el-input-number 
-                  v-model="generateForm.length" 
-                  :min="8" 
-                  :max="32" 
-                  controls-position="right"
-                  placeholder="请输入长度"
-                  class="form-input"
-                />
+                <el-input-number v-model="generateForm.length" :min="8" :max="32" controls-position="right"
+                  placeholder="请输入长度" class="form-input" />
               </el-form-item>
             </el-col>
             <el-col :span="5">
               <el-form-item label="商品">
-                <el-select v-model="generateForm.productId" placeholder="请选择商品" clearable class="form-input" @change="handleProductChange">
-                  <el-option 
-                    v-for="product in productList" 
-                    :key="product.id" 
-                    :label="product.name" 
-                    :value="product.id"
-                  />
+                <el-select v-model="generateForm.productId" placeholder="请选择商品" clearable class="form-input"
+                  @change="handleProductChange">
+                  <el-option v-for="product in productList" :key="product.id" :label="product.name"
+                    :value="product.id" />
                 </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="5">
               <el-form-item label="规格">
                 <el-select v-model="generateForm.specId" placeholder="请选择规格" clearable class="form-input">
-                  <el-option 
-                    v-for="spec in specList" 
-                    :key="spec.id" 
-                    :label="spec.name" 
-                    :value="spec.id"
-                  />
+                  <el-option v-for="spec in specList" :key="spec.id" :label="spec.name" :value="spec.id" />
                 </el-select>
               </el-form-item>
             </el-col>
@@ -73,7 +53,7 @@
               </el-form-item>
             </el-col>
           </el-row>
-          
+
           <!-- 第二行：字符集 -->
           <el-row :gutter="12">
             <el-col :span="24">
@@ -94,7 +74,7 @@
         <div class="result-header">
           <div class="result-header-content">
             <span class="result-title">生成结果 ({{ generatedKeys.length }} 条)</span>
-            
+
             <!-- 商品规格信息 -->
             <div v-if="generateForm.productId && generateForm.specId" class="product-spec-info">
               <span class="info-label">商品：</span>
@@ -102,27 +82,32 @@
               <span class="info-label">规格：</span>
               <span class="info-value">{{ getSpecName(generateForm.specId) }}</span>
             </div>
-            
+
             <!-- 操作按钮 -->
             <div class="action-buttons">
-              <el-button 
-                type="success" 
-                @click="addToStock" 
-                :loading="addingToStock" 
-                :disabled="!generateForm.productId || !generateForm.specId"
-                class="action-btn"
-              >
-                <el-icon><Upload /></el-icon>
+              <el-button type="success" @click="addToStock" :loading="addingToStock"
+                :disabled="!generateForm.productId || !generateForm.specId" class="action-btn">
+                <el-icon>
+                  <Upload />
+                </el-icon>
                 导入系统
               </el-button>
+              <el-button type="primary" @click="copyCardKeys">
+                <el-icon>
+                  <Copy />
+                </el-icon>
+                一键复制
+              </el-button>
               <el-button type="primary" @click="exportCardKeys" class="export-btn">
-                <el-icon><Download /></el-icon>
+                <el-icon>
+                  <Download />
+                </el-icon>
                 导出卡密
               </el-button>
             </div>
           </div>
         </div>
-        
+
         <el-table :data="paginatedKeys" border stripe class="result-table">
           <el-table-column type="index" label="序号" width="80" align="center" />
           <el-table-column prop="key" label="卡密代码" min-width="220" align="center">
@@ -135,18 +120,12 @@
           <el-table-column prop="productName" label="商品" width="120" align="center" />
           <el-table-column prop="specName" label="规格" width="120" align="center" />
         </el-table>
-        
+
         <!-- 分页 -->
         <div class="pagination-container" v-if="generatedKeys.length > 10">
-          <el-pagination
-            v-model:current-page="currentPage"
-            v-model:page-size="pageSize"
-            :page-sizes="[10, 20, 50, 100]"
-            :total="generatedKeys.length"
-            layout="total, sizes, prev, pager, next, jumper"
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-          />
+          <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 50, 100]"
+            :total="generatedKeys.length" layout="total, sizes, prev, pager, next, jumper"
+            @size-change="handleSizeChange" @current-change="handleCurrentChange" />
         </div>
       </div>
     </el-card>
@@ -156,7 +135,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Download, Upload } from '@element-plus/icons-vue'
+import { Download, Upload, Copy } from '@element-plus/icons-vue'
 import Server from '@/utils/Server.js'
 import api from '@/services/api.js'
 
@@ -196,7 +175,7 @@ const handleCurrentChange = (page) => {
 const loadProducts = async () => {
   try {
     const response = await Server.get('/api/products')
-    
+
     if (response.code === 200) {
       if (response.data && response.data.records) {
         productList.value = response.data.records || []
@@ -216,7 +195,7 @@ const loadProducts = async () => {
 const loadAllSpecs = async () => {
   try {
     const response = await Server.get('/api/specifications')
-    
+
     if (response.code === 200) {
       if (response.data && response.data.records) {
         allSpecList.value = response.data.records || []
@@ -225,7 +204,7 @@ const loadAllSpecs = async () => {
       } else {
         allSpecList.value = []
       }
-      
+
       specList.value = []
     } else {
       ElMessage.error('加载规格列表失败')
@@ -241,10 +220,10 @@ const loadSpecsByProduct = (productId) => {
     generateForm.specId = ''
     return
   }
-  
+
   const filteredSpecs = allSpecList.value.filter(spec => spec.productId === productId)
   specList.value = filteredSpecs
-  
+
   if (generateForm.specId && !filteredSpecs.some(spec => spec.id === generateForm.specId)) {
     generateForm.specId = ''
   }
@@ -255,14 +234,14 @@ const addToStock = async () => {
     ElMessage.warning('请先生成卡密')
     return
   }
-  
+
   if (!generateForm.productId || !generateForm.specId) {
     ElMessage.warning('请选择商品和规格')
     return
   }
-  
+
   addingToStock.value = true
-  
+
   try {
     await ElMessageBox.confirm(
       `确定要将 ${generatedKeys.value.length} 个卡密添加到库存吗？`,
@@ -273,37 +252,37 @@ const addToStock = async () => {
         type: 'warning'
       }
     )
-    
+
     let successCount = 0
     let errorCount = 0
-    
+
     for (const keyInfo of generatedKeys.value) {
       try {
-          const response = await api.admin.generateCardKey({
-            cardKey: keyInfo.key,
-            specificationId: generateForm.specId,
-            status: '未使用'
-          })
-          
-          if (response.code === 200) {
-            successCount++
-          } else {
-            errorCount++
-          }
+        const response = await api.admin.generateCardKey({
+          cardKey: keyInfo.key,
+          specificationId: generateForm.specId,
+          status: '未使用'
+        })
+
+        if (response.code === 200) {
+          successCount++
+        } else {
+          errorCount++
+        }
       } catch (error) {
         errorCount++
       }
     }
-    
+
     if (successCount > 0) {
       ElMessage.success(`成功添加 ${successCount} 个卡密到库存`)
       generatedKeys.value = []
     }
-    
+
     if (errorCount > 0) {
       ElMessage.warning(`${errorCount} 个卡密添加失败`)
     }
-    
+
   } catch (error) {
     if (error !== 'cancel') {
       ElMessage.error('添加库存失败，请检查网络连接')
@@ -315,7 +294,7 @@ const addToStock = async () => {
 
 const generateRandomKey = () => {
   let charset = ''
-  
+
   if (generateForm.charset.includes('numbers')) {
     charset += '0123456789'
   }
@@ -325,18 +304,18 @@ const generateRandomKey = () => {
   if (generateForm.charset.includes('lowercase')) {
     charset += 'abcdefghijklmnopqrstuvwxyz'
   }
-  
+
   if (charset === '') {
     charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
   }
-  
+
   let result = ''
   const charsetLength = charset.length
-  
+
   for (let i = 0; i < generateForm.length; i++) {
     result += charset.charAt(Math.floor(Math.random() * charsetLength))
   }
-  
+
   return result
 }
 
@@ -346,34 +325,34 @@ const generateCardKeys = async () => {
     ElMessage.warning('请设置生成数量')
     return
   }
-  
+
   if (generateForm.length < 8) {
     ElMessage.warning('卡密长度不能小于8位')
     return
   }
-  
+
   if (!generateForm.productId || !generateForm.specId) {
     ElMessage.warning('请选择商品和规格')
     return
   }
-  
+
   generating.value = true
-  
+
   try {
     generatedKeys.value = []
-    
+
     const product = productList.value.find(p => p.id === generateForm.productId)
     const spec = specList.value.find(s => s.id === generateForm.specId)
-    
+
     const maxAttempts = generateForm.count * 10 // 最大尝试次数，避免无限循环
     let attempts = 0
-    
+
     while (generatedKeys.value.length < generateForm.count && attempts < maxAttempts) {
       const key = generateRandomKey()
-      
+
       // 检查是否与已生成的卡密重复
       const isDuplicateInGenerated = generatedKeys.value.some(k => k.key === key)
-      
+
       if (!isDuplicateInGenerated) {
         generatedKeys.value.push({
           key: key,
@@ -381,10 +360,10 @@ const generateCardKeys = async () => {
           specName: spec ? spec.name : ''
         })
       }
-      
+
       attempts++
     }
-    
+
     if (generatedKeys.value.length < generateForm.count) {
       ElMessage.warning(`生成了 ${generatedKeys.value.length} 个唯一卡密（尝试 ${attempts} 次后达到上限）`)
     } else {
@@ -425,7 +404,7 @@ const exportCardKeys = () => {
     ElMessage.warning('没有可导出的卡密')
     return
   }
-  
+
   const content = generatedKeys.value.map(key => key.key).join('\n')
   const blob = new Blob([content], { type: 'text/plain' })
   const url = URL.createObjectURL(blob)

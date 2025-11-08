@@ -26,10 +26,14 @@
               </el-input>
             </el-col>
             <el-col :span="4">
-              <el-select v-model="statusFilter" placeholder="规格状态" clearable @change="handleSearch">
+              <el-select v-model="productFilter" placeholder="商品筛选" clearable @change="handleSearch">
                 <el-option label="全部" value="" />
-                <el-option label="发放中" value="active" />
-                <el-option label="已停用" value="inactive" />
+                <el-option 
+                  v-for="product in products" 
+                  :key="product.id" 
+                  :label="product.name" 
+                  :value="product.id" 
+                />
               </el-select>
             </el-col>
             <el-col :span="14" class="button-group">
@@ -175,7 +179,7 @@ const specs = ref([])
 const products = ref([])
 
 const searchQuery = ref('')
-const statusFilter = ref('')
+const productFilter = ref('')
 
 const currentPage = ref(1)
 const pageSize = ref(10)
@@ -253,16 +257,18 @@ const loadProducts = async () => {
 const loadSpecs = async () => {
   loading.value = true
   try {
-    const response = await api.admin.getSpecificationDTOs()
+    // 使用筛选参数调用API
+    const response = await api.admin.getSpecificationDTOs({
+      page: currentPage.value,
+      size: pageSize.value,
+      keyword: searchQuery.value,
+      productId: productFilter.value
+    })
     
     if (response && response.data) {
-      const specList = response.data
+      const specList = response.data.records || response.data.content || response.data || []
       
-      const startIndex = (currentPage.value - 1) * pageSize.value
-      const endIndex = startIndex + pageSize.value
-      const pageSpecs = specList.slice(startIndex, endIndex)
-      
-      const processedSpecs = pageSpecs.map(spec => {
+      const processedSpecs = specList.map(spec => {
         const product = products.value.find(p => p.id === spec.productId)
         const productName = product ? product.name : spec.productName || '未知商品'
         
@@ -290,7 +296,7 @@ const loadSpecs = async () => {
       })
       
       specs.value = processedSpecs
-      totalSpecs.value = specList.length
+      totalSpecs.value = response.data.total || response.data.totalElements || specList.length
     } else {
       specs.value = []
       totalSpecs.value = 0
@@ -312,7 +318,7 @@ const handleSearch = () => {
 
 const resetFilters = () => {
   searchQuery.value = ''
-  statusFilter.value = ''
+  productFilter.value = ''
   handleSearch()
 }
 

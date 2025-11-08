@@ -20,11 +20,14 @@
             </el-input>
           </el-col>
           <el-col :span="4">
-            <el-select v-model="statusFilter" placeholder="卡密状态" clearable @change="handleSearch">
+            <el-select v-model="specificationFilter" placeholder="商品规格" clearable @change="handleSearch">
               <el-option label="全部" value="" />
-              <el-option label="未使用" value="未使用" />
-              <el-option label="已使用" value="已使用" />
-              <el-option label="已禁用" value="已禁用" />
+              <el-option 
+                v-for="spec in specifications" 
+                :key="spec.id" 
+                :label="spec.name" 
+                :value="spec.id" 
+              />
             </el-select>
           </el-col>
           <el-col :span="14" class="button-group">
@@ -117,8 +120,9 @@ import api from '../../services/api'
 
 const loading = ref(false)
 const cardKeys = ref([])
+const specifications = ref([])
 const searchQuery = ref('')
-const statusFilter = ref('')
+const specificationFilter = ref('')
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
@@ -140,25 +144,18 @@ const getStatusTagType = (status) => {
 const loadCardKeys = async () => {
   loading.value = true
   try {
-    // 使用包含商品和规格名称的API接口
-    const response = await api.admin.getCardKeyListWithDetails()
+    // 使用包含商品和规格名称的API接口，并传递筛选参数
+    const response = await api.admin.getCardKeyListWithDetails({
+      page: currentPage.value,
+      size: pageSize.value,
+      keyword: searchQuery.value,
+      specificationId: specificationFilter.value
+    })
     
     if (response && response.data) {
-      // 前端分页处理
-      const allCardKeys = response.data
+      const cardKeyList = response.data.records || response.data.content || response.data || []
       
-      // 状态筛选
-      let filteredCardKeys = allCardKeys
-      if (statusFilter.value) {
-        filteredCardKeys = allCardKeys.filter(cardKey => cardKey.status === statusFilter.value)
-      }
-      
-      // 前端分页计算
-      const startIndex = (currentPage.value - 1) * pageSize.value
-      const endIndex = startIndex + pageSize.value
-      const pageCardKeys = filteredCardKeys.slice(startIndex, endIndex)
-      
-      const newCardKeys = pageCardKeys.map(cardKey => ({
+      const newCardKeys = cardKeyList.map(cardKey => ({
         id: cardKey.id,
         cardKey: cardKey.cardKey,
         status: cardKey.status,
@@ -173,7 +170,7 @@ const loadCardKeys = async () => {
       }))
       
       cardKeys.value = newCardKeys
-      total.value = filteredCardKeys.length
+      total.value = response.data.total || response.data.totalElements || cardKeyList.length
     } else {
       cardKeys.value = []
       total.value = 0
@@ -194,7 +191,7 @@ const handleSearch = () => {
 
 const resetFilter = () => {
   searchQuery.value = ''
-  statusFilter.value = ''
+  specificationFilter.value = ''
   currentPage.value = 1
   loadCardKeys()
 }
@@ -326,8 +323,23 @@ const handleCurrentChange = (page) => {
   loadCardKeys()
 }
 
+const loadSpecifications = async () => {
+  try {
+    const response = await api.admin.getSpecificationDTOs()
+    if (response && response.data) {
+      specifications.value = response.data.map(spec => ({
+        id: spec.id,
+        name: spec.productName ? `${spec.productName} - ${spec.name}` : spec.name
+      }))
+    }
+  } catch (error) {
+    console.error('加载规格数据失败:', error)
+  }
+}
+
 onMounted(() => {
   loadCardKeys()
+  loadSpecifications()
 })
 </script>
 
