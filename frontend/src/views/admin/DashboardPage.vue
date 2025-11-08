@@ -283,16 +283,12 @@ const loadDashboardData = async () => {
 
 const loadSpecDistribution = async () => {
   try {
-    console.log('开始加载规格分布数据...')
     const response = await api.admin.getSpecificationDTOs()
-    console.log('API响应:', response)
     
     if (response && response.code === 200 && response.data) {
       const specifications = response.data
-      console.log('规格数据:', specifications)
       
       const totalUnusedCards = specifications.reduce((total, spec) => total + (spec.unusedKeys || 0), 0)
-      console.log('未使用卡密总数:', totalUnusedCards)
       
       const distributionData = specifications
         .filter(spec => spec.unusedKeys > 0)
@@ -305,20 +301,16 @@ const loadSpecDistribution = async () => {
         }))
         .sort((a, b) => b.count - a.count)
       
-      console.log('处理后的分布数据:', distributionData)
       specDistribution.value = distributionData
       
       if (distributionData.length === 0) {
-        console.log('没有找到未使用卡密数据')
         ElMessage.info('暂无未使用卡密数据')
       }
     } else {
-      console.log('API响应格式不正确:', response)
       specDistribution.value = []
       ElMessage.warning('规格分布数据为空')
     }
   } catch (error) {
-    console.error('加载规格分布数据失败:', error)
     specDistribution.value = []
     ElMessage.error('加载规格分布数据失败')
   }
