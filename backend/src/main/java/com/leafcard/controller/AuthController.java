@@ -41,6 +41,11 @@ public class AuthController {
         // 根据邮箱查找管理员
         Admin admin = adminService.findByEmail(email);
         if (admin != null) {
+            // 检查用户状态
+            if ("inactive".equals(admin.getStatus())) {
+                return Result.error("账号已被禁用，请联系管理员");
+            }
+            
             // 验证密码（暂时不加密，直接比较明文）
             if (password.equals(admin.getPasswordHash())) {
                 // 更新最后登录时间

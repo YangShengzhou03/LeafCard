@@ -825,13 +825,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
             "status": "active",
             "createdAt": "2024-01-01T00:00:00",
             "updatedAt": "2024-01-01T00:00:00",
-            "totalCards": 500,
-            "usedCards": 200,
-            "unusedCards": 300
+            "totalKeys": 500,
+            "usedKeys": 200,
+            "unusedKeys": 300
         }
     ]
-}
-```
+}```
 
 ## 🔑 卡密管理 API
 

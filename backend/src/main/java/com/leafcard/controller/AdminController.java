@@ -37,21 +37,29 @@ public class AdminController {
         String password = loginRequest.get("password");
         
         Admin admin = adminService.findByEmail(email);
-        if (admin != null && admin.getPasswordHash().equals(password)) {
-            admin.setLastLoginTime(java.time.LocalDateTime.now());
-            adminService.updateById(admin);
+        if (admin != null) {
+            // 检查用户状态
+            if ("inactive".equals(admin.getStatus())) {
+                logUtil.logLogin(false, "管理员登录失败 - 邮箱: " + email + " (账号已被禁用)", request);
+                return Result.error("账号已被禁用，请联系管理员");
+            }
             
-            String token = jwtUtil.generateToken(admin.getId(), admin.getUsername());
-            
-            logUtil.logLogin(true, "管理员登录成功 - 邮箱: " + email, request);
-            
-            LoginResponse loginResponse = new LoginResponse(token, admin);
-            return Result.success("登录成功", loginResponse);
-        } else {
-            logUtil.logLogin(false, "管理员登录失败 - 邮箱: " + email + " (密码错误或用户不存在)", request);
-            
-            return Result.error("邮箱或密码错误");
+            if (admin.getPasswordHash().equals(password)) {
+                admin.setLastLoginTime(java.time.LocalDateTime.now());
+                adminService.updateById(admin);
+                
+                String token = jwtUtil.generateToken(admin.getId(), admin.getUsername());
+                
+                logUtil.logLogin(true, "管理员登录成功 - 邮箱: " + email, request);
+                
+                LoginResponse loginResponse = new LoginResponse(token, admin);
+                return Result.success("登录成功", loginResponse);
+            }
         }
+        
+        logUtil.logLogin(false, "管理员登录失败 - 邮箱: " + email + " (密码错误或用户不存在)", request);
+        
+        return Result.error("邮箱或密码错误");
     }
 
     /**

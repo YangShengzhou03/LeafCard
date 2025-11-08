@@ -274,40 +274,23 @@ const loadProducts = async () => {
 const loadSpecs = async () => {
   loading.value = true
   try {
-    // 构建查询参数（后端分页）
-    const params = {
-      page: currentPage.value,
-      size: pageSize.value
-    }
-    
-    // 调用分页API获取商品规格列表（后端分页）
-    const response = await api.admin.getSpecList(params)
+    // 使用getSpecificationDTOs接口获取包含卡密统计信息的规格数据
+    const response = await api.admin.getSpecificationDTOs()
     
     // 处理API响应数据格式
     if (response && response.data) {
-      const data = response.data
-      let specList = []
+      const specList = response.data
       
-      // 处理分页响应格式
-      if (data.records) {
-        specList = data.records
-        totalSpecs.value = data.total || 0
-      } else if (data.content) {
-        specList = data.content
-        totalSpecs.value = data.totalElements || 0
-      } else if (Array.isArray(data)) {
-        specList = data
-        totalSpecs.value = data.length
-      } else {
-        specList = []
-        totalSpecs.value = 0
-      }
+      // 前端分页处理
+      const startIndex = (currentPage.value - 1) * pageSize.value
+      const endIndex = startIndex + pageSize.value
+      const pageSpecs = specList.slice(startIndex, endIndex)
       
       // 处理规格数据，添加商品名称和格式化创建时间
-      const processedSpecs = specList.map(spec => {
+      const processedSpecs = pageSpecs.map(spec => {
         // 根据productId查找商品名称
         const product = products.value.find(p => p.id === spec.productId)
-        const productName = product ? product.name : '未知商品'
+        const productName = product ? product.name : spec.productName || '未知商品'
         
         // 格式化创建时间
         let createTime = spec.createTime || spec.createdAt || spec.create_time || ''
@@ -325,24 +308,26 @@ const loadSpecs = async () => {
           }
         }
         
-        // 修复卡密统计字段映射：后端返回的是totalCards/usedCards/unusedCards，前端使用totalKeys/usedKeys
+        // 卡密统计字段映射：后端返回的是totalKeys/usedKeys/unusedKeys
         return {
           ...spec,
           productName: productName,
           createTime: createTime || '未知时间',
-          totalKeys: spec.totalCards || spec.totalKeys || 0,  // 兼容两种字段名
-          usedKeys: spec.usedCards || spec.usedKeys || 0,     // 兼容两种字段名
-          unusedKeys: spec.unusedCards || spec.unusedKeys || 0 // 兼容两种字段名
+          totalKeys: spec.totalKeys || 0,
+          usedKeys: spec.usedKeys || 0,
+          unusedKeys: spec.unusedKeys || 0
         }
       })
       
       // 存储当前页的规格数据
       specs.value = processedSpecs
+      totalSpecs.value = specList.length
     } else {
       specs.value = []
       totalSpecs.value = 0
     }
   } catch (error) {
+    console.error('加载商品规格失败:', error)
     ElMessage.error('加载商品规格失败，请检查网络连接')
     specs.value = []
     totalSpecs.value = 0
