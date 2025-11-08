@@ -43,7 +43,15 @@
 
       <!-- 商品列表 -->
       <div class="table-container">
-        <el-table :data="filteredProducts" v-loading="loading" stripe style="width: 100%">
+        <el-table 
+          :data="filteredProducts" 
+          v-loading="loading" 
+          stripe 
+          style="width: 100%"
+          :key="tableKey"
+          :reserve-selection="false"
+          :row-key="row => row.id || Math.random()"
+        >
             <el-table-column prop="id" label="ID" width="100" align="center" show-overflow-tooltip />
             <el-table-column prop="name" label="商品名称" min-width="180" align="left" :show-overflow-tooltip="true" />
             <el-table-column prop="description" label="商品描述" min-width="200" align="left" :show-overflow-tooltip="true" />
@@ -131,6 +139,9 @@ const loading = ref(false)
 // 商品列表数据
 const products = ref([])
 
+// 表格key，用于强制重新渲染表格
+const tableKey = ref(0)
+
 // 搜索条件
 const searchQuery = ref('')
 const statusFilter = ref('')
@@ -188,6 +199,8 @@ const loadProducts = async () => {
     total.value = 0
   } finally {
     loading.value = false
+    // 强制更新表格key，避免ResizeObserver循环错误
+    tableKey.value += 1
   }
 }
 
