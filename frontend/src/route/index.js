@@ -188,56 +188,52 @@ const router = createRouter({
   routes
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   if (to.meta.title) {
     document.title = to.meta.title;
   }
 
   if (to.meta.requiresAuth) {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    // 使用store中的checkAuthStatus方法验证token
+    const isAuthenticated = await store.checkAuthStatus();
+    
+    if (!isAuthenticated) {
+      // token无效或过期，清除本地存储并跳转到登录页
+      store.clearUser();
       next('/login');
       return;
     }
     
     if (process.env.NODE_ENV === 'development') {
-      // 开发环境下，直接继续路由，不设置模拟用户
+      // 开发环境下，直接继续路由
       next();
       return;
     }
     
-    try {
-      const decoded = utils.parseJWT(token);
-      if (decoded.exp * 1000 < Date.now()) {
-        localStorage.removeItem('token');
+    // 确保用户信息存在
+    if (!store.state.user) {
+      try {
+        await store.fetchCurrentUser();
+      } catch (error) {
+        // 获取用户信息失败，清除token并跳转到登录页
+        store.clearUser();
         next('/login');
         return;
       }
-      
-      if (store.state.user === null) {
-        store.setUser({
-          id: decoded.id,
-          username: decoded.username
-          // 移除role字段，所有登录用户都是管理员
-        });
-      }
-      
-      // 移除角色验证，所有登录用户都是管理员
-      // if (to.meta.requiresAdmin && decoded.role !== 'admin') {
-      //   next('/');
-      //   return;
-      // }
-    } catch (error) {
-      localStorage.removeItem('token');
-      next('/login');
-      return;
     }
   }
   
-  if (to.path === '/login' && localStorage.getItem('token')) {
-    // 如果已登录，跳转到管理页面
-    next('/admin');
-    return;
+  // 如果已登录且访问登录页，跳转到管理页面
+  if (to.path === '/login' && utils.isLoggedIn()) {
+    // 验证token是否有效
+    const isAuthenticated = await store.checkAuthStatus();
+    if (isAuthenticated) {
+      next('/admin');
+      return;
+    } else {
+      // token无效，清除本地存储
+      store.clearUser();
+    }
   }
 
   next();

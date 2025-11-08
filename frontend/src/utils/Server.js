@@ -2,6 +2,7 @@ import axios from 'axios'
 import { getToken, removeToken } from './utils.js'
 import { ElMessage } from 'element-plus'
 import router from '@/route'
+import store from './store.js'
 
 const Server = axios.create({
   baseURL: process.env.VUE_APP_API_BASE_URL || '',
@@ -30,6 +31,15 @@ Server.interceptors.response.use(
       if (response.data.code === 200) {
         return response.data
       } else {
+        // 检查是否为token相关的错误
+        if (response.data.message && (response.data.message.includes('Token无效') || 
+            response.data.message.includes('Token过期') || 
+            response.data.message.includes('未授权访问'))) {
+          // token失效，清除本地存储并跳转到登录页
+          handleTokenExpiration()
+          return Promise.reject(new Error('登录已过期，请重新登录'))
+        }
+        
         ElMessage.error(response.data.message || '请求失败')
         return Promise.reject(new Error(response.data.message || '请求失败'))
       }
@@ -47,11 +57,8 @@ Server.interceptors.response.use(
     
     switch (status) {
       case 401:
-        ElMessage.error('登录已过期，请重新登录')
-        removeToken()
-        if (router.currentRoute.value.path !== '/login') {
-          router.replace('/login')
-        }
+        // 处理401未授权错误
+        handleTokenExpiration()
         break
       case 403:
         ElMessage.error('权限不足，无法访问该资源')
@@ -74,6 +81,28 @@ Server.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
+/**
+ * 处理token过期失效
+ */
+function handleTokenExpiration() {
+  // 清除本地token存储
+  removeToken()
+  
+  // 清除用户状态
+  if (store && store.clearUser) {
+    store.clearUser()
+  }
+  
+  // 显示提示信息
+  ElMessage.error('登录已过期，请重新登录')
+  
+  // 跳转到登录页面，避免重复跳转
+  const currentPath = router.currentRoute.value.path
+  if (currentPath !== '/login' && !currentPath.includes('/login')) {
+    router.replace('/login')
+  }
+}
 
 const http = {
   get: (url, params = {}) => Server.get(url, { params }),

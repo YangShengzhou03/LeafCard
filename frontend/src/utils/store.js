@@ -134,7 +134,7 @@ const store = {
     }
   },
 
-  checkAuthStatus() {
+  async checkAuthStatus() {
     const token = utils.getToken()
     if (!token) {
       this.clearUser()
@@ -143,17 +143,27 @@ const store = {
     
     try {
       const decoded = utils.parseJWT(token)
-      if (decoded.exp * 1000 < Date.now()) {
+      
+      // 检查token是否过期
+      if (!decoded || !decoded.exp || decoded.exp * 1000 < Date.now()) {
         this.clearUser()
         return false
       }
       
+      // 检查token是否有效（包含必要字段）
+      if (!decoded.adminId && !decoded.userId) {
+        this.clearUser()
+        return false
+      }
+      
+      // 如果用户信息不存在，尝试获取当前用户信息
       if (!state.user) {
-        this.fetchCurrentUser()
+        await this.fetchCurrentUser()
       }
       
       return true
     } catch (error) {
+      // token解析失败，清除用户状态
       this.clearUser()
       return false
     }

@@ -443,7 +443,7 @@ const copyCardKeys = async () => {
 
 const resetForm = () => {
   Object.assign(generateForm, {
-    count: 100,
+    count: 50,
     length: 32,
     productId: '',
     specId: '',
