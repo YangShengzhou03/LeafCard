@@ -41,6 +41,9 @@
             <el-button type="primary" size="large" class="start-btn" @click="handleStart">
               {{ isAuthenticated ? '进入管理后台' : '登录系统' }}
             </el-button>
+            <el-button type="default" size="large" class="down-btn" @click="handleDownload">
+              下载客户端
+            </el-button>
           </div>
           </div>
         </div>
@@ -209,6 +212,17 @@ const handleStart = () => {
   }
 }
 
+// 处理下载客户端
+const handleDownload = () => {
+  try {
+    // 打开指定的下载链接
+    window.open('https://gitee.com/Yangshengzhou/yang-shengzhou/releases/download/v2.0/WinQSB%202.0.rar', '_blank')
+    ElMessage.success('正在下载客户端...')
+  } catch (error) {
+    ElMessage.error('下载链接打开失败，请重试')
+  }
+}
+
 
 </script>
 
@@ -354,7 +368,7 @@ const handleStart = () => {
 }
 
 .start-btn,
-.demo-btn {
+.down-btn {
   padding: 14px 32px;
   font-size: 16px;
   font-weight: 500;
@@ -363,7 +377,7 @@ const handleStart = () => {
 }
 
 .start-btn:hover,
-.demo-btn:hover {
+.down-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
 }
