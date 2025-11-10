@@ -3,7 +3,7 @@
     <header class="header">
       <div class="container">
         <div class="logo-area">
-          <h1 class="logo">LeafCard</h1>
+          <h1 class="logo">WinQSB</h1>
         </div>
         <div class="auth-section">
           <div class="auth-buttons" v-if="!isAuthenticated">
@@ -35,8 +35,8 @@
       <section class="hero-section">
         <div class="container">
           <div class="hero-content">
-            <h1 class="hero-title">LeafCard</h1>
-            <p class="hero-description">内部卡密管理系统</p>
+            <h1 class="hero-title">WinQSB</h1>
+            <p class="hero-description">专为运筹学、管理科学和决策分析设计的软件工具</p>
             <div class="cta-buttons">
             <el-button type="primary" size="large" class="start-btn" @click="handleStart">
               {{ isAuthenticated ? '进入管理后台' : '登录系统' }}
@@ -69,8 +69,8 @@
       <div class="container">
         <div class="footer-content">
           <div class="footer-section">
-            <h3>LeafCard</h3>
-            <p>内部卡密管理系统</p>
+            <h3>WinQSB</h3>
+            <p>专为运筹学、管理科学和决策分析设计的软件工具</p>
           </div>
           <div class="footer-section">
             <h4>产品功能</h4>
@@ -95,7 +95,7 @@
           </div>
         </div>
         <div class="footer-bottom">
-          <p>&copy; 2024-2025 LeafCard - 内部卡密管理系统</p>
+          <p>&copy; 2024-2025 WinQSB - 专为运筹学、管理科学和决策分析设计的软件工具</p>
           <div class="icp-info">
             <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">
               赣ICP备2025075576号
