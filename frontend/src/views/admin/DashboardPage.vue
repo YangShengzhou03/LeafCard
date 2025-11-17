@@ -20,7 +20,7 @@
                   <el-icon><Key /></el-icon>
                 </div>
                 <div class="stat-content">
-                  <div class="stat-title">卡密总数</div>
+                  <div class="stat-title">剩余卡密</div>
                   <div class="stat-value">{{ stats.cardKeyCount }}</div>
                   <div class="stat-trend">
                     <span class="trend-text">较上月</span>
@@ -224,7 +224,7 @@ const loadDashboardData = async () => {
       const data = response.data
       
       stats.value = {
-        cardKeyCount: data.totalOrders || 0,
+        cardKeyCount: 0,
         monthlyRevenue: data.monthlyRevenue || 0,
         dailySales: data.dailySales || 0,
         dailyRevenue: data.dailyRevenue || 0,
@@ -289,6 +289,8 @@ const loadSpecDistribution = async () => {
       const specifications = response.data
       
       const totalUnusedCards = specifications.reduce((total, spec) => total + (spec.unusedKeys || 0), 0)
+      
+      stats.value.cardKeyCount = totalUnusedCards
       
       const distributionData = specifications
         .filter(spec => spec.unusedKeys > 0)
