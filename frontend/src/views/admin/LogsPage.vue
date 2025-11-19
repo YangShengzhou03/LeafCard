@@ -6,19 +6,12 @@
           <span>操作日志</span>
         </div>
       </template>
-      
+
       <div class="filter-section">
         <el-row :gutter="16">
           <el-col :span="6">
-            <el-date-picker
-              v-model="filter.dateRange"
-              type="daterange"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              value-format="YYYY-MM-DD"
-              style="width: 100%"
-            />
+            <el-date-picker v-model="filter.dateRange" type="daterange" range-separator="至" start-placeholder="开始日期"
+              end-placeholder="结束日期" value-format="YYYY-MM-DD" style="width: 100%" />
           </el-col>
           <el-col :span="4">
             <el-select v-model="filter.operationType" placeholder="操作类型" clearable style="width: 100%">
@@ -39,25 +32,23 @@
           <el-col :span="10">
             <div class="action-buttons" style="justify-content: flex-end;">
               <el-button @click="exportLogs" :loading="exporting">
-                <el-icon><Download /></el-icon>
+                <el-icon>
+                  <Download />
+                </el-icon>
                 导出
               </el-button>
               <el-button type="danger" @click="clearLogs" :loading="clearing">
-                <el-icon><Delete /></el-icon>
+                <el-icon>
+                  <Delete />
+                </el-icon>
                 清空
               </el-button>
             </div>
           </el-col>
         </el-row>
       </div>
-      
-      <el-table 
-        v-loading="loading" 
-        :data="logs" 
-        style="width: 100%" 
-        stripe
-        @row-click="viewLogDetail"
-      >
+
+      <el-table v-loading="loading" :data="logs" style="width: 100%" stripe @row-click="viewLogDetail">
         <template #empty>
           <div style="padding: 40px 0;">
             <el-empty description="暂无日志数据" />
@@ -74,20 +65,14 @@
         <el-table-column prop="ipAddress" label="IP地址" width="140" align="center" />
         <el-table-column prop="createdAt" label="操作时间" width="180" align="center" />
       </el-table>
-      
+
       <div class="pagination-container">
-        <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
-          :page-sizes="[10, 20, 50, 100]"
-          :total="totalLogs"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
+        <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 50, 100]"
+          :total="totalLogs" layout="total, sizes, prev, pager, next, jumper" @size-change="handleSizeChange"
+          @current-change="handleCurrentChange" />
       </div>
     </el-card>
-    
+
     <el-dialog v-model="showLogDetail" title="日志详情" width="500px">
       <div v-if="selectedLog">
         <el-descriptions :column="1" border>
@@ -165,18 +150,18 @@ const loadLogs = async () => {
       page: currentPage.value,
       size: pageSize.value
     }
-    
+
     if (filter.dateRange && filter.dateRange.length === 2) {
       params.startDate = filter.dateRange[0]
       params.endDate = filter.dateRange[1]
     }
-    
+
     if (filter.operationType) {
       params.operationType = filter.operationType
     }
-    
+
     const response = await api.admin.getLogList(params)
-    
+
     if (response && response.data) {
       const data = response.data
       if (data.records) {
@@ -222,12 +207,12 @@ const exportLogs = async () => {
   exporting.value = true
   try {
     const params = {}
-    
+
     if (filter.dateRange && filter.dateRange.length === 2) {
       params.startDate = filter.dateRange[0]
       params.endDate = filter.dateRange[1]
     }
-    
+
     const response = await api.admin.exportLogs(params)
 
     const blob = new Blob([response.data], { type: 'application/json' })
@@ -283,7 +268,7 @@ onMounted(() => {
 .admin-logs-page {
   padding: 0px;
   background-color: #f0f2f5;
-  min-height: calc(100vh - 32px);
+  max-height: 100vh;
 }
 
 .logs-card {
@@ -395,21 +380,21 @@ onMounted(() => {
   .admin-logs-page {
     padding: 10px;
   }
-  
+
   .logs-card :deep(.el-card__body) {
     padding: 12px;
   }
-  
+
   .filter-section {
     padding: 12px;
     margin-bottom: 12px;
   }
-  
+
   .action-buttons {
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .header-actions {
     flex-direction: column;
     gap: 5px;

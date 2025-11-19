@@ -22,24 +22,24 @@ Server.interceptors.response.use(
     if (response.data === null || response.data === undefined) {
       return { data: null, code: 500, message: '响应数据为空' }
     }
-    
+
     if (response.config.responseType === 'blob') {
       return response
     }
-    
+
     if (response.data && response.data.code !== undefined) {
       if (response.data.code === 200) {
         return response.data
       } else {
         // 检查是否为token相关的错误
-        if (response.data.message && (response.data.message.includes('Token无效') || 
-            response.data.message.includes('Token过期') || 
-            response.data.message.includes('未授权访问'))) {
+        if (response.data.message && (response.data.message.includes('Token无效') ||
+          response.data.message.includes('Token过期') ||
+          response.data.message.includes('未授权访问'))) {
           // token失效，清除本地存储并跳转到登录页
           handleTokenExpiration()
           return Promise.reject(new Error('登录已过期，请重新登录'))
         }
-        
+
         ElMessage.error(response.data.message || '请求失败')
         return Promise.reject(new Error(response.data.message || '请求失败'))
       }
@@ -51,10 +51,10 @@ Server.interceptors.response.use(
       ElMessage.error('网络连接失败，请检查网络连接')
       return Promise.reject(error)
     }
-    
+
     const status = error.response.status
     const url = error.config?.url || ''
-    
+
     switch (status) {
       case 401:
         // 处理401未授权错误
@@ -77,7 +77,7 @@ Server.interceptors.response.use(
       default:
         ElMessage.error('请求失败，请稍后重试')
     }
-    
+
     return Promise.reject(error)
   }
 )
@@ -88,15 +88,15 @@ Server.interceptors.response.use(
 function handleTokenExpiration() {
   // 清除本地token存储
   removeToken()
-  
+
   // 清除用户状态
   if (store && store.clearUser) {
     store.clearUser()
   }
-  
+
   // 显示提示信息
   ElMessage.error('登录已过期，请重新登录')
-  
+
   // 跳转到登录页面，避免重复跳转
   const currentPath = router.currentRoute.value.path
   if (currentPath !== '/login' && !currentPath.includes('/login')) {

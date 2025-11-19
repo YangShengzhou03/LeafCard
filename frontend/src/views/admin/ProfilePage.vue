@@ -5,7 +5,9 @@
         <div class="card-header">
           <span>个人资料</span>
           <el-button type="primary" @click="editProfile">
-            <el-icon><Edit /></el-icon>
+            <el-icon>
+              <Edit />
+            </el-icon>
             修改资料
           </el-button>
         </div>
@@ -19,7 +21,7 @@
               {{ userInfo.nickname ? userInfo.nickname.charAt(0) : 'U' }}
             </el-avatar>
           </div>
-          
+
           <div class="info-section">
             <h2 class="user-name">{{ userInfo.nickname ? userInfo.nickname : '未设置昵称' }}</h2>
             <p class="user-email">{{ userInfo.email || '未设置邮箱' }}</p>
@@ -39,63 +41,36 @@
     </el-card>
 
     <!-- 修改资料对话框 -->
-    <el-dialog 
-      v-model="profileDialogVisible" 
-      title="修改资料" 
-      width="500px"
-    >
-      <el-form 
-        :model="profileForm" 
-        :rules="profileRules" 
-        ref="profileFormRef" 
-        label-width="80px"
-      >
+    <el-dialog v-model="profileDialogVisible" title="修改资料" width="500px">
+      <el-form :model="profileForm" :rules="profileRules" ref="profileFormRef" label-width="80px">
         <el-form-item label="头像" prop="avatar">
           <div class="avatar-upload">
             <el-avatar :size="80" :src="profileForm.avatar" class="preview-avatar">
               {{ profileForm.nickname ? profileForm.nickname.charAt(0) : 'U' }}
             </el-avatar>
             <el-button type="primary" @click="changeAvatar" style="margin-left: 16px;">
-              <el-icon><Camera /></el-icon>
+              <el-icon>
+                <Camera />
+              </el-icon>
               更换头像
             </el-button>
-            <input 
-              ref="avatarInput" 
-              type="file" 
-              accept="image/*" 
-              style="display: none" 
-              @change="handleAvatarChange"
-            />
+            <input ref="avatarInput" type="file" accept="image/*" style="display: none" @change="handleAvatarChange" />
           </div>
         </el-form-item>
-        
+
         <el-form-item label="昵称" prop="nickname">
-          <el-input 
-            v-model="profileForm.nickname" 
-            placeholder="请输入昵称" 
-            maxlength="20"
-            show-word-limit
-          />
+          <el-input v-model="profileForm.nickname" placeholder="请输入昵称" maxlength="20" show-word-limit />
         </el-form-item>
-        
+
         <el-form-item label="邮箱" prop="email">
-          <el-input 
-            v-model="profileForm.email" 
-            placeholder="请输入邮箱" 
-            type="email"
-          />
+          <el-input v-model="profileForm.email" placeholder="请输入邮箱" type="email" />
         </el-form-item>
-        
+
         <el-form-item label="密码" prop="password">
-          <el-input 
-            v-model="profileForm.password" 
-            type="password" 
-            placeholder="请输入新密码（留空则不修改）"
-            show-password
-          />
+          <el-input v-model="profileForm.password" type="password" placeholder="请输入新密码（留空则不修改）" show-password />
         </el-form-item>
       </el-form>
-      
+
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="profileDialogVisible = false">取消</el-button>
@@ -165,7 +140,7 @@ const loadUserInfo = async () => {
   try {
     // 调用API获取用户信息
     const response = await api.user.getUserInfo()
-    
+
     if (response && response.code === 200 && response.data) {
       // 确保数据字段正确映射
       const userData = response.data
@@ -176,7 +151,7 @@ const loadUserInfo = async () => {
         avatar: userData.avatar || userData.profilePicture || '',
         createTime: userData.createTime || userData.createdAt || userData.registrationTime || ''
       }
-      
+
     } else {
       ElMessage.error('获取用户信息失败')
     }
@@ -194,25 +169,25 @@ const editProfile = () => {
 // 保存个人资料
 const saveProfile = async () => {
   if (!profileFormRef.value) return
-  
+
   try {
     await profileFormRef.value.validate()
     saving.value = true
-    
+
     // 准备提交的数据
     const submitData = {
       username: profileForm.nickname,
       email: profileForm.email
     }
-    
+
     // 如果有新密码，添加到提交数据
     if (profileForm.password) {
       submitData.password = profileForm.password
     }
-    
+
     // 调用API保存个人资料
     const response = await api.user.updateUserInfo(submitData)
-    
+
     if (response && response.code === 200) {
       // 更新用户信息
       userInfo.value = { ...userInfo.value, ...profileForm }
@@ -241,19 +216,19 @@ const changeAvatar = () => {
 const handleAvatarChange = (event) => {
   const file = event.target.files[0]
   if (!file) return
-  
+
   // 检查文件类型
   if (!file.type.startsWith('image/')) {
     ElMessage.warning('请选择图片文件')
     return
   }
-  
+
   // 检查文件大小（限制为2MB）
   if (file.size > 2 * 1024 * 1024) {
     ElMessage.warning('图片大小不能超过2MB')
     return
   }
-  
+
   // 创建预览URL
   const reader = new FileReader()
   reader.onload = (e) => {
@@ -261,7 +236,7 @@ const handleAvatarChange = (event) => {
     ElMessage.success('头像更换成功')
   }
   reader.readAsDataURL(file)
-  
+
   // 重置文件输入
   event.target.value = ''
 }
@@ -462,23 +437,23 @@ onMounted(() => {
   .admin-profile {
     padding: 16px;
   }
-  
+
   .user-info-display {
     flex-direction: column;
     text-align: center;
     gap: 24px;
   }
-  
+
   .info-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .info-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   .avatar-upload {
     flex-direction: column;
     gap: 12px;
@@ -489,11 +464,11 @@ onMounted(() => {
   .profile-card :deep(.el-card__body) {
     padding: 20px 16px;
   }
-  
+
   .user-name {
     font-size: 20px;
   }
-  
+
   .info-item {
     padding: 12px;
   }

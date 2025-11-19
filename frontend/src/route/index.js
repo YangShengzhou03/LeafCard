@@ -12,7 +12,7 @@ const routes = [
       requiresAuth: false
     }
   },
-  
+
   {
     path: '/',
     name: 'HomePage',
@@ -46,7 +46,7 @@ const routes = [
           requiresAuth: true
         }
       },
-      
+
       {
         path: 'logs',
         name: 'AdminLogs',
@@ -112,7 +112,7 @@ const routes = [
       },
     ]
   },
-  
+
   {
     path: '/share/:id?',
     name: 'SharePage',
@@ -179,7 +179,7 @@ const routes = [
       requiresAuth: false
     }
   },
-  
+
   { path: '/:pathMatch(.*)*', redirect: '/' }
 ];
 
@@ -196,20 +196,20 @@ router.beforeEach(async (to, from, next) => {
   if (to.meta.requiresAuth) {
     // 使用store中的checkAuthStatus方法验证token
     const isAuthenticated = await store.checkAuthStatus();
-    
+
     if (!isAuthenticated) {
       // token无效或过期，清除本地存储并跳转到登录页
       store.clearUser();
       next('/login');
       return;
     }
-    
+
     if (process.env.NODE_ENV === 'development') {
       // 开发环境下，直接继续路由
       next();
       return;
     }
-    
+
     // 确保用户信息存在
     if (!store.state.user) {
       try {
@@ -222,7 +222,7 @@ router.beforeEach(async (to, from, next) => {
       }
     }
   }
-  
+
   // 如果已登录且访问登录页，跳转到管理页面
   if (to.path === '/login' && utils.isLoggedIn()) {
     // 验证token是否有效

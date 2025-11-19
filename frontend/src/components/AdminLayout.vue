@@ -1,11 +1,6 @@
 <template>
-  <el-watermark 
-    :content="watermarkText"
-    :font="{ color: 'rgba(0, 0, 0, 0.15)', fontSize: 16 }"
-    :z-index="9"
-    :rotate="-15"
-    :gap="[100, 100]"
-  >
+  <el-watermark :content="watermarkText" :font="{ color: 'rgba(0, 0, 0, 0.15)', fontSize: 16 }" :z-index="9"
+    :rotate="-15" :gap="[100, 100]">
     <div class="admin-layout">
       <header class="admin-header">
         <div class="header-left">
@@ -311,7 +306,7 @@ onMounted(async () => {
   border-radius: 6px;
   border: 1px solid #e6e8eb;
   overflow: hidden;
-  margin-bottom: 16px;
+  margin-bottom: 0px;
 }
 
 .admin-main :deep(.el-card__header) {

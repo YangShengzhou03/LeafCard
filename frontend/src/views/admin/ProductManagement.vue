@@ -10,16 +10,13 @@
       <div class="search-bar">
         <el-row :gutter="20">
           <el-col :span="6">
-            <el-input
-              v-model="searchQuery"
-              placeholder="商品名称"
-              clearable
-              @clear="handleSearch()"
-              @keyup.enter="handleSearch()"
-            >
+            <el-input v-model="searchQuery" placeholder="商品名称" clearable @clear="handleSearch()"
+              @keyup.enter="handleSearch()">
               <template #append>
                 <el-button @click="handleSearch()">
-                  <el-icon><Search /></el-icon>
+                  <el-icon>
+                    <Search />
+                  </el-icon>
                 </el-button>
               </template>
             </el-input>
@@ -41,37 +38,30 @@
       </div>
 
       <div class="table-container">
-        <el-table 
-          :data="filteredProducts" 
-          v-loading="loading" 
-          stripe 
-          style="width: 100%"
-          :key="tableKey"
-          :reserve-selection="false"
-          :row-key="row => row.id || Math.random()"
-        >
-            <el-table-column prop="id" label="ID" width="100" align="center" show-overflow-tooltip />
-            <el-table-column prop="name" label="商品名称" min-width="180" align="left" :show-overflow-tooltip="true" />
-            <el-table-column prop="description" label="商品描述" min-width="200" align="left" :show-overflow-tooltip="true" />
-            <el-table-column prop="status" label="状态" width="100" align="center">
-              <template #default="scope">
-                <el-tag :type="scope.row.status === 'active' ? 'success' : 'danger'">
-                  {{ scope.row.status === 'active' ? '上架' : '下架' }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column prop="createdAt" label="创建时间" width="180" align="center" :show-overflow-tooltip="true">
-              <template #default="scope">
-                {{ formatDateTime(scope.row.createdAt) || '-' }}
-              </template>
-            </el-table-column>
+        <el-table :data="filteredProducts" v-loading="loading" stripe style="width: 100%" :key="tableKey"
+          :reserve-selection="false" :row-key="row => row.id || Math.random()">
+          <el-table-column prop="id" label="ID" width="100" align="center" show-overflow-tooltip />
+          <el-table-column prop="name" label="商品名称" min-width="180" align="left" :show-overflow-tooltip="true" />
+          <el-table-column prop="description" label="商品描述" min-width="200" align="left" :show-overflow-tooltip="true" />
+          <el-table-column prop="status" label="状态" width="100" align="center">
+            <template #default="scope">
+              <el-tag :type="scope.row.status === 'active' ? 'success' : 'danger'">
+                {{ scope.row.status === 'active' ? '上架' : '下架' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="createdAt" label="创建时间" width="180" align="center" :show-overflow-tooltip="true">
+            <template #default="scope">
+              {{ formatDateTime(scope.row.createdAt) || '-' }}
+            </template>
+          </el-table-column>
           <el-table-column label="操作" width="180" align="center" fixed="right">
-              <template #default="{ row }">
-                <el-button size="small" @click="handleEditProduct(row)">编辑</el-button>
-                <el-button size="small" type="danger" @click="handleDeleteProduct(row)">删除</el-button>
-              </template>
-            </el-table-column>
-          
+            <template #default="{ row }">
+              <el-button size="small" @click="handleEditProduct(row)">编辑</el-button>
+              <el-button size="small" type="danger" @click="handleDeleteProduct(row)">删除</el-button>
+            </template>
+          </el-table-column>
+
           <template #empty>
             <div class="empty-container" style="padding: 40px 0;">
               <el-empty description="暂无商品数据" :image-size="120" />
@@ -81,23 +71,13 @@
       </div>
 
       <div class="pagination-container">
-        <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
-          :page-sizes="[10, 20, 50, 100]"
-          :total="total"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
+        <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 50, 100]"
+          :total="total" layout="total, sizes, prev, pager, next, jumper" @size-change="handleSizeChange"
+          @current-change="handleCurrentChange" />
       </div>
     </el-card>
-    
-    <el-dialog
-      v-model="showAddDialog"
-      :title="editingProduct ? '编辑商品' : '添加商品'"
-      width="500px"
-    >
+
+    <el-dialog v-model="showAddDialog" :title="editingProduct ? '编辑商品' : '添加商品'" width="500px">
       <el-form :model="productForm" :rules="productRules" ref="productFormRef" label-width="80px">
         <el-form-item label="商品名称" prop="name">
           <el-input v-model="productForm.name" placeholder="请输入商品名称" />
@@ -167,7 +147,7 @@ const loadProducts = async () => {
       keyword: searchQuery.value,
       status: statusFilter.value
     })
-    
+
     if (response && response.data) {
       products.value = response.data.records || response.data.content || []
       total.value = response.data.total || response.data.totalElements || 0
@@ -254,7 +234,7 @@ const handleDeleteProduct = async (row) => {
         type: 'warning'
       }
     )
-    
+
     const response = await api.admin.deleteProduct(row.id)
     if (response && response.code === 200) {
       ElMessage.success('删除成功')

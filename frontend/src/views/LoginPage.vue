@@ -6,7 +6,7 @@
       <div class="bg-circle circle-2"></div>
       <div class="bg-circle circle-3"></div>
     </div>
-    
+
     <!-- 登录表单卡片 -->
     <div class="login-card">
       <div class="card-inner">
@@ -18,219 +18,137 @@
           <h1 class="app-title">LeafCard</h1>
           <p class="subtitle">管理员系统</p>
         </div>
-        
+
         <!-- 表单区域 -->
         <div class="form-section">
           <!-- 视图切换标题 -->
           <div class="view-header">
-            <h2 class="view-title">{{ currentView === 'login' ? '登录' : currentView === 'register' ? '注册' : '重置密码' }}</h2>
+            <h2 class="view-title">{{ currentView === 'login' ? '登录' : currentView === 'register' ? '注册' : '重置密码' }}
+            </h2>
             <div class="view-indicator">
               <div class="indicator-dot" :class="{ active: currentView === 'login' }"></div>
               <div class="indicator-dot" :class="{ active: currentView === 'register' }"></div>
               <div class="indicator-dot" :class="{ active: currentView === 'forgot' }"></div>
             </div>
           </div>
-          
+
           <!-- 登录视图 -->
           <div v-if="currentView === 'login'" class="view-content">
-            <el-form 
-              ref="loginFormRef" 
-              :model="loginForm" 
-              :rules="loginRules" 
-              label-width="0"
-              class="form-content"
-            >
+            <el-form ref="loginFormRef" :model="loginForm" :rules="loginRules" label-width="0" class="form-content">
               <el-form-item prop="email">
                 <div class="input-wrapper">
-                  <el-input 
-                    v-model="loginForm.email" 
-                    placeholder="邮箱"
-                    prefix-icon="Message"
-                    size="large"
-                    class="custom-input"
-                  />
+                  <el-input v-model="loginForm.email" placeholder="邮箱" prefix-icon="Message" size="large"
+                    class="custom-input" />
                 </div>
               </el-form-item>
-              
+
               <el-form-item prop="password">
                 <div class="input-wrapper">
-                  <el-input 
-                    v-model="loginForm.password" 
-                    type="password" 
-                    placeholder="密码"
-                    prefix-icon="Lock"
-                    show-password
-                    size="large"
-                    class="custom-input"
-                    @keyup.enter="handleLogin"
-                  />
+                  <el-input v-model="loginForm.password" type="password" placeholder="密码" prefix-icon="Lock"
+                    show-password size="large" class="custom-input" @keyup.enter="handleLogin" />
                 </div>
               </el-form-item>
-              
+
               <el-form-item class="remember-password-item">
                 <el-checkbox v-model="loginForm.rememberPassword" class="remember-checkbox">
                   记住密码
                 </el-checkbox>
               </el-form-item>
-              
+
               <el-form-item>
-                <el-button 
-                  type="primary" 
-                  class="submit-btn" 
-                  :loading="loginLoading"
-                  @click="handleLogin"
-                  size="large"
-                >
+                <el-button type="primary" class="submit-btn" :loading="loginLoading" @click="handleLogin" size="large">
                   <span v-if="!loginLoading">登录</span>
                   <span v-else>登录中...</span>
                 </el-button>
               </el-form-item>
-              
+
               <div class="form-footer">
                 <el-link type="primary" @click="currentView = 'register'">没有账号？立即注册</el-link>
                 <el-link type="info" @click="currentView = 'forgot'">忘记密码？</el-link>
               </div>
             </el-form>
           </div>
-          
+
           <!-- 注册视图 -->
           <div v-else-if="currentView === 'register'" class="view-content">
-            <el-form 
-              ref="registerFormRef" 
-              :model="registerForm" 
-              :rules="registerRules" 
-              label-width="0"
-              class="form-content"
-            >
+            <el-form ref="registerFormRef" :model="registerForm" :rules="registerRules" label-width="0"
+              class="form-content">
               <el-form-item prop="email">
                 <div class="input-wrapper">
-                  <el-input 
-                    v-model="registerForm.email" 
-                    placeholder="邮箱"
-                    prefix-icon="Message"
-                    size="large"
-                    class="custom-input"
-                  />
+                  <el-input v-model="registerForm.email" placeholder="邮箱" prefix-icon="Message" size="large"
+                    class="custom-input" />
                 </div>
               </el-form-item>
-              
+
               <el-form-item prop="password">
                 <div class="input-wrapper">
-                  <el-input 
-                    v-model="registerForm.password" 
-                    type="password" 
-                    placeholder="密码"
-                    prefix-icon="Lock"
-                    show-password
-                    size="large"
-                    class="custom-input"
-                    @input="checkPasswordStrength"
-                  />
+                  <el-input v-model="registerForm.password" type="password" placeholder="密码" prefix-icon="Lock"
+                    show-password size="large" class="custom-input" @input="checkPasswordStrength" />
                 </div>
                 <div v-if="registerForm.password" class="password-strength">
                   <div class="strength-bar">
-                    <div 
-                      class="strength-level" 
-                      :class="passwordStrength.level"
-                      :style="{ width: passwordStrength.width + '%' }"
-                    ></div>
+                    <div class="strength-level" :class="passwordStrength.level"
+                      :style="{ width: passwordStrength.width + '%' }"></div>
                   </div>
                 </div>
               </el-form-item>
-              
+
               <el-form-item>
                 <el-checkbox v-model="registerForm.agreed" class="custom-checkbox">
-                  我已阅读并同意 <el-link type="primary" @click="showUserAgreement">用户协议</el-link> 和 <el-link type="primary" @click="showPrivacyPolicy">隐私政策</el-link>
+                  我已阅读并同意 <el-link type="primary" @click="showUserAgreement">用户协议</el-link> 和 <el-link type="primary"
+                    @click="showPrivacyPolicy">隐私政策</el-link>
                 </el-checkbox>
               </el-form-item>
-              
+
               <el-form-item>
-                <el-button 
-                  type="primary" 
-                  class="submit-btn" 
-                  :loading="registerLoading"
-                  @click="handleRegister"
-                  size="large"
-                >
+                <el-button type="primary" class="submit-btn" :loading="registerLoading" @click="handleRegister"
+                  size="large">
                   <span v-if="!registerLoading">注册</span>
                   <span v-else>注册中...</span>
                 </el-button>
               </el-form-item>
-              
+
               <div class="form-footer">
                 <el-link type="primary" @click="currentView = 'login'">已有账号？立即登录</el-link>
               </div>
             </el-form>
           </div>
-          
+
           <!-- 忘记密码视图 -->
           <div v-else-if="currentView === 'forgot'" class="view-content">
-            <el-form 
-              ref="forgotFormRef" 
-              :model="forgotForm" 
-              :rules="forgotRules" 
-              label-width="0"
-              class="form-content"
-            >
+            <el-form ref="forgotFormRef" :model="forgotForm" :rules="forgotRules" label-width="0" class="form-content">
               <el-form-item prop="email">
                 <div class="input-wrapper">
-                  <el-input 
-                    v-model="forgotForm.email" 
-                    placeholder="管理员邮箱"
-                    prefix-icon="Message"
-                    size="large"
-                    class="custom-input"
-                  />
+                  <el-input v-model="forgotForm.email" placeholder="管理员邮箱" prefix-icon="Message" size="large"
+                    class="custom-input" />
                 </div>
               </el-form-item>
-              
+
               <el-form-item prop="verificationCode">
                 <div class="verification-code-container">
-                  <el-input 
-                    v-model="forgotForm.verificationCode" 
-                    placeholder="邮箱验证码"
-                    prefix-icon="Key"
-                    size="large"
-                  />
-                  <el-button 
-                    :disabled="forgotCodeSending || forgotCountdown > 0"
-                    :loading="forgotCodeSending"
-                    @click="sendForgotVerificationCode"
-                    size="large"
-                    class="send-code-btn"
-                  >
+                  <el-input v-model="forgotForm.verificationCode" placeholder="邮箱验证码" prefix-icon="Key" size="large" />
+                  <el-button :disabled="forgotCodeSending || forgotCountdown > 0" :loading="forgotCodeSending"
+                    @click="sendForgotVerificationCode" size="large" class="send-code-btn">
                     {{ forgotCountdown > 0 ? `${forgotCountdown}s` : '获取验证码' }}
                   </el-button>
                 </div>
               </el-form-item>
-              
+
               <el-form-item prop="newPassword">
                 <div class="input-wrapper">
-                  <el-input 
-                    v-model="forgotForm.newPassword" 
-                    type="password" 
-                    placeholder="新密码"
-                    prefix-icon="Lock"
-                    show-password
-                    size="large"
-                    class="custom-input"
-                  />
+                  <el-input v-model="forgotForm.newPassword" type="password" placeholder="新密码" prefix-icon="Lock"
+                    show-password size="large" class="custom-input" />
                 </div>
               </el-form-item>
-              
+
               <el-form-item>
-                <el-button 
-                  type="primary" 
-                  class="submit-btn" 
-                  :loading="forgotLoading"
-                  @click="handleForgotPassword"
-                  size="large"
-                >
+                <el-button type="primary" class="submit-btn" :loading="forgotLoading" @click="handleForgotPassword"
+                  size="large">
                   <span v-if="!forgotLoading">重置密码</span>
                   <span v-else>重置中...</span>
                 </el-button>
               </el-form-item>
-              
+
               <div class="form-footer">
                 <el-link type="primary" @click="currentView = 'login'">返回登录</el-link>
               </div>
@@ -342,16 +260,16 @@ const sendForgotVerificationCode = async () => {
     ElMessage.warning('请先输入管理员邮箱')
     return
   }
-  
+
   if (!/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/.test(forgotForm.email)) {
     ElMessage.warning('请输入正确的邮箱格式')
     return
   }
-  
+
   try {
     forgotCodeSending.value = true
     const response = await api.user.sendResetCode({ email: forgotForm.email })
-    
+
     if (response && response.code === 200) {
       ElMessage.success('验证码已发送，请查收邮箱')
       startForgotCountdown()
@@ -387,25 +305,25 @@ const checkPasswordStrength = () => {
     passwordStrength.width = 0
     return
   }
-  
+
   let score = 0
-  
+
   // 长度评分
   if (password.length >= 8) score += 25
   else if (password.length >= 6) score += 15
-  
+
   // 包含小写字母
   if (/[a-z]/.test(password)) score += 15
-  
+
   // 包含大写字母
   if (/[A-Z]/.test(password)) score += 15
-  
+
   // 包含数字
   if (/[0-9]/.test(password)) score += 15
-  
+
   // 包含特殊字符
   if (/[^a-zA-Z0-9]/.test(password)) score += 20
-  
+
   // 设置强度等级
   if (score >= 80) {
     passwordStrength.level = 'strong'
@@ -468,10 +386,11 @@ const handleRegister = async () => {
       email: registerForm.email,
       passwordHash: registerForm.password // 使用passwordHash来匹配实体类的属性名
     };
-    
+
     const response = await store.register(registerData);
     if (response.success) {
-      ElMessage.success('注册成功');
+      ElMessage.success('注册成功，正在自动登录...');
+      // 由于store.register已经处理了token和用户信息的保存，直接跳转即可
       router.replace('/admin');
     } else {
       ElMessage.error(response.message || '注册失败')
@@ -508,7 +427,7 @@ onMounted(() => {
   if (forgotFormRef.value) {
     forgotFormRef.value = markRaw(forgotFormRef.value)
   }
-  
+
   // 检查是否有保存的登录凭据
   const savedCredentials = utils.getCredentials()
   if (savedCredentials) {
@@ -516,7 +435,7 @@ onMounted(() => {
     loginForm.email = savedCredentials.username
     loginForm.password = savedCredentials.password
     loginForm.rememberPassword = true
-    
+
     // 如果保存的邮箱是admin@leaf.com，自动更正为正确的邮箱
     if (loginForm.email === 'admin@leaf.com') {
       loginForm.email = 'admin@leafcard.com'
@@ -649,6 +568,7 @@ onMounted(() => {
     opacity: 0;
     transform: translateY(12px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -690,12 +610,15 @@ onMounted(() => {
 /* 确保输入框内部元素不限制宽度 */
 .form-content .el-input__prefix,
 .form-content .el-input__suffix {
-  flex-shrink: 0; /* 防止图标区域压缩输入区域 */
+  flex-shrink: 0;
+  /* 防止图标区域压缩输入区域 */
 }
 
 .form-content .el-input__inner {
-  flex: 1; /* 输入区域占据剩余空间 */
-  min-width: 0; /* 允许压缩 */
+  flex: 1;
+  /* 输入区域占据剩余空间 */
+  min-width: 0;
+  /* 允许压缩 */
 }
 
 /* 验证码输入区域样式优化 */
@@ -1008,67 +931,67 @@ onMounted(() => {
   .login-container {
     padding: 8px;
   }
-  
+
   .card-inner {
     padding: 16px 12px;
     flex-direction: column;
     gap: 20px;
   }
-  
+
   .logo-section {
     margin-bottom: 16px;
     border-right: none;
     border-bottom: 1px solid #f0f0f0;
     padding-bottom: 16px;
   }
-  
+
   .app-title {
     font-size: 18px;
   }
-  
+
   .logo {
     width: 50px;
     height: 50px;
   }
-  
+
   .logo-text {
     font-size: 20px;
   }
-  
+
   :deep(.el-tabs__item) {
     font-size: 12px;
     padding: 0 10px;
     height: 32px;
     line-height: 32px;
   }
-  
+
   :deep(.el-input__inner) {
     height: 32px;
     line-height: 32px;
   }
-  
+
   .submit-btn {
     height: 32px;
     font-size: 12px;
   }
-  
+
   .form-footer {
     flex-direction: column;
     gap: 8px;
     align-items: stretch;
   }
-  
+
   .form-footer .el-link {
     text-align: center;
     margin: 2px 0;
     font-size: 10px;
   }
-  
+
   .verification-code-container {
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .send-code-btn {
     min-width: 100%;
     font-size: 11px;
@@ -1081,30 +1004,30 @@ onMounted(() => {
     padding: 12px 8px;
     gap: 16px;
   }
-  
+
   .logo-section {
     margin-bottom: 12px;
     padding-bottom: 12px;
   }
-  
+
   .logo {
     width: 40px;
     height: 40px;
   }
-  
+
   .logo-text {
     font-size: 18px;
   }
-  
+
   .app-title {
     font-size: 16px;
   }
-  
+
   :deep(.el-input__inner) {
     height: 28px;
     line-height: 28px;
   }
-  
+
   .submit-btn {
     height: 28px;
     font-size: 11px;

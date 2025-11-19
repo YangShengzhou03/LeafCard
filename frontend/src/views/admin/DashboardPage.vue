@@ -5,19 +5,23 @@
         <div class="card-header">
           <span>管理员仪表盘</span>
           <el-button type="text" @click="refreshData" :loading="loading">
-            <el-icon><Refresh /></el-icon>
+            <el-icon>
+              <Refresh />
+            </el-icon>
             刷新
           </el-button>
         </div>
       </template>
-      
+
       <div class="dashboard-content">
         <el-row :gutter="20" class="stats-row">
           <el-col :span="6">
             <div class="stat-card primary">
               <div class="stat-item">
                 <div class="stat-icon">
-                  <el-icon><Key /></el-icon>
+                  <el-icon>
+                    <Key />
+                  </el-icon>
                 </div>
                 <div class="stat-content">
                   <div class="stat-title">剩余卡密</div>
@@ -30,12 +34,14 @@
               </div>
             </div>
           </el-col>
-          
+
           <el-col :span="6">
             <div class="stat-card success">
               <div class="stat-item">
                 <div class="stat-icon">
-                  <el-icon><Goods /></el-icon>
+                  <el-icon>
+                    <Goods />
+                  </el-icon>
                 </div>
                 <div class="stat-content">
                   <div class="stat-title">当月收入</div>
@@ -48,12 +54,14 @@
               </div>
             </div>
           </el-col>
-          
+
           <el-col :span="6">
             <div class="stat-card warning">
               <div class="stat-item">
                 <div class="stat-icon">
-                  <el-icon><Money /></el-icon>
+                  <el-icon>
+                    <Money />
+                  </el-icon>
                 </div>
                 <div class="stat-content">
                   <div class="stat-title">日销售数量</div>
@@ -66,12 +74,14 @@
               </div>
             </div>
           </el-col>
-          
+
           <el-col :span="6">
             <div class="stat-card info">
               <div class="stat-item">
                 <div class="stat-icon">
-                  <el-icon><Coin /></el-icon>
+                  <el-icon>
+                    <Coin />
+                  </el-icon>
                 </div>
                 <div class="stat-content">
                   <div class="stat-title">日收入</div>
@@ -122,7 +132,7 @@ import {
   LegendComponent
 } from 'echarts/components'
 import VChart from 'vue-echarts'
-import { 
+import {
   Refresh, Key, Money, Goods, Coin
 } from '@element-plus/icons-vue'
 import api from '../../services/api'
@@ -217,12 +227,12 @@ const formatCurrency = (value) => {
 const loadDashboardData = async () => {
   try {
     loading.value = true
-    
+
     const response = await api.admin.getDashboardStats()
-    
+
     if (response && response.data) {
       const data = response.data
-      
+
       stats.value = {
         cardKeyCount: 0,
         monthlyRevenue: data.monthlyRevenue || 0,
@@ -233,9 +243,9 @@ const loadDashboardData = async () => {
         dailySalesGrowth: data.dailySalesChange || 0,
         dailyGrowth: data.dailyRevenueChange || 0
       }
-      
+
       await loadSpecDistribution()
-      
+
     } else {
       stats.value = {
         cardKeyCount: 0,
@@ -247,12 +257,12 @@ const loadDashboardData = async () => {
         dailySalesGrowth: 0,
         dailyGrowth: 0
       }
-      
+
       specDistribution.value = []
-      
+
       ElMessage.warning('仪表盘数据为空，请检查数据配置')
     }
-    
+
   } catch (error) {
     if (error.response && error.response.status === 401) {
       ElMessage.warning('登录过期，请重新登录')
@@ -263,7 +273,7 @@ const loadDashboardData = async () => {
     } else {
       ElMessage.error('加载仪表盘数据失败，请稍后重试')
     }
-    
+
     stats.value = {
       cardKeyCount: 0,
       monthlyRevenue: 0,
@@ -274,7 +284,7 @@ const loadDashboardData = async () => {
       dailySalesGrowth: 0,
       dailyGrowth: 0
     }
-    
+
     specDistribution.value = []
   } finally {
     loading.value = false
@@ -284,27 +294,27 @@ const loadDashboardData = async () => {
 const loadSpecDistribution = async () => {
   try {
     const response = await api.admin.getSpecificationDTOs()
-    
+
     if (response && response.code === 200 && response.data) {
       const specifications = response.data
-      
+
       const totalUnusedCards = specifications.reduce((total, spec) => total + (spec.unusedKeys || 0), 0)
-      
+
       stats.value.cardKeyCount = totalUnusedCards
-      
+
       const distributionData = specifications
         .filter(spec => spec.unusedKeys > 0)
         .map(spec => ({
           name: spec.name,
           count: spec.unusedKeys || 0,
-          percentage: totalUnusedCards > 0 
-            ? Math.round((spec.unusedKeys / totalUnusedCards) * 100) 
+          percentage: totalUnusedCards > 0
+            ? Math.round((spec.unusedKeys / totalUnusedCards) * 100)
             : 0
         }))
         .sort((a, b) => b.count - a.count)
-      
+
       specDistribution.value = distributionData
-      
+
       if (distributionData.length === 0) {
         ElMessage.info('暂无未使用卡密数据')
       }
@@ -330,7 +340,7 @@ onMounted(() => {
 }
 
 .dashboard-card {
-  margin-bottom: 16px;
+  margin-bottom: 0px;
   border-radius: 4px;
   border: 1px solid #ebeef5;
 }
@@ -489,11 +499,11 @@ onMounted(() => {
 
 @media (max-width: 1200px) {
   .stats-row .el-col {
-    margin-bottom: 16px;
+    margin-bottom: 0px;
   }
-  
+
   .charts-row .el-col {
-    margin-bottom: 16px;
+    margin-bottom: 0px;
   }
 }
 
@@ -501,11 +511,11 @@ onMounted(() => {
   .stats-row .el-col {
     width: 100%;
   }
-  
+
   .charts-row .el-col {
     width: 100%;
   }
-  
+
   .pie-chart-container {
     height: 250px;
   }

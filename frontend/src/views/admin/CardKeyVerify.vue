@@ -9,15 +9,8 @@
 
       <div class="verify-content">
         <div class="input-section">
-          <el-input
-            v-model="cardKeyInput"
-            placeholder="请输入卡密代码"
-            clearable
-            size="large"
-            @keyup.enter="handleVerify"
-            @clear="clearResult"
-            class="cardkey-input"
-          />
+          <el-input v-model="cardKeyInput" placeholder="请输入卡密代码" clearable size="large" @keyup.enter="handleVerify"
+            @clear="clearResult" class="cardkey-input" />
           <el-button type="primary" @click="handleVerify" :loading="verifying" class="verify-btn">
             验证
           </el-button>
@@ -25,7 +18,7 @@
 
         <div v-if="showResult" class="result-section">
           <el-divider content-position="left">验证结果</el-divider>
-          
+
           <div class="result-card" :class="resultClass">
             <div class="result-header">
               <el-icon :size="24" :color="resultIconColor">
@@ -33,7 +26,7 @@
               </el-icon>
               <span class="result-title">{{ resultTitle }}</span>
             </div>
-            
+
             <div class="result-content">
               <el-descriptions :column="2" border>
                 <el-descriptions-item label="卡密代码">{{ cardKeyInfo.cardKey }}</el-descriptions-item>
@@ -42,7 +35,8 @@
                     {{ getStatusText(cardKeyInfo.status) }}
                   </el-tag>
                 </el-descriptions-item>
-                <el-descriptions-item label="商品规格">{{ cardKeyInfo.productSpec || cardKeyInfo.specificationName || cardKeyInfo.specificationId || '未设置' }}</el-descriptions-item>
+                <el-descriptions-item label="商品规格">{{ cardKeyInfo.productSpec || cardKeyInfo.specificationName ||
+                  cardKeyInfo.specificationId || '未设置' }}</el-descriptions-item>
                 <el-descriptions-item label="价格">¥{{ cardKeyInfo.price || '0.00' }}</el-descriptions-item>
                 <el-descriptions-item label="使用时间">{{ cardKeyInfo.activateTime || '未使用' }}</el-descriptions-item>
                 <el-descriptions-item label="创建时间">{{ cardKeyInfo.createdAt || '-' }}</el-descriptions-item>
@@ -140,20 +134,20 @@ const handleVerify = async () => {
   }
 
   verifying.value = true
-  
+
   try {
     const response = await Server.get(`/api/card-keys/verify/${cardKeyInput.value.trim()}`)
-    
-      if (response && response.code === 200) {
-        if (response.data) {
-          cardKeyInfo.value = response.data
-          
-          if (!cardKeyInfo.value.productSpec && cardKeyInfo.value.specificationName) {
-            cardKeyInfo.value.productSpec = cardKeyInfo.value.specificationName
-          }
-          
-          showResult.value = true
-          ElMessage.success('卡密验证成功')
+
+    if (response && response.code === 200) {
+      if (response.data) {
+        cardKeyInfo.value = response.data
+
+        if (!cardKeyInfo.value.productSpec && cardKeyInfo.value.specificationName) {
+          cardKeyInfo.value.productSpec = cardKeyInfo.value.specificationName
+        }
+
+        showResult.value = true
+        ElMessage.success('卡密验证成功')
       } else {
         cardKeyInfo.value = {
           cardKey: cardKeyInput.value.trim(),
@@ -326,6 +320,7 @@ const clearResult = () => {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -337,15 +332,15 @@ const clearResult = () => {
   .cardkey-verify {
     padding: 0;
   }
-  
+
   .input-section :deep(.el-input) {
     width: 100%;
   }
-  
+
   .verify-card :deep(.el-card__body) {
     padding: 16px;
   }
-  
+
   .result-content :deep(.el-descriptions) {
     --el-descriptions-item-bordered-cell-padding: 8px 12px;
   }

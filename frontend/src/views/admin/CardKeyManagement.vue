@@ -13,7 +13,9 @@
             <el-input v-model="searchQuery" placeholder="搜索卡密或邮箱" clearable @keyup.enter="handleSearch">
               <template #append>
                 <el-button @click="handleSearch">
-                  <el-icon><Search /></el-icon>
+                  <el-icon>
+                    <Search />
+                  </el-icon>
                 </el-button>
               </template>
             </el-input>
@@ -21,12 +23,7 @@
           <el-col :span="4">
             <el-select v-model="specificationFilter" placeholder="商品规格" clearable @change="handleSearch">
               <el-option label="全部" value="" />
-              <el-option 
-                v-for="spec in specifications" 
-                :key="spec.id" 
-                :label="spec.name" 
-                :value="spec.id" 
-              />
+              <el-option v-for="spec in specifications" :key="spec.id" :label="spec.name" :value="spec.id" />
             </el-select>
           </el-col>
           <el-col :span="14" class="button-group">
@@ -42,14 +39,15 @@
       <div class="table-container">
         <el-table :data="pagedCardKeys" style="width: 100%" v-loading="loading" :scroll="{ x: 1200 }">
           <template #empty>
-             <div style="padding: 40px 0;">
-               <el-empty description="暂无卡密数据" />
-             </div>
-           </template>
+            <div style="padding: 40px 0;">
+              <el-empty description="暂无卡密数据" />
+            </div>
+          </template>
           <el-table-column prop="id" label="ID" width="80" align="center" />
           <el-table-column prop="cardKey" label="卡密代码" min-width="200" align="left" :show-overflow-tooltip="true">
             <template #default="scope">
-              <span class="cardkey-code" @click="copyCardKey(scope.row.cardKey)" style="cursor: pointer;">{{ scope.row.cardKey }}</span>
+              <span class="cardkey-code" @click="copyCardKey(scope.row.cardKey)" style="cursor: pointer;">{{
+                scope.row.cardKey }}</span>
             </template>
           </el-table-column>
           <el-table-column prop="status" label="状态" width="120" align="center">
@@ -76,18 +74,11 @@
           </el-table-column>
           <el-table-column label="操作" width="200" fixed="right" align="center">
             <template #default="scope">
-              <el-button 
-                size="small" 
-                :type="scope.row.status === '已禁用' ? 'primary' : 'warning'"
-                @click="handleToggleCardKey(scope.row)"
-              >
+              <el-button size="small" :type="scope.row.status === '已禁用' ? 'primary' : 'warning'"
+                @click="handleToggleCardKey(scope.row)">
                 {{ scope.row.status === '已禁用' ? '启用' : '禁用' }}
               </el-button>
-              <el-button 
-                size="small" 
-                type="danger" 
-                @click="handleDeleteCardKey(scope.row)"
-              >
+              <el-button size="small" type="danger" @click="handleDeleteCardKey(scope.row)">
                 删除
               </el-button>
             </template>
@@ -96,15 +87,9 @@
       </div>
 
       <div class="pagination-container">
-        <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
-          :page-sizes="[10, 20, 50, 100]"
-          :total="total"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
+        <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 50, 100]"
+          :total="total" layout="total, sizes, prev, pager, next, jumper" @size-change="handleSizeChange"
+          @current-change="handleCurrentChange" />
       </div>
     </el-card>
   </div>
@@ -148,16 +133,16 @@ const loadCardKeys = async () => {
       keyword: searchQuery.value,
       specificationId: specificationFilter.value
     })
-    
+
     if (response && response.data) {
       const cardKeyList = response.data.records || response.data.content || response.data || []
-      
+
       const newCardKeys = cardKeyList.map(cardKey => ({
         id: cardKey.id,
         cardKey: cardKey.cardKey,
         status: cardKey.status,
-        productSpec: cardKey.productName && cardKey.specificationName 
-          ? `${cardKey.productName} - ${cardKey.specificationName}` 
+        productSpec: cardKey.productName && cardKey.specificationName
+          ? `${cardKey.productName} - ${cardKey.specificationName}`
           : '未设置',
         userEmail: cardKey.userEmail || '',
         userId: cardKey.userId || '',
@@ -165,7 +150,7 @@ const loadCardKeys = async () => {
         createTime: cardKey.createdAt ? formatDateTime(cardKey.createdAt) : '',
         updatedAt: cardKey.updatedAt ? formatDateTime(cardKey.updatedAt) : ''
       }))
-      
+
       cardKeys.value = newCardKeys
       total.value = response.data.total || response.data.totalElements || cardKeyList.length
     } else {
@@ -237,14 +222,14 @@ const handleExport = async () => {
         type: 'info'
       }
     )
-    
+
     // 显示加载提示
     const loadingMessage = ElMessage({
       message: '正在获取卡密数据...',
       type: 'info',
       duration: 0
     })
-    
+
     try {
       // 获取所有卡密数据（不分页）
       const response = await api.admin.getCardKeyListWithDetails({
@@ -253,24 +238,24 @@ const handleExport = async () => {
         keyword: searchQuery.value,
         specificationId: specificationFilter.value
       })
-      
+
       if (response && response.data) {
         const cardKeyList = response.data.records || response.data.content || response.data || []
-        
+
         if (cardKeyList.length === 0) {
           loadingMessage.close()
           ElMessage.warning('没有找到可导出的卡密数据')
           return
         }
-        
+
         // 提取卡密内容，每行一个
         const cardKeyContent = cardKeyList.map(cardKey => cardKey.cardKey).join('\n')
-        
+
         // 生成文件名
         const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-')
         const specName = specifications.value.find(spec => spec.id === specificationFilter.value)?.name || '全部'
         const fileName = `卡密导出_${specName}_${timestamp}.txt`
-        
+
         // 创建Blob并下载
         const blob = new Blob([cardKeyContent], { type: 'text/plain;charset=utf-8' })
         const url = URL.createObjectURL(blob)
@@ -281,7 +266,7 @@ const handleExport = async () => {
         link.click()
         document.body.removeChild(link)
         URL.revokeObjectURL(url)
-        
+
         loadingMessage.close()
         ElMessage.success(`成功导出 ${cardKeyList.length} 个卡密`)
       } else {
@@ -311,9 +296,9 @@ const handleClearUsed = async () => {
         confirmButtonClass: 'el-button--danger'
       }
     )
-    
+
     const response = await api.admin.batchDeleteUsedCardKeys()
-    
+
     if (response && response.code === 200) {
       ElMessage.success('已使用卡密清空成功')
       loadCardKeys()
@@ -330,7 +315,7 @@ const handleClearUsed = async () => {
 const handleToggleCardKey = async (row) => {
   const isDisabling = row.status !== '已禁用'
   const actionText = isDisabling ? '禁用' : '启用'
-  
+
   try {
     await ElMessageBox.confirm(
       `确定要${actionText}卡密"${row.cardKey}"吗？`,
@@ -341,14 +326,14 @@ const handleToggleCardKey = async (row) => {
         type: 'warning'
       }
     )
-    
+
     let response
     if (isDisabling) {
       response = await api.admin.disableCardKey(row.cardKey)
     } else {
       response = await api.admin.toggleCardKeyStatus(row.cardKey, '未使用')
     }
-    
+
     if (response && response.code === 200) {
       ElMessage.success(`${actionText}成功`)
       loadCardKeys()
@@ -373,9 +358,9 @@ const handleDeleteCardKey = async (row) => {
         type: 'warning'
       }
     )
-    
+
     const response = await api.admin.deleteCardKey(row.cardKey)
-    
+
     if (response && response.code === 200) {
       ElMessage.success('删除成功')
       loadCardKeys()
@@ -577,30 +562,30 @@ onMounted(() => {
   .admin-cardkey-management {
     padding: 10px;
   }
-  
+
   .cardkey-card :deep(.el-card__body) {
     padding: 16px;
   }
-  
+
   .search-bar {
     padding: 16px;
     margin-bottom: 16px;
   }
-  
+
   .search-bar :deep(.button-group) {
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .table-container :deep(.el-table) {
     font-size: 12px;
   }
-  
+
   .table-container :deep(.el-table th),
   .table-container :deep(.el-table td) {
     padding: 8px 0;
   }
-  
+
   .cardkey-code,
   .product-spec,
   .time-text {

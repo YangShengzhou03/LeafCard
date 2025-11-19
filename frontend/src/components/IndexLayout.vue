@@ -14,7 +14,9 @@
             <el-dropdown @command="handleUserCommand" trigger="click">
               <span class="user-dropdown">
                 <el-avatar :size="32" :src="userAvatar">
-                  <el-icon><User /></el-icon>
+                  <el-icon>
+                    <User />
+                  </el-icon>
                 </el-avatar>
                 <span class="username">{{ displayName }}</span>
                 <el-icon class="el-icon--right"><arrow-down /></el-icon>
@@ -38,13 +40,13 @@
             <h1 class="hero-title">WinQSB</h1>
             <p class="hero-description">专为运筹学、管理科学和决策分析设计的软件工具</p>
             <div class="cta-buttons">
-            <el-button type="primary" size="large" class="start-btn" @click="handleStart">
-              {{ isAuthenticated ? '进入管理后台' : '登录系统' }}
-            </el-button>
-            <el-button type="default" size="large" class="down-btn" @click="handleDownload">
-              下载客户端
-            </el-button>
-          </div>
+              <el-button type="primary" size="large" class="start-btn" @click="handleStart">
+                {{ isAuthenticated ? '进入管理后台' : '登录系统' }}
+              </el-button>
+              <el-button type="default" size="large" class="down-btn" @click="handleDownload">
+                下载客户端
+              </el-button>
+            </div>
           </div>
         </div>
       </section>
@@ -55,7 +57,9 @@
           <div class="features-grid">
             <div class="feature-card" v-for="feature in features" :key="feature.id">
               <div class="feature-icon">
-                <el-icon :size="40"><component :is="feature.icon" /></el-icon>
+                <el-icon :size="40">
+                  <component :is="feature.icon" />
+                </el-icon>
               </div>
               <h3>{{ feature.title }}</h3>
               <p>{{ feature.description }}</p>
@@ -169,7 +173,7 @@ const handleUserCommand = async (command) => {
           type: 'warning'
         }
       )
-      
+
       await store.logout()
       ElMessage.success('已退出登录')
       router.push('/')
@@ -509,38 +513,38 @@ const handleDownload = () => {
   .container {
     padding: 0 16px;
   }
-  
+
   .header .container {
     padding: 12px 16px;
     height: 56px;
   }
-  
+
   .logo {
     font-size: 20px;
   }
-  
+
   .hero-section {
     padding: 80px 0 60px;
   }
-  
+
   .hero-title {
     font-size: 32px;
   }
-  
+
   .hero-description {
     font-size: 16px;
   }
-  
+
   .cta-buttons {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .features-grid {
     grid-template-columns: 1fr;
     gap: 24px;
   }
-  
+
   .footer-content {
     grid-template-columns: 1fr;
     text-align: center;

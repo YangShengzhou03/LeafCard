@@ -1,4 +1,3 @@
-
 <template>
   <div class="admin-users">
     <el-card class="users-card">
@@ -13,16 +12,13 @@
         <div class="search-bar">
           <el-row :gutter="16">
             <el-col :span="6">
-              <el-input
-                v-model="searchQuery"
-                placeholder="搜索邮箱"
-                clearable
-                @clear="handleSearch"
-                @keyup.enter="handleSearch"
-              >
+              <el-input v-model="searchQuery" placeholder="搜索邮箱" clearable @clear="handleSearch"
+                @keyup.enter="handleSearch">
                 <template #append>
                   <el-button @click="handleSearch">
-                    <el-icon><Search /></el-icon>
+                    <el-icon>
+                      <Search />
+                    </el-icon>
                   </el-button>
                 </template>
               </el-input>
@@ -44,18 +40,14 @@
             </el-col>
           </el-row>
         </div>
-        
+
         <!-- 用户表格 -->
         <div class="table-container">
-          <el-table 
-            :data="filteredUsers" 
-            style="width: 100%" 
-            v-loading="loading" 
-            stripe
-          >
+          <el-table :data="filteredUsers" style="width: 100%" v-loading="loading" stripe>
             <el-table-column prop="id" label="ID" min-width="80" align="center">
               <template #default="scope">
-                <span class="truncate-id">{{ scope.row.id ? scope.row.id.toString().substring(0, 3) + '...' : '' }}</span>
+                <span class="truncate-id">{{ scope.row.id ? scope.row.id.toString().substring(0, 3) + '...' : ''
+                  }}</span>
               </template>
             </el-table-column>
             <el-table-column prop="username" label="用户名" min-width="120" align="center" :show-overflow-tooltip="true" />
@@ -68,23 +60,22 @@
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="createdAt" label="注册时间" min-width="160" align="center" :show-overflow-tooltip="true" />
-            <el-table-column prop="lastLoginTime" label="最后上线时间" min-width="160" align="center" :show-overflow-tooltip="true" />
+            <el-table-column prop="createdAt" label="注册时间" min-width="160" align="center"
+              :show-overflow-tooltip="true" />
+            <el-table-column prop="lastLoginTime" label="最后上线时间" min-width="160" align="center"
+              :show-overflow-tooltip="true" />
             <el-table-column label="操作" min-width="280" fixed="right" align="center">
               <template #default="scope">
                 <el-button size="small" @click="editUser(scope.row)">编辑</el-button>
-                <el-button 
-                  size="small" 
-                  :type="scope.row.status === 'active' ? 'warning' : 'primary'"
-                  @click="toggleUserStatus(scope.row)"
-                >
+                <el-button size="small" :type="scope.row.status === 'active' ? 'warning' : 'primary'"
+                  @click="toggleUserStatus(scope.row)">
                   {{ scope.row.status === 'active' ? '停用' : '启用' }}
                 </el-button>
                 <el-button size="small" type="info" @click="resetPassword(scope.row)">重置密码</el-button>
                 <el-button size="small" type="danger" @click="deleteUser(scope.row)">删除</el-button>
               </template>
             </el-table-column>
-            
+
             <!-- 空状态 -->
             <template #empty>
               <div class="empty-container" style="padding: 40px 0;">
@@ -93,28 +84,18 @@
             </template>
           </el-table>
         </div>
-        
+
         <!-- 分页 -->
         <div class="pagination-container">
-          <el-pagination
-            v-model:current-page="currentPage"
-            v-model:page-size="pageSize"
-            :page-sizes="[10, 20, 50, 100]"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total="totalUsers"
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-          />
+          <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 50, 100]"
+            layout="total, sizes, prev, pager, next, jumper" :total="totalUsers" @size-change="handleSizeChange"
+            @current-change="handleCurrentChange" />
         </div>
       </div>
     </el-card>
-    
+
     <!-- 添加/编辑用户对话框 -->
-    <el-dialog
-      v-model="showAddUserDialog"
-      :title="editingUser ? '编辑用户' : '添加用户'"
-      width="500px"
-    >
+    <el-dialog v-model="showAddUserDialog" :title="editingUser ? '编辑用户' : '添加用户'" width="500px">
       <el-form :model="userForm" :rules="userRules" ref="userFormRef" label-width="80px">
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="userForm.email" />
@@ -124,9 +105,9 @@
         </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-radio-group v-model="userForm.status">
-              <el-radio label="active">正常</el-radio>
-              <el-radio label="inactive">禁用</el-radio>
-            </el-radio-group>
+            <el-radio label="active">正常</el-radio>
+            <el-radio label="inactive">禁用</el-radio>
+          </el-radio-group>
         </el-form-item>
 
       </el-form>
@@ -190,20 +171,20 @@ const loadUsers = async () => {
       page: currentPage.value,
       size: pageSize.value
     }
-    
+
     // 添加搜索条件
     if (searchQuery.value) {
       params.keyword = searchQuery.value
     }
-    
+
     // 添加状态筛选条件
     if (statusFilter.value) {
       params.status = statusFilter.value
     }
-    
+
     // 调用API获取用户列表（后端分页）
     const response = await api.admin.getUserList(params)
-    
+
     if (response && response.data) {
       users.value = response.data.records || response.data.content || []
       totalUsers.value = response.data.total || response.data.totalElements || 0
@@ -241,10 +222,10 @@ const resetPassword = async (user) => {
         type: 'warning'
       }
     )
-    
-    await api.user.adminResetPassword({ 
-      email: user.email, 
-      newPassword: '123456' 
+
+    await api.user.adminResetPassword({
+      email: user.email,
+      newPassword: '123456'
     })
     ElMessage.success(`密码重置成功，新密码为：123456`)
   } catch (error) {
@@ -274,25 +255,25 @@ const editUser = (user) => {
 
 const saveUser = async () => {
   if (!userFormRef.value) return
-  
+
   try {
     await userFormRef.value.validate()
-    
+
     const userData = {
       email: userForm.email,
       status: userForm.status === 'active' ? 1 : 0
     }
-    
+
     if (!editingUser.value && userForm.password) {
       userData.password = userForm.password
     }
-    
+
     if (editingUser.value) {
       await api.user.updateUser(editingUser.value.id, userData)
     } else {
       await api.user.createUser(userData)
     }
-    
+
     ElMessage.success(editingUser.value ? '用户更新成功' : '用户添加成功')
     showAddUserDialog.value = false
     editingUser.value = null
@@ -315,11 +296,11 @@ const toggleUserStatus = async (user) => {
   try {
     const newStatus = user.status === 'active' ? 'inactive' : 'active'
     const enabled = newStatus === 'active'
-    
+
     await api.user.updateUser(user.id, {
       status: enabled ? 1 : 0
     })
-    
+
     ElMessage.success(`用户已${newStatus === 'active' ? '启用' : '禁用'}`)
     loadUsers()
   } catch (error) {
@@ -339,7 +320,7 @@ const deleteUser = async (user) => {
         confirmButtonClass: 'el-button--danger'
       }
     )
-    
+
     await api.user.deleteUser(user.id)
     ElMessage.success('用户删除成功')
     loadUsers()
@@ -368,7 +349,7 @@ onMounted(() => {
   padding: 0;
   background-color: #f0f2f5;
   width: 100%;
-  min-height: 100vh;
+  max-height: 100vh;
 }
 
 .users-card {
@@ -377,7 +358,7 @@ onMounted(() => {
   border-radius: 0;
   box-shadow: none;
   width: 100%;
-  min-height: 100vh;
+  max-height: 100vh;
 }
 
 .users-card :deep(.el-card__body) {
@@ -499,7 +480,8 @@ onMounted(() => {
 :deep(.el-table) {
   min-width: 100%;
   font-size: 14px;
-  table-layout: auto !important; /* 启用自动表格布局 */
+  table-layout: auto !important;
+  /* 启用自动表格布局 */
 }
 
 :deep(.el-table__header) {
@@ -511,14 +493,16 @@ onMounted(() => {
   color: #495057;
   font-weight: 600;
   border-bottom: 2px solid #dee2e6;
-  text-align: center !important; /* 强制表头居中对齐 */
+  text-align: center !important;
+  /* 强制表头居中对齐 */
   white-space: nowrap;
 }
 
 :deep(.el-table td) {
   border-bottom: 1px solid #e9ecef;
   padding: 12px 8px;
-  text-align: center !important; /* 强制单元格居中对齐 */
+  text-align: center !important;
+  /* 强制单元格居中对齐 */
 }
 
 :deep(.el-table__body-wrapper) {
@@ -528,7 +512,8 @@ onMounted(() => {
 :deep(.el-table .cell) {
   white-space: nowrap;
   line-height: 1.4;
-  text-align: center !important; /* 强制单元格内容居中对齐 */
+  text-align: center !important;
+  /* 强制单元格内容居中对齐 */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -559,37 +544,44 @@ onMounted(() => {
   min-width: 80px;
 }
 
-:deep(.el-table .el-table__cell:nth-child(1)) { /* ID列 */
+:deep(.el-table .el-table__cell:nth-child(1)) {
+  /* ID列 */
   min-width: 80px;
   max-width: 100px;
 }
 
-:deep(.el-table .el-table__cell:nth-child(2)) { /* 用户名列 */
+:deep(.el-table .el-table__cell:nth-child(2)) {
+  /* 用户名列 */
   min-width: 120px;
   max-width: 150px;
 }
 
-:deep(.el-table .el-table__cell:nth-child(3)) { /* 邮箱列 */
+:deep(.el-table .el-table__cell:nth-child(3)) {
+  /* 邮箱列 */
   min-width: 200px;
   max-width: 280px;
 }
 
-:deep(.el-table .el-table__cell:nth-child(4)) { /* 状态列 */
+:deep(.el-table .el-table__cell:nth-child(4)) {
+  /* 状态列 */
   min-width: 100px;
   max-width: 120px;
 }
 
-:deep(.el-table .el-table__cell:nth-child(5)) { /* 注册时间列 */
+:deep(.el-table .el-table__cell:nth-child(5)) {
+  /* 注册时间列 */
   min-width: 160px;
   max-width: 200px;
 }
 
-:deep(.el-table .el-table__cell:nth-child(6)) { /* 最后上线时间列 */
+:deep(.el-table .el-table__cell:nth-child(6)) {
+  /* 最后上线时间列 */
   min-width: 160px;
   max-width: 200px;
 }
 
-:deep(.el-table .el-table__cell:nth-child(7)) { /* 操作列 */
+:deep(.el-table .el-table__cell:nth-child(7)) {
+  /* 操作列 */
   min-width: 280px;
   max-width: 320px;
 }

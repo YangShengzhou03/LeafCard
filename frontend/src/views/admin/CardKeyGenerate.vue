@@ -410,7 +410,7 @@ const copyCardKey = async (key) => {
     await navigator.clipboard.writeText(key)
     ElMessage.success('卡密已复制到剪贴板')
   } catch (error) {
-      const textArea = document.createElement('textarea')
+    const textArea = document.createElement('textarea')
     textArea.value = key
     document.body.appendChild(textArea)
     textArea.select()

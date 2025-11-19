@@ -16,11 +16,11 @@ export function getToken() {
 
 export function formatFileSize(bytes) {
   if (bytes === null || bytes === undefined || bytes === 0) return '0 Bytes'
-  
+
   const k = 1024
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
-  
+
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
@@ -29,26 +29,26 @@ export function parseJWT(token) {
     if (!token || typeof token !== 'string' || token.split('.').length !== 3) {
       return {};
     }
-    
+
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    
+
     const jsonPayload = decodeURIComponent(
       atob(base64)
         .split('')
-        .map(function(c) {
+        .map(function (c) {
           return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
         })
         .join('')
     );
-    
+
     const payload = JSON.parse(jsonPayload);
-    
+
     if (payload.exp && payload.exp * 1000 < Date.now()) {
       removeToken();
       return {};
     }
-    
+
     return payload;
   } catch (error) {
     removeToken();
@@ -98,7 +98,7 @@ export function debounce(func, wait, immediate) {
 
 export function throttle(func, limit) {
   let inThrottle
-  return function(...args) {
+  return function (...args) {
     if (!inThrottle) {
       func.apply(this, args)
       inThrottle = true
@@ -149,7 +149,7 @@ export function formatDate(date, format = 'YYYY-MM-DD') {
   const hours = String(d.getHours()).padStart(2, '0')
   const minutes = String(d.getMinutes()).padStart(2, '0')
   const seconds = String(d.getSeconds()).padStart(2, '0')
-  
+
   return format
     .replace('YYYY', year)
     .replace('MM', month)
@@ -165,7 +165,7 @@ export function getRelativeTime(date) {
   const minutes = Math.floor(diff / 60000)
   const hours = Math.floor(minutes / 60)
   const days = Math.floor(hours / 24)
-  
+
   if (days > 0) return `${days}天前`
   if (hours > 0) return `${hours}小时前`
   if (minutes > 0) return `${minutes}分钟前`
@@ -178,13 +178,13 @@ export function checkNetworkStatus() {
       resolve(false)
       return
     }
-    
+
     // 尝试请求一个小的资源来确认网络连接
     const img = new Image()
     img.onload = () => resolve(true)
     img.onerror = () => resolve(false)
     img.src = 'https://www.baidu.com/favicon.ico?t=' + Date.now()
-    
+
     // 设置超时
     setTimeout(() => resolve(false), 3000)
   })
@@ -196,7 +196,7 @@ export function setupNetworkListener(callback) {
     window.addEventListener('online', () => {
       callback(true)
     })
-    
+
     window.addEventListener('offline', () => {
       callback(false)
     })
@@ -212,7 +212,7 @@ export async function retryWithBackoff(operation, maxRetries = 3, baseDelay = 10
       if (attempt === maxRetries - 1) {
         throw error
       }
-      
+
       // 检查是否是网络错误
       if (error.code === 'NETWORK_ERROR' || !error.response) {
         // 等待一段时间后重试

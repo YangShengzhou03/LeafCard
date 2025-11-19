@@ -1,11 +1,8 @@
 <template>
-  <div id="app" v-loading="isLoading" :element-loading-text="loadingText" :element-loading-background="loadingBackground">
+  <div id="app" v-loading="isLoading" :element-loading-text="loadingText"
+    :element-loading-background="loadingBackground">
     <div v-if="hasError" class="app-error">
-      <el-result
-        icon="error"
-        title="应用加载失败"
-        :sub-title="errorMessage"
-      >
+      <el-result icon="error" title="应用加载失败" :sub-title="errorMessage">
         <template #extra>
           <el-button type="primary" @click="retryLoading">重试</el-button>
         </template>
@@ -34,7 +31,7 @@ onErrorCaptured((err) => {
 const retryLoading = async () => {
   hasError.value = false
   isLoading.value = true
-  
+
   try {
     await store.init()
     isLoading.value = false
@@ -101,12 +98,12 @@ body {
   --warning-color: #E6A23C;
   --danger-color: #F56C6C;
   --info-color: #909399;
-  
+
   --text-primary: #2c3e50;
   --text-regular: #5a6c7d;
   --text-secondary: #7f8c8d;
   --text-placeholder: #aab7c4;
-  
+
   --border-base: #e1e8ed;
   --border-light: #e4e7ed;
   --border-lighter: #ebeeF5;
