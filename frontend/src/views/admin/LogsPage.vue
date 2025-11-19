@@ -33,7 +33,7 @@
             <div class="action-buttons" style="justify-content: flex-end;">
               <el-button @click="exportLogs" :loading="exporting">
                 <el-icon>
-                  <Download />
+                  <Upload />
                 </el-icon>
                 导出
               </el-button>
@@ -94,7 +94,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Download, Delete } from '@element-plus/icons-vue'
+import { Delete, Upload } from '@element-plus/icons-vue'
 import api from '../../services/api'
 
 const loading = ref(false)

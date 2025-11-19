@@ -20,13 +20,21 @@
               </template>
             </el-input>
           </el-col>
-          <el-col :span="4">
+          <el-col :span="3">
             <el-select v-model="specificationFilter" placeholder="商品规格" clearable @change="handleSearch">
               <el-option label="全部" value="" />
               <el-option v-for="spec in specifications" :key="spec.id" :label="spec.name" :value="spec.id" />
             </el-select>
           </el-col>
-          <el-col :span="14" class="button-group">
+          <el-col :span="3">
+            <el-select v-model="statusFilter" placeholder="卡密状态" clearable @change="handleSearch">
+              <el-option label="全部" value="" />
+              <el-option label="未使用" value="未使用" />
+              <el-option label="已使用" value="已使用" />
+              <el-option label="已禁用" value="已禁用" />
+            </el-select>
+          </el-col>
+          <el-col :span="12" class="button-group">
             <el-button type="primary" @click="handleSearch">查询</el-button>
             <el-button @click="resetFilter">重置</el-button>
             <div style="flex: 1;"></div>
@@ -106,6 +114,7 @@ const cardKeys = ref([])
 const specifications = ref([])
 const searchQuery = ref('')
 const specificationFilter = ref('')
+const statusFilter = ref('')
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
@@ -131,7 +140,8 @@ const loadCardKeys = async () => {
       page: currentPage.value,
       size: pageSize.value,
       keyword: searchQuery.value,
-      specificationId: specificationFilter.value
+      specificationId: specificationFilter.value,
+      status: statusFilter.value
     })
 
     if (response && response.data) {
@@ -174,6 +184,7 @@ const handleSearch = () => {
 const resetFilter = () => {
   searchQuery.value = ''
   specificationFilter.value = ''
+  statusFilter.value = ''
   currentPage.value = 1
   loadCardKeys()
 }
@@ -236,7 +247,8 @@ const handleExport = async () => {
         page: 1,
         size: 10000, // 设置较大的size获取所有数据
         keyword: searchQuery.value,
-        specificationId: specificationFilter.value
+        specificationId: specificationFilter.value,
+        status: statusFilter.value
       })
 
       if (response && response.data) {
