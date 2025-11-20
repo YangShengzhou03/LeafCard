@@ -586,6 +586,9 @@ onUnmounted(() => {
 
 .icp-info {
   margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
 }
 
 .icp-info a {
