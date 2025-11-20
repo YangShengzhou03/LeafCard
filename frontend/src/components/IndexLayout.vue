@@ -141,6 +141,8 @@
               aria-label="查看ICP备案信息：赣ICP备2025075576号">
               赣ICP备2025075576号
             </a>
+            <a href="https://beian.mps.gov.cn/#/query/webSearch?code=36010802001254" rel="noreferrer"
+              target="_blank">赣公网安备36010802001254号</a>
           </div>
         </div>
       </div>
