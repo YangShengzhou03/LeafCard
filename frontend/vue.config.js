@@ -10,7 +10,6 @@ module.exports = defineConfig({
         '~': path.resolve(__dirname, 'src')
       }
     },
-    // 优化构建输出
     optimization: {
       splitChunks: {
         chunks: 'all',
@@ -26,7 +25,8 @@ module.exports = defineConfig({
     }
   },
   devServer: {
-    port: 8080,
+    // 这里实际上没被使用，先留着吧。因为用了环境变量 VUE_APP_API_BASE_URL
+    port: 80,
     host: 'localhost',
     open: true,
     hot: true,
