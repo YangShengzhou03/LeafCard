@@ -26,7 +26,7 @@ module.exports = defineConfig({
   },
   devServer: {
     // 这里实际上没被使用，先留着吧。因为用了环境变量 VUE_APP_API_BASE_URL
-    port: 80,
+    port: 8080,
     host: 'localhost',
     open: true,
     hot: true,
