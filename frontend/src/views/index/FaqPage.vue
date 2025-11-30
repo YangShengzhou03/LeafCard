@@ -4,7 +4,7 @@
     <header class="page-header">
       <div class="container">
         <h1>常见问题</h1>
-        <p>LeafCard枫叶卡管系统的常见问题解答和使用帮助</p>
+        <p>LeafCard轻羽卡管系统的常见问题解答和使用帮助</p>
       </div>
     </header>
 

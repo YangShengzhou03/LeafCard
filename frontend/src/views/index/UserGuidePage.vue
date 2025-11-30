@@ -4,7 +4,7 @@
     <header class="page-header">
       <div class="container">
         <h1>使用指南</h1>
-        <p>LeafCard枫叶卡管系统快速入门指南</p>
+        <p>LeafCard轻羽卡管系统快速入门指南</p>
       </div>
     </header>
 
@@ -15,13 +15,13 @@
           <section class="guide-section">
             <div class="section-header">
               <h2>快速入门</h2>
-              <p>新手用户快速上手LeafCard枫叶卡管系统</p>
+              <p>新手用户快速上手LeafCard轻羽卡管系统</p>
             </div>
             <div class="guide-content">
               <el-collapse v-model="activeNames" accordion>
                 <el-collapse-item name="register" title="注册账号">
                   <div class="collapse-content">
-                    <p>注册LeafCard枫叶卡管系统账号需要满足以下要求：</p>
+                    <p>注册LeafCard轻羽卡管系统账号需要满足以下要求：</p>
                     <ul>
                       <li>用户名：3-20个字符，支持中文、英文、数字和下划线</li>
                       <li>密码：8-20个字符，必须包含字母和数字</li>
@@ -39,7 +39,7 @@
                 
                 <el-collapse-item name="card" title="卡管理">
                   <div class="collapse-content">
-                    <p>LeafCard枫叶卡管系统支持多种卡管理操作：</p>
+                    <p>LeafCard轻羽卡管系统支持多种卡管理操作：</p>
                     <ul>
                       <li>添加卡片：点击"添加卡片"按钮填写卡信息</li>
                       <li>编辑卡片：点击卡片列表中的编辑按钮修改信息</li>

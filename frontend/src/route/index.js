@@ -18,7 +18,7 @@ const routes = [
     name: 'HomePage',
     component: () => import('@/components/IndexLayout.vue'),
     meta: {
-      title: 'LeafCard - 枫叶卡管系统',
+      title: 'LeafCard - 轻羽卡管系统',
       requiresAuth: false
     }
   },
@@ -118,7 +118,7 @@ const routes = [
     name: 'SharePage',
     component: () => import('@/components/IndexLayout.vue'),
     meta: {
-      title: 'LeafCard - 枫叶卡管系统',
+      title: 'LeafCard - 轻羽卡管系统',
       requiresAuth: false
     }
   },

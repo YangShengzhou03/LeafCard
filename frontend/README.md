@@ -1,4 +1,4 @@
-# LeafCard Frontend - 枫叶卡管系统前端
+# LeafCard Frontend - 轻羽卡管系统前端
 
 LeafCard 是一个企业级卡密管理系统前端项目，基于 Vue 3 和 Element Plus 构建。
 

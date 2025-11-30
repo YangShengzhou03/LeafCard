@@ -2,7 +2,7 @@
   "name": "leaf-card-frontend",
   "version": "1.0.0",
   "private": true,
-  "description": "LeafCard Frontend - 枫叶卡管系统前端",
+  "description": "LeafCard Frontend - 轻羽卡管系统前端",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build"

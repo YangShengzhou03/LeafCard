@@ -4,7 +4,7 @@
     <div class="admin-layout">
       <header class="admin-header">
         <div class="header-left">
-          <h1 class="logo">LeafCard - 枫叶卡管系统</h1>
+          <h1 class="logo">LeafCard - 轻羽卡管系统</h1>
         </div>
         <div class="header-right">
           <el-dropdown @command="handleCommand" trigger="click">

@@ -4,7 +4,7 @@
     <header class="page-header">
       <div class="container">
         <h1>关于作者</h1>
-        <p>LeafCard枫叶卡管系统开发者简介</p>
+        <p>LeafCard轻羽卡管系统开发者简介</p>
       </div>
     </header>
 
@@ -85,7 +85,7 @@
                   <div class="timeline-marker"></div>
                   <div class="timeline-content">
                     <h3>正式发布(2024年10月27日)</h3>
-                    <p>LeafCard枫叶卡管系统正式上线，为用户提供服务</p>
+                    <p>LeafCard轻羽卡管系统正式上线，为用户提供服务</p>
                   </div>
                 </div>
               </div>

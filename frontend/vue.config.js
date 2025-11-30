@@ -63,7 +63,7 @@ module.exports = defineConfig({
   },
   // 配置PWA（可选）
   pwa: {
-    name: 'LeafCard - 枫叶卡管系统',
+    name: 'LeafCard - 轻羽卡管系统',
     themeColor: '#409EFF',
     msTileColor: '#000000',
     appleMobileWebAppCapable: 'yes',

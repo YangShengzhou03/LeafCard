@@ -3,7 +3,7 @@
     <header class="header" role="banner">
       <div class="container">
         <div class="logo-area">
-          <h1 class="logo" aria-label="WinQSB - 运筹学管理科学软件">WinQSB</h1>
+          <h1 class="logo" aria-label="LeafCard - 轻羽卡管系统">LeafCard</h1>
         </div>
         <nav class="auth-section" role="navigation" aria-label="用户导航">
           <div class="auth-buttons" v-if="!isAuthenticated" role="group" aria-label="登录注册选项">
@@ -45,9 +45,9 @@
       <section class="hero-section" aria-labelledby="hero-title">
         <div class="container">
           <div class="hero-content">
-            <h1 id="hero-title" class="hero-title">WinQSB</h1>
+            <h1 id="hero-title" class="hero-title">LeafCard</h1>
             <p class="hero-description">
-              专为运筹学、管理科学和决策分析设计的软件工具
+              高效的卡密管理解决方案
             </p>
             <div class="cta-buttons" role="group" aria-label="主要操作">
               <el-button type="primary" size="large" class="start-btn" @click="handleStart"
@@ -64,7 +64,7 @@
 
       <section id="features" class="features-section" aria-labelledby="features-title">
         <div class="container">
-          <h2 id="features-title" class="section-title">系统功能模块</h2>
+          <h2 id="features-title" class="section-title">轻羽卡管系统功能</h2>
           <div class="features-grid" role="list">
             <article class="feature-card" v-for="feature in features" :key="feature.id" role="listitem"
               :aria-labelledby="`feature-${feature.id}`">
@@ -85,8 +85,8 @@
       <div class="container">
         <div class="footer-content">
           <section class="footer-section" aria-labelledby="footer-about">
-            <h3 id="footer-about">WinQSB</h3>
-            <p>专为运筹学、管理科学和决策分析设计的软件工具</p>
+            <h3 id="footer-about">LeafCard</h3>
+            <p>高效的卡密管理解决方案</p>
           </section>
           <nav class="footer-section" aria-labelledby="footer-products">
             <h4 id="footer-products">产品功能</h4>
@@ -135,7 +135,7 @@
           </nav>
         </div>
         <div class="footer-bottom">
-          <p>&copy; 2024-2025 WinQSB - 专为运筹学、管理科学和决策分析设计的软件工具</p>
+          <p>&copy; 2024-2025 LeafCard - 轻羽卡管系统</p>
           <div class="icp-info">
             <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer"
               aria-label="查看ICP备案信息：赣ICP备2025075576号">
@@ -174,20 +174,20 @@ const FEATURES_DATA = [
   {
     id: 1,
     icon: Key,
-    title: '卡密管理',
-    description: '批量生成、验证和管理卡密，支持多种格式和自定义规则。'
+    title: '智能卡密管理',
+    description: '批量生成、验证和管理卡密，支持多种格式和自定义规则，高效安全。'
   },
   {
     id: 2,
     icon: Box,
-    title: '商品管理',
-    description: '商品和规格管理，支持多种产品类型和授权策略。'
+    title: '灵活商品配置',
+    description: '商品和规格管理，支持多种产品类型和授权策略，满足不同业务需求。'
   },
   {
     id: 3,
     icon: DataLine,
-    title: '数据分析',
-    description: '使用数据统计和分析，支持管理决策。'
+    title: '实时数据分析',
+    description: '全面的数据统计和分析功能，助力管理决策，提升运营效率。'
   }
 ]
 
@@ -285,7 +285,7 @@ const handleStart = () => {
 // 处理下载客户端 - 优化用户体验
 const handleDownload = () => {
   try {
-    const downloadUrl = 'https://gitee.com/Yangshengzhou/yang-shengzhou/releases/download/v2.0/WinQSB.rar'
+    const downloadUrl = 'https://gitee.com/Yangshengzhou/yang-shengzhou/releases/download/v2.0/LeafCard.rar'
     const link = document.createElement('a')
     link.href = downloadUrl
     link.target = '_blank'
